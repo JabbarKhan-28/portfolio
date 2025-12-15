@@ -4,8 +4,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+    ActivityIndicator,
     Alert,
     KeyboardAvoidingView,
+    Modal,
     Platform,
     ScrollView,
     StyleSheet,
@@ -14,14 +16,17 @@ import {
     TouchableOpacity,
     View
 } from "react-native";
+import * as Animatable from "react-native-animatable";
 
 export default function ContactScreen() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!name || !email || !message) {
       if (Platform.OS === 'web') {
         window.alert("Please fill in all fields");
@@ -31,17 +36,40 @@ export default function ContactScreen() {
       return;
     }
 
-    // Simulate sending email
-    if (Platform.OS === 'web') {
-      window.alert(`Email sent successfully!\n\nName: ${name}\nMessage: ${message}`);
-    } else {
-      Alert.alert("Success", "Email sent successfully!");
+    setIsSubmitting(true);
+
+    try {
+      // Use FormSubmit.co to send email without backend
+      // Note: First time usage requires confirming the email address
+      const response = await fetch("https://formsubmit.co/ajax/jabbar118114@gmail.com", {
+        method: "POST",
+        headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          message,
+          _subject: `Portfolio Contact from ${name}`,
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setModalVisible(true);
+        setName("");
+        setEmail("");
+        setMessage("");
+      } else {
+        Alert.alert("Error", "Something went wrong. Please try again later.");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to send message. Please check your internet connection.");
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    // Reset form
-    setName("");
-    setEmail("");
-    setMessage("");
   };
 
   return (
@@ -100,12 +128,48 @@ export default function ContactScreen() {
             />
           </View>
 
-          <TouchableOpacity style={styles.submitButton} onPress={handleSend}>
-            <Text style={styles.submitButtonText}>Send Message</Text>
-            <Ionicons name="send" size={20} color={COLORS.textPrim} />
+          <TouchableOpacity 
+            style={[styles.submitButton, isSubmitting && { opacity: 0.7 }]} 
+            onPress={handleSend}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <ActivityIndicator color={COLORS.textPrim} />
+            ) : (
+                <>
+                <Text style={styles.submitButtonText}>Send Message</Text>
+                <Ionicons name="send" size={20} color={COLORS.textPrim} />
+                </>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* STYLISH CUSTOM ALERT MODAL */}
+      <Modal
+        transparent={true}
+        visible={modalVisible}
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <Animatable.View animation="zoomIn" duration={500} style={styles.modalContent}>
+            <View style={styles.iconContainer}>
+              <Ionicons name="checkmark-circle" size={60} color={COLORS.purple} />
+            </View>
+            <Text style={styles.modalTitle}>Message Sent!</Text>
+            <Text style={styles.modalMessage}>
+              Thanks for reaching out. I'll get back to you as soon as possible.
+            </Text>
+            <TouchableOpacity 
+              style={styles.modalButton} 
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>Awesome</Text>
+            </TouchableOpacity>
+          </Animatable.View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -183,5 +247,57 @@ const styles = StyleSheet.create({
     color: COLORS.textPrim,
     fontSize: 18,
     fontWeight: 'bold'
+  },
+
+  /* MODAL STYLES */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20
+  },
+  modalContent: {
+    backgroundColor: COLORS.cardBg,
+    borderRadius: 20,
+    padding: 30,
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+  },
+  iconContainer: {
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: COLORS.textPrim,
+    marginBottom: 10,
+    textAlign: 'center'
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: COLORS.textSec,
+    textAlign: 'center',
+    marginBottom: 30,
+    lineHeight: 22
+  },
+  modalButton: {
+    backgroundColor: COLORS.purple,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 50,
+  },
+  modalButtonText: {
+    color: COLORS.textPrim,
+    fontWeight: 'bold',
+    fontSize: 16
   }
 });
