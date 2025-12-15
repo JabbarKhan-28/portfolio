@@ -13,8 +13,7 @@ export function HelloWave() {
   const rotation = useSharedValue(0);
 
   rotation.value = withRepeat(
-    withSequence(withTiming(25, { duration: 150 }), withTiming(-25, { duration: 150 })),
-    4 // Run the animation 4 times
+    withSequence(withTiming(25, { duration: 150 }), withTiming(-25, { duration: 150 }))
   );
 
   const animatedStyle = useAnimatedStyle(() => ({

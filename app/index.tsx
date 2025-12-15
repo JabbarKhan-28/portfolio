@@ -1,5 +1,4 @@
 
-import { HelloWave } from '@/components/hello-wave';
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -46,7 +45,7 @@ export default function HomeScreen() {
         <View style={[styles.heroContent, isWeb && styles.webContentRaw]}>
             <Animatable.View animation="fadeInDown" style={styles.header}>
                 <Text style={[styles.heading, isWeb && styles.webHeading]}>
-                Hi There! <HelloWave />
+                Hi There!
                 </Text>
                 <Text style={styles.headingName}>
                 I'M <Text style={styles.mainName}>JABBAR KHAN</Text>
@@ -60,7 +59,7 @@ export default function HomeScreen() {
                 maxDelay={150} 
                 style={styles.typeText}
             >
-                Full Stack Developer | React Native | Open Source
+                Full Stack Developer | React Native | React 
             </TypeWriter>
             </View>
 

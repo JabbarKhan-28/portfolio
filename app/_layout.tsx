@@ -1,18 +1,35 @@
+import { COLORS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from 'expo-blur';
 import { Tabs } from "expo-router";
 import React from "react";
+import { Platform, StyleSheet, View } from "react-native";
 
-/* 
-  Note: We are assuming some standard components exist (HapticTab, IconSymbol, etc.) 
-  because they are standard in the 'tabs' template. 
-  If they are missing because of the 'blank' or 'reset', we might need to inline 
-  some simplifications or recreate them. 
-  Given we did a 'reset-project' but with 'N' (delete), we might be missing them.
-  
-  SAFE APPROACH: Use standard simplified Tabs first to avoid missing component errors.
-*/
+function GlassTabBar() {
+  if (Platform.OS === 'web') {
+    return (
+      <View style={{
+        flex: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.15)', // Semi-transparent based on primaryBg
+        backdropFilter: 'blur(10px)', // Standard CSS blur
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+      } as any} />
+    );
+  }
 
-import { COLORS } from "@/constants/theme";
+  // Native Blur
+  return (
+    <BlurView 
+      intensity={50} 
+      tint="dark" 
+      style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(27, 26, 46, 0.5)' }]}
+    />
+  );
+}
 
 export default function TabLayout() {
   return (
@@ -21,6 +38,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: COLORS.tabBarActive,
         tabBarInactiveTintColor: COLORS.tabBarInactive,
         headerShown: false,
+        tabBarBackground: () => <GlassTabBar />,
         tabBarStyle: {
           position: 'absolute',
           backgroundColor: 'transparent',

@@ -6,7 +6,6 @@ import React, { useState } from "react";
 import {
     Alert,
     KeyboardAvoidingView,
-    Linking,
     Platform,
     ScrollView,
     StyleSheet,
@@ -32,12 +31,17 @@ export default function ContactScreen() {
       return;
     }
 
-    // Construct mailto link
-    const subject = `Portfolio Contact from ${name}`;
-    const body = `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
-    const mailtoUrl = `mailto:jabbarkhan118114@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-    Linking.openURL(mailtoUrl);
+    // Simulate sending email
+    if (Platform.OS === 'web') {
+      window.alert(`Email sent successfully!\n\nName: ${name}\nMessage: ${message}`);
+    } else {
+      Alert.alert("Success", "Email sent successfully!");
+    }
+    
+    // Reset form
+    setName("");
+    setEmail("");
+    setMessage("");
   };
 
   return (

@@ -19,7 +19,7 @@ export const PROJECTS: Project[] = [
     description: "A mobile quiz application built using React Native. Features include user authentication, complex scoring logic, and dynamic API-based questions to deliver a versatile and engaging user experience.",
     ghLink: "https://github.com/JabbarKhan-28", // Placeholder link
     demoLink: "",
-    // image: require("../assets/projects/quiz.png") 
+    image: require("../assets/Projects/icon.png"), // Placeholder until quiz-app.png is added
   }
 ];
 
@@ -52,9 +52,9 @@ function ProjectCard({ project }: { project: Project }) {
             {/* Image Placeholder */}
             <View style={styles.imageContainer}>
                  <Image 
-                    source={require('../assets/Projects/blog.png')} 
+                    source={require('../assets/Projects/icon.png')} 
                     style={styles.projectImage} 
-                    contentFit="cover"
+                    contentFit="contain"
                  />
             </View>
             

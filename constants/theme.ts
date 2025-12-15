@@ -2,20 +2,20 @@
 import { Platform } from 'react-native';
 
 export const COLORS = {
-  // Base Backgrounds
-  primaryBg: '#1b1a2e',      // Main deep background
-  darkBg: '#131124',         // Darker alternative for contrast
-  cardBg: 'rgba(255, 255, 255, 0.05)', // Glassmorphism effect
+  // Base Backgrounds - Blue Palette
+  primaryBg: '#03045e',      // Main deep background (Midnight Blue)
+  darkBg: '#023e8a',         // Darker alternative (Dark Blue)
+  cardBg: 'rgba(72, 202, 228, 0.05)', // Glassmorphism effect (Cyan tint)
   
   // Text Colors
-  textPrim: '#FFFFFF',
-  textSec: '#d1d5db',        // Light gray for subtitles/body
-  textHighlight: '#cd5ff8',  // Bright Purple/Pink for emphasis
+  textPrim: '#caf0f8',       // Lightest Cyan (almost white) for primary text
+  textSec: '#90e0ef',        // Light Cyan for subtitles
+  textHighlight: '#48cae4',  // Bright Cyan for emphasis
   
   // Accents
-  purple: '#c770f0',         // Primary Portfolio Purple
-  darkPurple: '#623686',     // Darker purple for buttons/borders
-  border: 'rgba(199, 112, 240, 0.3)', // Subtle purple border
+  purple: '#0096c7',         // Darker Cyan for better contrast
+  darkPurple: '#0077b6',     // Star Command Blue (darker accent)
+  border: 'rgba(72, 202, 228, 0.3)', // Subtle cyan border
 
   // UI Elements
   inputBg: 'rgba(255, 255, 255, 0.1)',
@@ -23,9 +23,9 @@ export const COLORS = {
   error: '#f87171',
   
   // Tab Bar
-  tabBarBg: '#1b1a2ea9',
-  tabBarActive: '#c770f0',
-  tabBarInactive: '#fff',
+  tabBarBg: '#03045ec0',     // Semi-transparent Midnight Blue
+  tabBarActive: '#0096c7',   // Darker Cyan match
+  tabBarInactive: '#90e0ef', // Light Cyan
 };
 
 export const FONTS = Platform.select({
