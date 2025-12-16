@@ -1,4 +1,5 @@
 
+import { TypeWriter } from '@/components/TypeWriter';
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -6,7 +7,6 @@ import { Link, useRouter } from 'expo-router';
 import React from 'react';
 import { Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import * as Animatable from 'react-native-animatable';
-import TypeWriter from 'react-native-typewriter';
 
 export default function HomeScreen() {
   const router = useRouter();

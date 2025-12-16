@@ -103,6 +103,12 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="react-native-typewriter.d"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

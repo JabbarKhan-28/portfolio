@@ -4,17 +4,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 import * as Animatable from "react-native-animatable";
 
@@ -181,25 +181,31 @@ const styles = StyleSheet.create({
   },
   container: {
     flexGrow: 1,
-    padding: 20,
-    paddingTop: 60,
-    paddingBottom: 100
+    padding: 24,
+    justifyContent: 'center', // Vertically center
+    backgroundColor: COLORS.primaryBg,
   },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
-    gap: 15
+    marginBottom: 10,
+    gap: 15,
+    maxWidth: 500,
+    width: '100%',
+    alignSelf: 'center',
   },
   backButton: {
-    padding: 8,
+    padding: 10,
     backgroundColor: COLORS.cardBg,
-    borderRadius: 8
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   headerText: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 32,
+    fontWeight: '800',
     color: COLORS.textPrim,
+    letterSpacing: -0.5,
   },
   purpleText: {
     color: COLORS.purple
@@ -207,97 +213,143 @@ const styles = StyleSheet.create({
   subText: {
     color: COLORS.textSec,
     fontSize: 16,
-    marginBottom: 30,
-    lineHeight: 24
+    marginBottom: 40,
+    lineHeight: 24,
+    maxWidth: 500,
+    width: '100%',
+    alignSelf: 'center',
   },
   formContainer: {
-    gap: 20
+    gap: 24,
+    maxWidth: 500,
+    width: '100%',
+    alignSelf: 'center',
+    backgroundColor: COLORS.cardBg, // Added card background
+    padding: 30, // Inner padding
+    borderRadius: 24, // Rounded corners
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    ...Platform.select({
+      web: { boxShadow: '0px 10px 20px rgba(0,0,0,0.3)' },
+      default: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+        elevation: 5,
+      }
+    }),
   },
   inputGroup: {
-    gap: 8
+    gap: 10
   },
   label: {
     color: COLORS.textPrim,
-    fontSize: 16,
-    fontWeight: '600'
+    fontSize: 14,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginLeft: 4,
   },
   input: {
     backgroundColor: COLORS.inputBg,
     color: COLORS.textPrim,
-    padding: 15,
-    borderRadius: 8,
+    padding: 18,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
-    fontSize: 16
+    fontSize: 16,
   },
   textArea: {
-    minHeight: 120
+    minHeight: 140,
+    paddingTop: 18
   },
   submitButton: {
     backgroundColor: COLORS.purple,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
-    borderRadius: 8,
+    padding: 20,
+    borderRadius: 16,
     marginTop: 10,
-    gap: 10
+    gap: 12,
+    ...Platform.select({
+      web: { boxShadow: '0px 8px 16px rgba(110, 84, 255, 0.4)' },
+      default: {
+        shadowColor: COLORS.purple,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.4,
+        shadowRadius: 16,
+        elevation: 8,
+      }
+    }),
   },
   submitButtonText: {
     color: COLORS.textPrim,
     fontSize: 18,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    letterSpacing: 0.5
   },
 
   /* MODAL STYLES */
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(0,0,0,0.85)', // Darker overlay
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20
   },
   modalContent: {
     backgroundColor: COLORS.cardBg,
-    borderRadius: 20,
-    padding: 30,
+    borderRadius: 30,
+    padding: 40,
     width: '100%',
-    maxWidth: 400,
+    maxWidth: 380,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
+    borderColor: COLORS.purple, // Purple border highlight
+    ...Platform.select({
+      web: { boxShadow: '0px 0px 30px rgba(110, 84, 255, 0.3)' },
+      default: {
+        elevation: 20,
+        shadowColor: COLORS.purple,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.3,
+        shadowRadius: 30,
+      }
+    }),
   },
   iconContainer: {
-    marginBottom: 20,
+    marginBottom: 24,
+    backgroundColor: 'rgba(110, 84, 255, 0.1)',
+    padding: 20,
+    borderRadius: 50,
   },
   modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 28,
+    fontWeight: '800',
     color: COLORS.textPrim,
-    marginBottom: 10,
+    marginBottom: 12,
     textAlign: 'center'
   },
   modalMessage: {
     fontSize: 16,
     color: COLORS.textSec,
     textAlign: 'center',
-    marginBottom: 30,
-    lineHeight: 22
+    marginBottom: 32,
+    lineHeight: 24
   },
   modalButton: {
     backgroundColor: COLORS.purple,
-    paddingVertical: 12,
-    paddingHorizontal: 40,
+    paddingVertical: 16,
+    paddingHorizontal: 48,
     borderRadius: 50,
+    width: '100%',
+    alignItems: 'center'
   },
   modalButtonText: {
     color: COLORS.textPrim,
     fontWeight: 'bold',
-    fontSize: 16
+    fontSize: 18
   }
 });
