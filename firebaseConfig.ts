@@ -20,10 +20,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Auth and Firestore
-import { getAuth } from "firebase/auth";
+import { getAuth, initializeAuth, inMemoryPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-export const auth = getAuth(app);
+// Initialize Auth with in-memory persistence (no auto-login)
+export const auth = initializeAuth(app, {
+  persistence: inMemoryPersistence
+});
 export const db = getFirestore(app);
 
 export default app;

@@ -1,14 +1,17 @@
+
 import AddProjectModal from "@/components/AddProjectModal";
 import CustomAlertModal, { AlertType } from "@/components/CustomAlertModal";
 import { COLORS } from "@/constants/theme";
 import { auth, db } from "@/firebaseConfig";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from 'expo-haptics';
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import * as Animatable from 'react-native-animatable';
 
 export interface Project {
   id: string;
@@ -16,7 +19,7 @@ export interface Project {
   description: string;
   ghLink: string;
   demoLink: string;
-  // image?: any; // We'll user a default placeholder for now or add URL support later
+  imageUrl?: string;
 }
 
 export default function ProjectsScreen() {
@@ -56,9 +59,11 @@ export default function ProjectsScreen() {
 
     const newTaps = secretTaps + 1;
     setSecretTaps(newTaps);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     if (newTaps >= 5) {
       setSecretTaps(0);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.push('/login');
     }
 
@@ -95,6 +100,7 @@ export default function ProjectsScreen() {
   }, []);
 
   const handleDelete = (id: string) => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     showAlert(
         "confirm",
         "Delete Project",
@@ -102,8 +108,10 @@ export default function ProjectsScreen() {
         async () => {
             try {
                 await deleteDoc(doc(db, "projects", id));
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 hideAlert();
             } catch (error: any) {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
                 hideAlert();
                 setTimeout(() => {
                     showAlert("error", "Error", error.message);
@@ -115,11 +123,17 @@ export default function ProjectsScreen() {
 
   const handleLogout = async () => {
       try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         await signOut(auth);
       } catch (error) {
         console.error("Error signing out: ", error);
       }
   };
+
+  const openAddModal = () => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      setModalVisible(true);
+  }
 
   return (
     <View style={styles.container}>
@@ -154,8 +168,18 @@ export default function ProjectsScreen() {
                 {projects.length === 0 ? (
                     <Text style={styles.emptyText}>No projects added yet.</Text>
                 ) : (
-                    projects.map((project) => (
-                        <ProjectCard key={project.id} project={project} onDelete={user ? () => handleDelete(project.id) : undefined} />
+                    projects.map((project, index) => (
+                        <Animatable.View 
+                            key={project.id}
+                            animation="fadeInUp"
+                            duration={800}
+                            delay={index * 150} // Stagger effect
+                        >
+                            <ProjectCard 
+                                project={project} 
+                                onDelete={user ? () => handleDelete(project.id) : undefined} 
+                            />
+                        </Animatable.View>
                     ))
                 )}
             </View>
@@ -164,12 +188,14 @@ export default function ProjectsScreen() {
 
         {/* Floating Action Button for Admin */}
         {user && (
-            <TouchableOpacity 
-                style={styles.fab} 
-                onPress={() => setModalVisible(true)}
-            >
-                <Ionicons name="add" size={30} color="#FFF" />
-            </TouchableOpacity>
+            <Animatable.View animation="zoomIn" delay={500} style={styles.fabContainer}>
+                <TouchableOpacity 
+                    style={styles.fab} 
+                    onPress={openAddModal}
+                >
+                    <Ionicons name="add" size={30} color="#FFF" />
+                </TouchableOpacity>
+            </Animatable.View>
         )}
 
         <AddProjectModal 
@@ -192,17 +218,21 @@ export default function ProjectsScreen() {
 
 function ProjectCard({ project, onDelete }: { project: Project, onDelete?: () => void }) {
     const handleLink = (url: string) => {
-        if (url) Linking.openURL(url);
+        if (url) {
+            Haptics.selectionAsync();
+            Linking.openURL(url);
+        }
     }
 
     return (
         <View style={styles.card}>
-            {/* Image Placeholder */}
+            {/* Image Placeholder or Custom Image */}
             <View style={styles.imageContainer}>
                  <Image 
-                    source={require('../assets/Projects/icon.png')} 
+                    source={project.imageUrl ? { uri: project.imageUrl } : require('../assets/images/favicon.png')} 
                     style={styles.projectImage} 
-                    contentFit="contain"
+                    contentFit="cover"
+                    transition={500}
                  />
                  {onDelete && (
                      <TouchableOpacity style={styles.deleteBtn} onPress={onDelete}>
@@ -239,7 +269,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingBottom: 100,
-    marginBottom: 100,
     backgroundColor: COLORS.primaryBg,
   },
   contentContainer: {
@@ -282,7 +311,7 @@ const styles = StyleSheet.create({
   imageContainer: {
       height: 200,
       width: '100%',
-      backgroundColor: 'rgba(0,0,0,0.3)',
+      backgroundColor: '#2a2a2a',
       justifyContent: 'center',
       alignItems: 'center',
       position: 'relative'
@@ -333,10 +362,12 @@ const styles = StyleSheet.create({
       color: COLORS.textPrim,
       fontWeight: 'bold'
   },
+  fabContainer: {
+      position: 'absolute',
+      bottom: 100,
+      right: 20,
+  },
   fab: {
-    position: 'absolute',
-    bottom: 30,
-    right: 20,
     backgroundColor: COLORS.purple,
     width: 60,
     height: 60,
@@ -357,3 +388,4 @@ const styles = StyleSheet.create({
     }),
   }
 });
+

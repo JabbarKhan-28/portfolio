@@ -17,6 +17,7 @@ export default function AddProjectModal({ visible, onClose }: AddProjectModalPro
   const [description, setDescription] = useState('');
   const [ghLink, setGhLink] = useState('');
   const [demoLink, setDemoLink] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Custom Alert State
@@ -54,25 +55,15 @@ export default function AddProjectModal({ visible, onClose }: AddProjectModalPro
         description,
         ghLink,
         demoLink,
+        imageUrl,
         createdAt: new Date().toISOString()
       });
       setTitle('');
       setDescription('');
       setGhLink('');
       setDemoLink('');
+      setImageUrl('');
       onClose();
-      // Show success after closing the form modal
-      // Ideally this might be better shown on the parent, but since the modal is closed, 
-      // we can't show it INSIDE this modal. 
-      // However, usually we want to show feedback. 
-      // Since the request is to "show error if less data is provided", and general "submission same as login" (which just goes back),
-      // Actually, for "Add", usually a success message is nice.
-      // But if I close the modal immediately, this alert won't be seen because it is inside the modal.
-      // Wait, CustomAlertModal is inside THIS component (AddProjectModal). 
-      // If I close AddProjectModal, CustomAlertModal also unmounts.
-      // So I should NOT close AddProjectModal immediately if I want to show success here.
-      // OR I should use a callback to show it on the parent.
-      // Given the constraints, I will show success message first, then close on "Okay".
       
       showAlert('success', 'Success', 'Project added!', () => {
           hideAlert();
@@ -125,6 +116,18 @@ export default function AddProjectModal({ visible, onClose }: AddProjectModalPro
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
+              />
+            </View>
+
+             <View style={styles.inputGroup}>
+              <Text style={styles.label}>Image URL (Optional)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="https://..."
+                placeholderTextColor={COLORS.textSec}
+                value={imageUrl}
+                onChangeText={setImageUrl}
+                autoCapitalize="none"
               />
             </View>
 

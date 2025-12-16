@@ -16,6 +16,7 @@ export default function AddBlogModal({ visible, onClose }: AddBlogModalProps) {
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
   const [mediumLink, setMediumLink] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Custom Alert State
@@ -52,12 +53,14 @@ export default function AddBlogModal({ visible, onClose }: AddBlogModalProps) {
         title,
         summary,
         mediumLink,
+        imageUrl,
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         createdAt: new Date().toISOString()
       });
       setTitle('');
       setSummary('');
       setMediumLink('');
+      setImageUrl('');
       
       showAlert('success', 'Success', 'Blog post added!', () => {
           hideAlert();
@@ -110,6 +113,18 @@ export default function AddBlogModal({ visible, onClose }: AddBlogModalProps) {
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Image URL (Optional)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="https://..."
+                placeholderTextColor={COLORS.textSec}
+                value={imageUrl}
+                onChangeText={setImageUrl}
+                autoCapitalize="none"
               />
             </View>
 

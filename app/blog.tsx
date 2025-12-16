@@ -1,13 +1,17 @@
+
 import AddBlogModal from "@/components/AddBlogModal";
 import CustomAlertModal, { AlertType } from "@/components/CustomAlertModal";
 import { COLORS } from "@/constants/theme";
 import { auth, db } from "@/firebaseConfig";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from 'expo-haptics';
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import * as Animatable from 'react-native-animatable';
 
 interface BlogPost {
   id: string;
@@ -15,6 +19,7 @@ interface BlogPost {
   date: string;
   summary: string;
   mediumLink?: string;
+  imageUrl?: string;
 }
 
 export default function BlogScreen() {
@@ -54,9 +59,11 @@ export default function BlogScreen() {
 
     const newTaps = secretTaps + 1;
     setSecretTaps(newTaps);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     if (newTaps >= 5) {
       setSecretTaps(0);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.push('/login');
     }
 
@@ -93,10 +100,14 @@ export default function BlogScreen() {
   }, []);
 
   const handleReadMore = (url?: string) => {
-    if (url) Linking.openURL(url);
+    if (url) {
+        Haptics.selectionAsync();
+        Linking.openURL(url);
+    }
   };
 
   const handleDelete = (id: string) => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     showAlert(
         "confirm",
         "Delete Blog",
@@ -104,8 +115,10 @@ export default function BlogScreen() {
         async () => {
             try {
                 await deleteDoc(doc(db, "blogs", id));
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 hideAlert(); // Auto close on success (snapshot updates UI)
             } catch (error: any) {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
                 hideAlert();
                 setTimeout(() => {
                     showAlert("error", "Error", error.message);
@@ -117,29 +130,40 @@ export default function BlogScreen() {
 
   const handleLogout = async () => {
     try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await signOut(auth);
     } catch (error) {
       console.error("Error signing out: ", error);
     }
   };
 
+  const openAddModal = () => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      setModalVisible(true);
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
          <View style={styles.headerContainer}>
-            <View style={styles.headerTop}>
-              <TouchableOpacity activeOpacity={1} onPress={handleSecretLogin}>
-                <Text style={styles.headerText}>
-                  My <Text style={styles.purpleText}>Blogs</Text>
-                </Text>
-              </TouchableOpacity>
-              
-              {/* Logout Button (Only visible when logged in) */}
-              {user && (
-                 <TouchableOpacity onPress={handleLogout} style={styles.iconBtn}>
-                   <Ionicons name="log-out-outline" size={24} color={COLORS.textSec} />
-                 </TouchableOpacity>
-              )}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                 <View style={{ width: 40 }} /> 
+                 {/* Spacer to center the title */}
+
+                <TouchableOpacity activeOpacity={1} onPress={handleSecretLogin}>
+                    <Text style={styles.headerText}>
+                        My <Text style={styles.purpleText}>Blogs</Text>
+                    </Text>
+                </TouchableOpacity>
+
+                {/* Logout Button */}
+                {user ? (
+                    <TouchableOpacity onPress={handleLogout} style={{ padding: 5 }}>
+                        <Ionicons name="log-out-outline" size={24} color={COLORS.textSec} />
+                    </TouchableOpacity>
+                ) : (
+                    <View style={{ width: 40 }} />
+                )}
             </View>
             <Text style={styles.subText}>Thoughts, tutorials, and tech ramblings.</Text>
          </View>
@@ -151,29 +175,45 @@ export default function BlogScreen() {
                {blogs.length === 0 ? (
                  <Text style={styles.emptyText}>No blog posts yet.</Text>
                ) : (
-                 blogs.map((blog) => (
-                    <View key={blog.id} style={styles.blogCard}>
-                       <View style={styles.blogHeader}>
+                 blogs.map((blog, index) => (
+                    <Animatable.View 
+                        key={blog.id} 
+                        style={styles.blogCard}
+                        animation="fadeInUp"
+                        duration={800}
+                        delay={index * 150}
+                    >
+                       <View style={styles.imageContainer}>
+                            <Image 
+                                source={blog.imageUrl ? { uri: blog.imageUrl } : require('../assets/images/favicon.png')} 
+                                style={styles.blogImage} 
+                                contentFit="cover"
+                                transition={500}
+                            />
+                            {user && (
+                                <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(blog.id)}>
+                                    <Ionicons name="trash" size={20} color="#FFF" />
+                                </TouchableOpacity>
+                            )}
+                       </View>
+
+                       <View style={styles.cardBody}>
                            <View>
                              <Text style={styles.blogTitle}>{blog.title}</Text>
                              <Text style={styles.blogDate}>{blog.date}</Text>
                            </View>
-                           {user && (
-                             <TouchableOpacity onPress={() => handleDelete(blog.id)}>
-                               <Ionicons name="trash-outline" size={20} color="#ff4444" />
-                             </TouchableOpacity>
-                           )}
+                           
+                           <Text style={styles.blogSummary}>{blog.summary}</Text>
+                           
+                           <TouchableOpacity 
+                               style={styles.readMoreBtn}
+                               onPress={() => handleReadMore(blog.mediumLink)}
+                           >
+                               <Ionicons name="book-outline" size={20} color={COLORS.textPrim} />
+                               <Text style={styles.readMoreText}>Read Article</Text>
+                           </TouchableOpacity>
                        </View>
-                       <Text style={styles.blogSummary}>{blog.summary}</Text>
-                       
-                       <TouchableOpacity 
-                           style={styles.readMoreBtn}
-                           onPress={() => handleReadMore(blog.mediumLink)}
-                       >
-                           <Text style={styles.readMoreText}>Read Article</Text>
-                           <Ionicons name="open-outline" size={16} color={COLORS.purple} />
-                       </TouchableOpacity>
-                    </View>
+                    </Animatable.View>
                  ))
                )}
             </View>
@@ -182,12 +222,14 @@ export default function BlogScreen() {
 
       {/* Floating Action Button for Admin */}
       {user && (
-        <TouchableOpacity 
-          style={styles.fab} 
-          onPress={() => setModalVisible(true)}
-        >
-          <Ionicons name="add" size={30} color="#FFF" />
-        </TouchableOpacity>
+        <Animatable.View animation="zoomIn" delay={500} style={styles.fabContainer}>
+            <TouchableOpacity 
+            style={styles.fab} 
+            onPress={openAddModal}
+            >
+            <Ionicons name="add" size={30} color="#FFF" />
+            </TouchableOpacity>
+        </Animatable.View>
       )}
 
       <AddBlogModal 
@@ -216,16 +258,10 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 20,
     paddingTop: 60,
-    paddingBottom: 100
   },
   headerContainer: {
+      alignItems: 'center',
       marginBottom: 30
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10
   },
   headerText: {
       fontSize: 28,
@@ -252,47 +288,75 @@ const styles = StyleSheet.create({
   },
   blogCard: {
       backgroundColor: COLORS.cardBg,
-      padding: 20,
       borderRadius: 10,
-      borderLeftWidth: 4,
-      borderLeftColor: COLORS.purple
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: 'rgba(199, 112, 240, 0.2)'
   },
-  blogHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: 10
+  imageContainer: {
+      height: 180,
+      width: '100%',
+      backgroundColor: '#2a2a2a',
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'relative'
+  },
+  blogImage: {
+      width: '100%',
+      height: '100%'
+  },
+  deleteBtn: {
+      position: 'absolute',
+      top: 10,
+      right: 10,
+      backgroundColor: 'rgba(255, 68, 68, 0.8)',
+      padding: 8,
+      borderRadius: 20
+  },
+  cardBody: {
+      padding: 20
   },
   blogTitle: {
       color: COLORS.textPrim,
       fontSize: 20,
       fontWeight: 'bold',
-      marginBottom: 5
+      marginBottom: 5,
+      textAlign: 'center'
   },
   blogDate: {
       color: COLORS.textSec,
       fontSize: 12,
-      fontStyle: 'italic'
+      fontStyle: 'italic',
+      marginBottom: 10,
+      textAlign: 'center'
   },
   blogSummary: {
       color: COLORS.textSec,
       fontSize: 15,
       lineHeight: 22,
-      marginBottom: 15
+      marginBottom: 20,
+      textAlign: 'justify'
   },
   readMoreBtn: {
+      backgroundColor: COLORS.darkPurple,
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 5
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 5,
+      gap: 8,
+      alignSelf: 'center'
   },
   readMoreText: {
-      color: COLORS.purple,
+      color: COLORS.textPrim,
       fontWeight: 'bold'
   },
-  fab: {
+  fabContainer: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 100,
     right: 20,
+  },
+  fab: {
     backgroundColor: COLORS.purple,
     width: 60,
     height: 60,
@@ -313,3 +377,4 @@ const styles = StyleSheet.create({
     }),
   }
 });
+
