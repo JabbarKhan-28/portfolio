@@ -1,48 +1,196 @@
+import AddProjectModal from "@/components/AddProjectModal";
+import CustomAlertModal, { AlertType } from "@/components/CustomAlertModal";
 import { COLORS } from "@/constants/theme";
+import { auth, db } from "@/firebaseConfig";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import React from "react";
-import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useRouter } from "expo-router";
+import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export interface Project {
+  id: string;
   title: string;
   description: string;
   ghLink: string;
   demoLink: string;
-  image?: any;
+  // image?: any; // We'll user a default placeholder for now or add URL support later
 }
 
-// Placeholder data since we don't have the image assets loaded yet
-export const PROJECTS: Project[] = [
-  {
-    title: "Quiz App (React Native)",
-    description: "A mobile quiz application built using React Native. Features include user authentication, complex scoring logic, and dynamic API-based questions to deliver a versatile and engaging user experience.",
-    ghLink: "https://github.com/JabbarKhan-28", // Placeholder link
-    demoLink: "",
-    image: require("../assets/Projects/icon.png"), // Placeholder until quiz-app.png is added
-  }
-];
-
 export default function ProjectsScreen() {
-  return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-       <View style={styles.headerContainer}>
-          <Text style={styles.headerText}>
-            My Recent <Text style={styles.purpleText}>Works</Text>
-          </Text>
-          <Text style={styles.subText}>Here are a few projects I've worked on recently.</Text>
-       </View>
+  const router = useRouter();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
-       <View style={styles.projectsContainer}>
-          {PROJECTS.map((project, index) => (
-             <ProjectCard key={index} project={project} />
-          ))}
-       </View>
-    </ScrollView>
+    // Custom Alert State
+  const [alertConfig, setAlertConfig] = useState<{
+        visible: boolean;
+        type: AlertType;
+        title: string;
+        message: string;
+        onConfirm?: () => void;
+    }>({
+        visible: false,
+        type: 'info',
+        title: '',
+        message: '',
+    });
+
+    const showAlert = (type: AlertType, title: string, message: string, onConfirm?: () => void) => {
+        setAlertConfig({ visible: true, type, title, message, onConfirm });
+    }
+
+    const hideAlert = () => {
+        setAlertConfig(prev => ({ ...prev, visible: false }));
+    }
+
+  // Secret Login Logic
+  const [secretTaps, setSecretTaps] = useState(0);
+
+  const handleSecretLogin = () => {
+    if (user) return; // Already logged in
+
+    const newTaps = secretTaps + 1;
+    setSecretTaps(newTaps);
+
+    if (newTaps >= 5) {
+      setSecretTaps(0);
+      router.push('/login');
+    }
+
+    // Reset taps if no activity for 2 seconds
+    setTimeout(() => {
+        setSecretTaps(0);
+    }, 2000);
+  };
+
+  useEffect(() => {
+    // Auth Listener
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    // Real-time Project Fetching
+    const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
+    const unsubscribeProjects = onSnapshot(q, (snapshot) => {
+      const projectList: Project[] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Project));
+      setProjects(projectList);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching projects: ", error);
+      setLoading(false);
+    });
+
+    return () => {
+      unsubscribeAuth();
+      unsubscribeProjects();
+    };
+  }, []);
+
+  const handleDelete = (id: string) => {
+    showAlert(
+        "confirm",
+        "Delete Project",
+        "Are you sure you want to delete this project?",
+        async () => {
+            try {
+                await deleteDoc(doc(db, "projects", id));
+                hideAlert();
+            } catch (error: any) {
+                hideAlert();
+                setTimeout(() => {
+                    showAlert("error", "Error", error.message);
+                }, 400); 
+            }
+        }
+    );
+  };
+
+  const handleLogout = async () => {
+      try {
+        await signOut(auth);
+      } catch (error) {
+        console.error("Error signing out: ", error);
+      }
+  };
+
+  return (
+    <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.contentContainer}>
+        <View style={styles.headerContainer}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                 <View style={{ width: 40 }} /> 
+                 {/* Spacer to center the title */}
+
+                <TouchableOpacity activeOpacity={1} onPress={handleSecretLogin}>
+                    <Text style={styles.headerText}>
+                        My Recent <Text style={styles.purpleText}>Works</Text>
+                    </Text>
+                </TouchableOpacity>
+
+                {/* Logout Button */}
+                {user ? (
+                    <TouchableOpacity onPress={handleLogout} style={{ padding: 5 }}>
+                        <Ionicons name="log-out-outline" size={24} color={COLORS.textSec} />
+                    </TouchableOpacity>
+                ) : (
+                    <View style={{ width: 40 }} />
+                )}
+            </View>
+            <Text style={styles.subText}>Here are a few projects I've worked on recently.</Text>
+        </View>
+
+        {loading ? (
+            <ActivityIndicator size="large" color={COLORS.purple} style={{ marginTop: 50 }} />
+        ) : (
+            <View style={styles.projectsContainer}>
+                {projects.length === 0 ? (
+                    <Text style={styles.emptyText}>No projects added yet.</Text>
+                ) : (
+                    projects.map((project) => (
+                        <ProjectCard key={project.id} project={project} onDelete={user ? () => handleDelete(project.id) : undefined} />
+                    ))
+                )}
+            </View>
+        )}
+        </ScrollView>
+
+        {/* Floating Action Button for Admin */}
+        {user && (
+            <TouchableOpacity 
+                style={styles.fab} 
+                onPress={() => setModalVisible(true)}
+            >
+                <Ionicons name="add" size={30} color="#FFF" />
+            </TouchableOpacity>
+        )}
+
+        <AddProjectModal 
+            visible={modalVisible} 
+            onClose={() => setModalVisible(false)} 
+        />
+
+        <CustomAlertModal
+            visible={alertConfig.visible}
+            type={alertConfig.type}
+            title={alertConfig.title}
+            message={alertConfig.message}
+            onClose={hideAlert}
+            onConfirm={alertConfig.onConfirm}
+            confirmText="Delete"
+        />
+    </View>
   );
 }
 
-function ProjectCard({ project }: { project: Project }) {
+function ProjectCard({ project, onDelete }: { project: Project, onDelete?: () => void }) {
     const handleLink = (url: string) => {
         if (url) Linking.openURL(url);
     }
@@ -56,6 +204,11 @@ function ProjectCard({ project }: { project: Project }) {
                     style={styles.projectImage} 
                     contentFit="contain"
                  />
+                 {onDelete && (
+                     <TouchableOpacity style={styles.deleteBtn} onPress={onDelete}>
+                         <Ionicons name="trash" size={20} color="#FFF" />
+                     </TouchableOpacity>
+                 )}
             </View>
             
             <View style={styles.cardBody}>
@@ -63,10 +216,12 @@ function ProjectCard({ project }: { project: Project }) {
                 <Text style={styles.cardDescription}>{project.description}</Text>
                 
                 <View style={styles.buttonsContainer}>
-                    <TouchableOpacity style={styles.button} onPress={() => handleLink(project.ghLink)}>
-                        <Ionicons name="logo-github" size={20} color={COLORS.textPrim} />
-                        <Text style={styles.buttonText}>GitHub</Text>
-                    </TouchableOpacity>
+                    {project.ghLink ? (
+                        <TouchableOpacity style={styles.button} onPress={() => handleLink(project.ghLink)}>
+                            <Ionicons name="logo-github" size={20} color={COLORS.textPrim} />
+                            <Text style={styles.buttonText}>GitHub</Text>
+                        </TouchableOpacity>
+                    ) : null}
                     
                     {project.demoLink ? (
                          <TouchableOpacity style={styles.button} onPress={() => handleLink(project.demoLink)}>
@@ -83,6 +238,8 @@ function ProjectCard({ project }: { project: Project }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: 100,
+    marginBottom: 100,
     backgroundColor: COLORS.primaryBg,
   },
   contentContainer: {
@@ -110,6 +267,11 @@ const styles = StyleSheet.create({
   projectsContainer: {
       gap: 20
   },
+  emptyText: {
+    color: COLORS.textSec,
+    textAlign: 'center',
+    marginTop: 50,
+  },
   card: {
       backgroundColor: COLORS.cardBg,
       borderRadius: 10,
@@ -122,11 +284,20 @@ const styles = StyleSheet.create({
       width: '100%',
       backgroundColor: 'rgba(0,0,0,0.3)',
       justifyContent: 'center',
-      alignItems: 'center'
+      alignItems: 'center',
+      position: 'relative'
   },
   projectImage: {
       width: '100%',
       height: '100%'
+  },
+  deleteBtn: {
+      position: 'absolute',
+      top: 10,
+      right: 10,
+      backgroundColor: 'rgba(255, 68, 68, 0.8)',
+      padding: 8,
+      borderRadius: 20
   },
   cardBody: {
       padding: 20
@@ -161,5 +332,28 @@ const styles = StyleSheet.create({
   buttonText: {
       color: COLORS.textPrim,
       fontWeight: 'bold'
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    backgroundColor: COLORS.purple,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    ...Platform.select({
+      web: {
+        boxShadow: '0px 2px 3px rgba(0, 0, 0, 0.3)',
+      },
+      default: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+      }
+    }),
   }
 });

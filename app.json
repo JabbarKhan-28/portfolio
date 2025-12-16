@@ -4,9 +4,10 @@
     "slug": "portfolio",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/Projects/icon.png",
     "scheme": "portfolio",
     "userInterfaceStyle": "automatic",
+    "backgroundColor": "#03045e",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true

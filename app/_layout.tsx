@@ -2,7 +2,7 @@ import { COLORS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from 'expo-blur';
 import { Tabs } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 
 function GlassTabBar() {
@@ -32,6 +32,23 @@ function GlassTabBar() {
 }
 
 export default function TabLayout() {
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      const style = document.createElement('style');
+      style.textContent = `
+        html, body, #root {
+          background-color: ${COLORS.primaryBg} !important; 
+          min-height: 100% !important;
+        }
+      `;
+      document.head.appendChild(style);
+      return () => {
+        // Optional cleanup if we wanted to be strict, but for global theme it's fine to keep
+        // document.head.removeChild(style);
+      };
+    }
+  }, []);
+
   return (
     <Tabs
       screenOptions={{
@@ -101,6 +118,12 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Ionicons name="mail-outline" size={24} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="login"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen

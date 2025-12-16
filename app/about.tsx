@@ -77,6 +77,7 @@ export default function AboutScreen() {
                 <SkillBadge name="Node.js" />
                 <SkillBadge name="Babel" />
                 <SkillBadge name="Firebase" />
+                <SkillBadge name="Vercel"/>
                 <SkillBadge name="PostgreSQL" />
                 <SkillBadge name="C++" />
                 <SkillBadge name="Python" />
@@ -90,7 +91,6 @@ export default function AboutScreen() {
                 <SkillBadge name="Postman" />
                 <SkillBadge name="Git" />
                 <SkillBadge name="Github" />
-                <SkillBadge name="Android Studio" />
                 <SkillBadge name="Expo" />
                 <SkillBadge name="Figma" />
                 <SkillBadge name="Adobe Illustrator" />
@@ -349,10 +349,17 @@ const styles = StyleSheet.create({
       paddingHorizontal: 40,
       borderRadius: 30,
       gap: 10,
-      shadowColor: COLORS.purple,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
+      ...Platform.select({
+        web: {
+            boxShadow: '0px 4px 8px rgba(112, 112, 112, 0.3)', // Approximate purple tint if needed, or just standard shadow
+        },
+        default: {
+            shadowColor: COLORS.purple,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+        }
+      }),
       elevation: 5
   },
   hireBtnText: {
