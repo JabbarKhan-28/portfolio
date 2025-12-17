@@ -10,7 +10,7 @@ import { useRouter } from "expo-router";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import * as Animatable from 'react-native-animatable';
 
 export interface Project {
@@ -169,17 +169,12 @@ export default function ProjectsScreen() {
                     <Text style={styles.emptyText}>No projects added yet.</Text>
                 ) : (
                     projects.map((project, index) => (
-                        <Animatable.View 
-                            key={project.id}
-                            animation="fadeInUp"
-                            duration={800}
-                            delay={index * 150} // Stagger effect
-                        >
+                        <ProjectCardWrapper key={project.id} index={index}>
                             <ProjectCard 
                                 project={project} 
                                 onDelete={user ? () => handleDelete(project.id) : undefined} 
                             />
-                        </Animatable.View>
+                        </ProjectCardWrapper>
                     ))
                 )}
             </View>
@@ -220,6 +215,26 @@ export default function ProjectsScreen() {
   );
 }
 
+function ProjectCardWrapper({ children, index }: { children: React.ReactNode, index: number }) {
+    const { width } = useWindowDimensions();
+    const isTablet = width > 768;
+    const isDesktop = width > 1024;
+    
+    // Calculate width: 100% on mobile, ~48% on tablet, ~31% on desktop
+    const cardWidth = isDesktop ? '31%' : isTablet ? '48%' : '100%';
+
+    return (
+        <Animatable.View 
+            animation="fadeInUp"
+            duration={800}
+            delay={index * 100}
+            style={{ width: cardWidth }}
+        >
+            {children}
+        </Animatable.View>
+    );
+}
+
 function ProjectCard({ project, onDelete }: { project: Project, onDelete?: () => void }) {
     const handleLink = (url: string) => {
         if (url) {
@@ -239,13 +254,14 @@ function ProjectCard({ project, onDelete }: { project: Project, onDelete?: () =>
                  <Image 
                     source={imgSource}
                     style={styles.projectImage} 
-                    contentFit="contain" 
+                    contentFit="cover" // Changed to cover for fuller, premium look
                     transition={500}
                     onError={() => setImgSource(require('../assets/icon.png'))} 
                  />
+                 {/* Gradient Overlay for Text Readability if we overlapped, but here separate */}
                  {onDelete && (
                      <TouchableOpacity style={styles.deleteBtn} onPress={onDelete}>
-                         <Ionicons name="trash" size={20} color="#FFF" />
+                         <Ionicons name="trash" size={18} color="#FFF" />
                      </TouchableOpacity>
                  )}
             </View>
@@ -257,15 +273,15 @@ function ProjectCard({ project, onDelete }: { project: Project, onDelete?: () =>
                 <View style={styles.buttonsContainer}>
                     {project.ghLink ? (
                         <TouchableOpacity style={styles.button} onPress={() => handleLink(project.ghLink)}>
-                            <Ionicons name="logo-github" size={20} color={COLORS.textPrim} />
-                            <Text style={styles.buttonText}>GitHub</Text>
+                            <Ionicons name="logo-github" size={18} color={COLORS.primaryBg} />
+                            <Text style={styles.buttonText}>Code</Text>
                         </TouchableOpacity>
                     ) : null}
                     
                     {project.demoLink ? (
-                         <TouchableOpacity style={styles.button} onPress={() => handleLink(project.demoLink)}>
-                            <Ionicons name="desktop-outline" size={20} color={COLORS.textPrim} />
-                            <Text style={styles.buttonText}>Demo</Text>
+                         <TouchableOpacity style={[styles.button, styles.demoButton]} onPress={() => handleLink(project.demoLink)}>
+                            <Ionicons name="rocket-outline" size={18} color="#FFF" />
+                            <Text style={[styles.buttonText, { color: '#FFF' }]}>Live Demo</Text>
                         </TouchableOpacity>
                     ) : null}
                 </View>
@@ -300,10 +316,15 @@ const styles = StyleSheet.create({
   },
   subText: {
       color: COLORS.textPrim,
-      fontSize: 16
+      fontSize: 16,
+      textAlign: 'center',
+      marginTop: 5
   },
   projectsContainer: {
-      gap: 20
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 20,
+      justifyContent: 'center' // Center cards when wrapping
   },
   emptyText: {
     color: COLORS.textSec,
@@ -311,16 +332,29 @@ const styles = StyleSheet.create({
     marginTop: 50,
   },
   card: {
-      backgroundColor: COLORS.cardBg,
-      borderRadius: 10,
+      backgroundColor: 'rgba(255, 255, 255, 0.03)', // Ultra subtle glass
+      borderRadius: 20,
       overflow: 'hidden',
       borderWidth: 1,
-      borderColor: 'rgba(199, 112, 240, 0.2)'
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      ...Platform.select({
+          web: {
+              boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
+              backdropFilter: 'blur(4px)',
+          },
+          default: {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 5,
+              elevation: 5
+          }
+      })
   },
   imageContainer: {
-      height: 200,
+      height: 220,
       width: '100%',
-      backgroundColor: '#2a2a2a',
+      backgroundColor: 'rgba(0,0,0,0.2)', // Slightly darker for contrast
       justifyContent: 'center',
       alignItems: 'center',
       position: 'relative'
@@ -331,45 +365,58 @@ const styles = StyleSheet.create({
   },
   deleteBtn: {
       position: 'absolute',
-      top: 10,
-      right: 10,
-      backgroundColor: 'rgba(255, 68, 68, 0.8)',
-      padding: 8,
-      borderRadius: 20
+      top: 15,
+      right: 15,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      padding: 10,
+      borderRadius: 30, // Full circle
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.2)'
   },
   cardBody: {
-      padding: 20
+      padding: 24,
+      alignItems: 'center'
   },
   cardTitle: {
-      fontSize: 22,
-      fontWeight: 'bold',
+      fontSize: 24,
+      fontWeight: '800', // Extra bold
       color: COLORS.textPrim,
-      marginBottom: 10,
-      textAlign: 'center'
+      marginBottom: 8,
+      textAlign: 'center',
+      letterSpacing: 0.5
   },
   cardDescription: {
-      color: COLORS.textPrim,
+      color: COLORS.textSec, // Softer color
       textAlign: 'center',
-      marginBottom: 20,
-      lineHeight: 20
+      marginBottom: 24,
+      lineHeight: 24,
+      fontSize: 15
   },
   buttonsContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
-      gap: 10
+      gap: 15,
+      width: '100%'
   },
   button: {
-      backgroundColor: COLORS.darkPurple,
+      backgroundColor: COLORS.textHighlight, // Bright Cyan
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 10,
+      justifyContent: 'center',
+      paddingVertical: 12,
       paddingHorizontal: 20,
-      borderRadius: 5,
-      gap: 8
+      borderRadius: 10, // Pill shape
+      gap: 8,
+      flex: 1, // Equal width buttons
+      minWidth: 120
+  },
+  demoButton: {
+      backgroundColor: COLORS.purple, // Different color for Demo
   },
   buttonText: {
-      color: COLORS.textPrim,
-      fontWeight: 'bold'
+      color: COLORS.primaryBg, // Dark text on bright button
+      fontWeight: 'bold',
+      fontSize: 14
   },
   fabContainer: {
       position: 'absolute',

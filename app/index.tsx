@@ -128,9 +128,9 @@ export default function HomeScreen() {
             </View>
 
             <Link href="/resume" asChild>
-                <TouchableOpacity style={{ ...styles.primaryButton, marginTop: 30 }}>
-                    <Ionicons name="document-text-outline" size={20} color={COLORS.textPrim} />
-                    <Text style={styles.primaryButtonText}>View My Resume</Text>
+                <TouchableOpacity style={{ ...styles.primaryButton, marginTop: 30, backgroundColor: 'transparent', borderWidth: 1, borderColor: COLORS.textHighlight }}>
+                    <Ionicons name="document-text-outline" size={20} color={COLORS.textHighlight} />
+                    <Text style={{ ...styles.primaryButtonText, color: COLORS.textHighlight }}>View My Resume</Text>
                 </TouchableOpacity>
             </Link>
          </View>
@@ -164,7 +164,16 @@ const styles = StyleSheet.create({
   contentWrapper: {
       width: '100%',
       maxWidth: 600,
-      alignItems: 'flex-start'
+      alignItems: 'flex-start',
+      backgroundColor: 'rgba(255, 255, 255, 0.03)',
+      padding: 30,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      ...Platform.select({
+          web: { backdropFilter: 'blur(4px)', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' },
+          default: { shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 5, elevation: 5 }
+      })
   },
   
   // Web Specifics
@@ -259,17 +268,19 @@ const styles = StyleSheet.create({
   
   // Buttons
   primaryButton: {
-      backgroundColor: COLORS.purple,
+      backgroundColor: COLORS.textHighlight,
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 12,
-      paddingHorizontal: 25,
-      borderRadius: 8,
+      paddingVertical: 14,
+      paddingHorizontal: 30,
+      borderRadius: 50, // Pill shape
       gap: 10,
-      alignSelf:'center'
+      alignSelf:'center',
+      elevation: 5,
+      marginTop: 10
   },
   primaryButtonText: {
-      color: COLORS.textPrim,
+      color: COLORS.primaryBg,
       fontWeight: 'bold',
       fontSize: 16
   },
@@ -284,9 +295,11 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'center',
       gap: 15,
-      backgroundColor: COLORS.cardBg,
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
       padding: 15,
-      borderRadius: 10
+      borderRadius: 15,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)'
   },
   contactText: {
       color: COLORS.textPrim,

@@ -3,16 +3,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import * as Animatable from "react-native-animatable";
 
@@ -138,7 +138,7 @@ export default function ContactScreen() {
           </View>
 
           {/* FORM */}
-          <View style={styles.formContainer}>
+          <Animatable.View animation="fadeInUp" duration={800} style={styles.formContainer}>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Name</Text>
               <TextInput
@@ -186,19 +186,19 @@ export default function ContactScreen() {
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <ActivityIndicator color={COLORS.textPrim} />
+                <ActivityIndicator color={COLORS.primaryBg} />
               ) : (
                 <>
                   <Text style={styles.submitButtonText}>Send Message</Text>
                   <Ionicons
                     name="send"
                     size={20}
-                    color={COLORS.textPrim}
+                    color={COLORS.primaryBg}
                   />
                 </>
               )}
             </TouchableOpacity>
-          </View>
+          </Animatable.View>
         </ScrollView>
 
         {/* STATUS MODAL */}
@@ -291,11 +291,11 @@ const styles = StyleSheet.create({
   },
   backButton: {
     alignSelf: "flex-start",
-    padding: 10,
-    backgroundColor: COLORS.cardBg,
-    borderRadius: 12,
+    padding: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 50, // Circle
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   headerText: {
     fontSize: 32,
@@ -316,12 +316,17 @@ const styles = StyleSheet.create({
   formContainer: {
     width: "100%",
     alignSelf: "center",
-    borderRadius: 12,
-    backgroundColor: COLORS.cardBg,
-    padding: 24,
+    maxWidth: 500, // Limit width on large screens
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    padding: 30,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     gap: 24,
+    ...Platform.select({
+        web: { backdropFilter: 'blur(4px)', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' },
+        default: { shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 5, elevation: 5 }
+    })
   },
   inputGroup: {
     gap: 10,
@@ -331,30 +336,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     letterSpacing: 1,
+    marginLeft: 5
   },
   input: {
-    backgroundColor: COLORS.inputBg,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
     color: COLORS.textPrim,
     padding: 18,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     fontSize: 16,
   },
   textArea: {
     minHeight: 140,
   },
   submitButton: {
-    backgroundColor: COLORS.purple,
+    backgroundColor: COLORS.textHighlight, // Bright Cyan
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: 18,
     borderRadius: 16,
     gap: 12,
+    marginTop: 10
   },
   submitButtonText: {
-    color: COLORS.textPrim,
+    color: COLORS.primaryBg, // Dark text
     fontSize: 18,
     fontWeight: "bold",
   },

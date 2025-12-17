@@ -4,19 +4,20 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import React from "react";
 import {
-  Alert,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  useWindowDimensions,
+    Alert,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    useWindowDimensions,
 } from "react-native";
 
-/* ------------------ GITHUB RAW PDF LINK ------------------ */
-const RESUME_URL =
-  "https://raw.githubusercontent.com/JabbarKhan-28/portfolio/master/assets/Jabbar_khan_resume.pdf";
+/* ------------------ GOOGLE DRIVE LINKS ------------------ */
+const GOOGLE_DRIVE_ID = "1Abh6vZLuBVRvN0OoOEIeVxAKhpy14ALD";
+const RESUME_DOWNLOAD_URL = `https://drive.google.com/uc?export=download&id=${GOOGLE_DRIVE_ID}`;
+const RESUME_PREVIEW_URL = `https://drive.google.com/file/d/${GOOGLE_DRIVE_ID}/preview`;
 
 
 export default function ResumeScreen() {
@@ -33,7 +34,7 @@ export default function ResumeScreen() {
         (fileSystem.documentDirectory || fileSystem.cacheDirectory) + "Jabbar_Khan_Resume.pdf";
 
       const download = FileSystem.createDownloadResumable(
-        RESUME_URL,
+        RESUME_DOWNLOAD_URL,
         fileUri
       );
 
@@ -66,7 +67,7 @@ export default function ResumeScreen() {
           <View style={styles.actionRow}>
             {isWeb ? (
               <a
-                href={RESUME_URL}
+                href={RESUME_DOWNLOAD_URL}
                 download="Jabbar_Khan_Resume.pdf"
                 style={{ textDecoration: "none" }}
               >
@@ -75,7 +76,7 @@ export default function ResumeScreen() {
                   <Ionicons
                     name="cloud-download-outline"
                     size={20}
-                    color={COLORS.textPrim}
+                    color={COLORS.primaryBg}
                   />
                 </View>
               </a>
@@ -88,7 +89,7 @@ export default function ResumeScreen() {
                 <Ionicons
                   name="cloud-download-outline"
                   size={20}
-                  color={COLORS.textPrim}
+                  color={COLORS.primaryBg}
                 />
               </TouchableOpacity>
             )}
@@ -116,7 +117,7 @@ export default function ResumeScreen() {
         {showPdf ? (
           <View style={styles.pdfContainer}>
             <iframe
-              src={RESUME_URL}
+              src={RESUME_PREVIEW_URL}
               title="Resume PDF"
               style={{
                 width: "100%",
@@ -260,17 +261,17 @@ const styles = StyleSheet.create({
   },
 
   downloadBtn: {
-    backgroundColor: COLORS.purple,
+    backgroundColor: COLORS.textHighlight,
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 25,
+    paddingVertical: 14,
+    paddingHorizontal: 30,
     borderRadius: 50,
-    gap: 8,
+    gap: 10,
     elevation: 5,
   },
   btnText: {
-    color: COLORS.textPrim,
+    color: COLORS.primaryBg,
     fontWeight: "bold",
     fontSize: 16,
   },
@@ -295,11 +296,17 @@ const styles = StyleSheet.create({
 
   section: {
     marginBottom: 30,
-    backgroundColor: COLORS.cardBg,
-    padding: 20,
-    borderRadius: 12,
-    borderLeftWidth: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    padding: 25,
+    borderRadius: 20,
+    borderLeftWidth: 4,
     borderLeftColor: COLORS.purple,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...Platform.select({
+        web: { backdropFilter: 'blur(4px)', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' },
+        default: { shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 5, elevation: 5 }
+    })
   },
   sectionTitle: {
     fontSize: 20,

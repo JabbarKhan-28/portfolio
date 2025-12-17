@@ -239,48 +239,61 @@ const styles = StyleSheet.create({
 
   // Card / Bio
   cardContainer: {
-    backgroundColor: COLORS.cardBg,
-    padding: 25,
-    borderRadius: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    padding: 30,
+    borderRadius: 20,
     width: '100%',
     borderLeftWidth: 4,
     borderLeftColor: COLORS.purple,
-    marginBottom: 30
+    marginBottom: 30,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...Platform.select({
+        web: { backdropFilter: 'blur(4px)', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' },
+        default: { shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 5, elevation: 5 }
+    })
   },
   cardText: {
     color: COLORS.textPrim,
-    fontSize: 16,
-    lineHeight: 26,
-    textAlign: 'center'
+    fontSize: 18,
+    lineHeight: 30,
+    textAlign: 'justify' // Better reading flow
   },
   imagePlaceholder: {
       width: '100%',
       alignItems: 'center',
-      marginTop: 10
+      marginTop: 20,
+      marginBottom: 20
   },
   aboutImage: {
     width: 250,
-    height: 250
+    height: 250,
+    borderRadius: 125, // Circle
+    borderWidth: 4,
+    borderColor: 'rgba(255, 255, 255, 0.1)'
   },
+
   
   // Skills
   skillRow: {
       flexDirection: 'row',
       flexWrap: 'wrap',
       justifyContent: 'center',
-      gap: 12
+      gap: 15,
+      marginTop: 10
   },
   badge: {
-      borderColor: COLORS.purple,
+      borderColor: 'rgba(199, 112, 240, 0.3)',
       borderWidth: 1,
-      paddingVertical: 8,
-      paddingHorizontal: 16,
-      borderRadius: 6,
-      backgroundColor: 'rgba(199, 112, 240, 0.05)'
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 50, // Pill shape
+      backgroundColor: 'rgba(255, 255, 255, 0.05)'
   },
   badgeText: {
       color: COLORS.textPrim,
-      fontWeight: '600'
+      fontWeight: '600',
+      fontSize: 15
   },
 
   // Timeline (Journey)
@@ -291,19 +304,21 @@ const styles = StyleSheet.create({
   timelineItem: {
       marginLeft: 20,
       borderLeftWidth: 2,
-      borderLeftColor: COLORS.cardBg,
-      paddingLeft: 20,
-      paddingBottom: 40,
+      borderLeftColor: 'rgba(255, 255, 255, 0.1)',
+      paddingLeft: 25,
+      paddingBottom: 45,
       position: 'relative'
   },
   timelineDot: {
-      width: 12,
-      height: 12,
-      borderRadius: 6,
-      backgroundColor: COLORS.purple,
+      width: 14,
+      height: 14,
+      borderRadius: 7,
+      backgroundColor: COLORS.textHighlight,
       position: 'absolute',
-      left: -7,
-      top: 0
+      left: -8,
+      top: 0,
+      borderWidth: 2,
+      borderColor: COLORS.primaryBg // Create a 'cutout' effect
   },
   timelineContent: {
       alignItems: 'flex-start'
@@ -342,30 +357,24 @@ const styles = StyleSheet.create({
      fontWeight: 'bold'
   },
   hireBtn: {
-      backgroundColor: COLORS.purple,
+      backgroundColor: COLORS.textHighlight,
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 15,
-      paddingHorizontal: 40,
-      borderRadius: 30,
-      gap: 10,
+      paddingVertical: 18,
+      paddingHorizontal: 50,
+      borderRadius: 50,
+      gap: 12,
+      elevation: 10,
       ...Platform.select({
-        web: {
-            boxShadow: '0px 4px 8px rgba(112, 112, 112, 0.3)', // Approximate purple tint if needed, or just standard shadow
-        },
-        default: {
-            shadowColor: COLORS.purple,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-        }
-      }),
-      elevation: 5
+          web: { boxShadow: '0 0 20px rgba(72, 202, 228, 0.4)' },
+          default: { shadowColor: COLORS.textHighlight, shadowOpacity: 0.5, shadowRadius: 10 }
+      })
   },
   hireBtnText: {
-      color: COLORS.textPrim,
-      fontSize: 18,
-      fontWeight: 'bold'
+      color: COLORS.primaryBg,
+      fontSize: 20,
+      fontWeight: 'bold',
+      letterSpacing: 1
   },
 
   // Scroll Indicator
