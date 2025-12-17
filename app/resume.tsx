@@ -4,14 +4,15 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import React from "react";
 import {
-    Alert,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  Alert,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 
 /* ------------------ GOOGLE DRIVE LINKS ------------------ */
@@ -50,140 +51,154 @@ export default function ResumeScreen() {
     }
   };
 
+  /* ------------------ VIEW PDF HANDLER ------------------ */
+  const handleViewPdf = () => {
+      if (isWeb) {
+          setShowPdf(!showPdf);
+      } else {
+          // On Native, open in browser/drive app
+          Linking.openURL(RESUME_PREVIEW_URL);
+      }
+  };
+
+  /* ------------------ RENDER HEADER ------------------ */
+  const renderHeader = () => (
+    <View style={styles.headerSection}>
+      <Text style={[styles.headerText, isWeb && styles.webHeader]}>
+        My <Text style={styles.purpleText}>Resume</Text>
+      </Text>
+
+      <Text style={styles.subText}>
+        Check out my resume below or download it for later.
+      </Text>
+
+      <View style={styles.actionRow}>
+        {isWeb ? (
+          <a
+            href={RESUME_DOWNLOAD_URL}
+            download="Jabbar_Khan_Resume.pdf"
+            style={{ textDecoration: "none" }}
+          >
+            <View style={styles.downloadBtn}>
+              <Text style={styles.btnText}>Download CV</Text>
+              <Ionicons
+                name="cloud-download-outline"
+                size={20}
+                color={COLORS.primaryBg}
+              />
+            </View>
+          </a>
+        ) : (
+          <TouchableOpacity
+            style={styles.downloadBtn}
+            onPress={handleDownloadMobile}
+          >
+            <Text style={styles.btnText}>Download CV</Text>
+            <Ionicons
+              name="cloud-download-outline"
+              size={20}
+              color={COLORS.primaryBg}
+            />
+          </TouchableOpacity>
+        )}
+
+        {/* View PDF Button (Supported on all platforms now) */}
+        <TouchableOpacity 
+            style={[styles.downloadBtn, { backgroundColor: 'transparent', borderWidth: 1, borderColor: COLORS.purple }]}
+            onPress={handleViewPdf}
+        >
+            <Text style={[styles.btnText, { color: COLORS.purple }]}>
+                {isWeb && showPdf ? "View Text" : "View PDF"}
+            </Text>
+            <Ionicons
+                name={isWeb && showPdf ? "document-text-outline" : "eye-outline"}
+                size={20}
+                color={COLORS.purple}
+            />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      <View style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
-        {/* ------------------ HEADER ------------------ */}
-        <View style={styles.headerSection}>
-          <Text style={[styles.headerText, isWeb && styles.webHeader]}>
-            My <Text style={styles.purpleText}>Resume</Text>
-          </Text>
+      {showPdf ? (
+        /* ------------------ PDF VIEW (Header Fixed, Web Only) ------------------ */
+        <View style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
+           {renderHeader()}
+           <View style={styles.pdfContainer}>
+              <iframe
+                src={RESUME_PREVIEW_URL}
+                title="Resume PDF"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  border: "none",
+                }}
+              />
+           </View>
+        </View>
+      ) : (
+        /* ------------------ DIGITAL RESUME (Whole Page Scroll) ------------------ */
+        <ScrollView
+            style={styles.digitalResumeScroll}
+            contentContainerStyle={[styles.scrollContent, { alignItems: 'center' }]} 
+            showsVerticalScrollIndicator={false}
+        >
+            <View style={[styles.contentWrapper, isWeb && styles.webContentCentered, { flex: 0 }]}>
+                {renderHeader()}
 
-          <Text style={styles.subText}>
-            Check out my resume below or download it for later.
-          </Text>
+                {/* SUMMARY */}
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Summary</Text>
+                  <Text style={styles.bodyText}>
+                    Passionate React Native Developer with strong experience in
+                    building cross-platform mobile applications using modern
+                    technologies. Currently pursuing BS Computer Science.
+                  </Text>
+                </View>
 
-          {/* ------------------ ACTION BUTTONS ------------------ */}
-          <View style={styles.actionRow}>
-            {isWeb ? (
-              <a
-                href={RESUME_DOWNLOAD_URL}
-                download="Jabbar_Khan_Resume.pdf"
-                style={{ textDecoration: "none" }}
-              >
-                <View style={styles.downloadBtn}>
-                  <Text style={styles.btnText}>Download CV</Text>
-                  <Ionicons
-                    name="cloud-download-outline"
-                    size={20}
-                    color={COLORS.primaryBg}
+                {/* EXPERIENCE */}
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Experience</Text>
+
+                  <ResumeItem
+                    role="Freelance Full Stack Developer"
+                    company="Self-Employed"
+                    date="2024 – Present"
+                    desc="Developing mobile and web applications using React Native, backend integrations, and modern UI practices."
+                  />
+
+                  <ResumeItem
+                    role="Open Source Contributor"
+                    company="GitHub"
+                    date="2023 – 2024"
+                    desc="Contributed to React Native projects, bug fixes, and documentation improvements."
                   />
                 </View>
-              </a>
-            ) : (
-              <TouchableOpacity
-                style={styles.downloadBtn}
-                onPress={handleDownloadMobile}
-              >
-                <Text style={styles.btnText}>Download CV</Text>
-                <Ionicons
-                  name="cloud-download-outline"
-                  size={20}
-                  color={COLORS.primaryBg}
-                />
-              </TouchableOpacity>
-            )}
 
-            {/* Toggle PDF View Button (Web Only for now as iframe is used) */}
-            {isWeb && (
-                <TouchableOpacity 
-                    style={[styles.downloadBtn, { backgroundColor: 'transparent', borderWidth: 1, borderColor: COLORS.purple }]}
-                    onPress={() => setShowPdf(!showPdf)}
-                >
-                    <Text style={[styles.btnText, { color: COLORS.purple }]}>
-                        {showPdf ? "View Text" : "View PDF"}
-                    </Text>
-                    <Ionicons
-                        name={showPdf ? "document-text-outline" : "eye-outline"}
-                        size={20}
-                        color={COLORS.purple}
-                    />
-                </TouchableOpacity>
-            )}
-          </View>
-        </View>
+                {/* EDUCATION */}
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Education</Text>
+                  <ResumeItem
+                    role="BS Computer Science"
+                    company="Sir Syed CASE Institute of Technology"
+                    date="2024 – 2028 (Expected)"
+                    desc="Relevant Coursework: Data Structures, Algorithms, OOP, Databases."
+                  />
+                </View>
 
-        {/* ------------------ WEB PDF VIEW ------------------ */}
-        {showPdf ? (
-          <View style={styles.pdfContainer}>
-            <iframe
-              src={RESUME_PREVIEW_URL}
-              title="Resume PDF"
-              style={{
-                width: "100%",
-                height: "100%",
-                border: "none",
-              }}
-            />
-          </View>
-        ) : (
-          /* ------------------ MOBILE DIGITAL RESUME ------------------ */
-          <ScrollView
-            style={styles.digitalResumeScroll}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* SUMMARY */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Summary</Text>
-              <Text style={styles.bodyText}>
-                Passionate React Native Developer with strong experience in
-                building cross-platform mobile applications using modern
-                technologies. Currently pursuing BS Computer Science.
-              </Text>
+                {/* SKILLS */}
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Technical Skills</Text>
+                  <Text style={styles.skillBadges}>
+                    React Native • TypeScript • JavaScript • Node.js • Firebase • Git
+                    • UI/UX
+                  </Text>
+                </View>
             </View>
-
-            {/* EXPERIENCE */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Experience</Text>
-
-              <ResumeItem
-                role="Freelance Full Stack Developer"
-                company="Self-Employed"
-                date="2024 – Present"
-                desc="Developing mobile and web applications using React Native, backend integrations, and modern UI practices."
-              />
-
-              <ResumeItem
-                role="Open Source Contributor"
-                company="GitHub"
-                date="2023 – 2024"
-                desc="Contributed to React Native projects, bug fixes, and documentation improvements."
-              />
-            </View>
-
-            {/* EDUCATION */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Education</Text>
-              <ResumeItem
-                role="BS Computer Science"
-                company="Sir Syed CASE Institute of Technology"
-                date="2024 – 2028 (Expected)"
-                desc="Relevant Coursework: Data Structures, Algorithms, OOP, Databases."
-              />
-            </View>
-
-            {/* SKILLS */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Technical Skills</Text>
-              <Text style={styles.skillBadges}>
-                React Native • TypeScript • JavaScript • Node.js • Firebase • Git
-                • UI/UX
-              </Text>
-            </View>
-          </ScrollView>
-        )}
-      </View>
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -279,6 +294,7 @@ const styles = StyleSheet.create({
   pdfContainer: {
     flex: 1,
     width: "100%",
+    maxWidth: 850,
     backgroundColor: COLORS.cardBg,
     borderRadius: 12,
     overflow: "hidden",
@@ -304,8 +320,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
     ...Platform.select({
-        web: { backdropFilter: 'blur(4px)', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' },
-        default: { shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 5, elevation: 5 }
+        web: { backdropFilter: 'blur(4px)' },
+        default: {}
     })
   },
   sectionTitle: {

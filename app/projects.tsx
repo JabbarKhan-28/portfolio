@@ -335,20 +335,13 @@ const styles = StyleSheet.create({
       backgroundColor: 'rgba(255, 255, 255, 0.03)', // Ultra subtle glass
       borderRadius: 20,
       overflow: 'hidden',
-      borderWidth: 1,
+      borderWidth: 0.5,
       borderColor: 'rgba(255, 255, 255, 0.1)',
       ...Platform.select({
           web: {
-              boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
               backdropFilter: 'blur(4px)',
           },
-          default: {
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 5,
-              elevation: 5
-          }
+          default: {}
       })
   },
   imageContainer: {
@@ -370,7 +363,7 @@ const styles = StyleSheet.create({
       backgroundColor: 'rgba(0, 0, 0, 0.6)',
       padding: 10,
       borderRadius: 30, // Full circle
-      borderWidth: 1,
+      borderWidth: 0.5,
       borderColor: 'rgba(255,255,255,0.2)'
   },
   cardBody: {
