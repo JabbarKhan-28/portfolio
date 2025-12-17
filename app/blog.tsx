@@ -1,24 +1,32 @@
-
 import AddBlogModal from "@/components/AddBlogModal";
 import CustomAlertModal, { AlertType } from "@/components/CustomAlertModal";
 import { COLORS } from "@/constants/theme";
 import { auth, db } from "@/firebaseConfig";
 import { Ionicons } from "@expo/vector-icons";
-import * as Haptics from 'expo-haptics';
-import { Image } from "expo-image";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import * as Animatable from 'react-native-animatable';
+import {
+  ActivityIndicator,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import * as Animatable from "react-native-animatable";
 
 interface BlogPost {
   id: string;
   title: string;
-  date: string;
+  date?: string;
   summary: string;
-  mediumLink?: string;
+  pdfPath: string;
   imageUrl?: string;
 }
 
@@ -27,214 +35,180 @@ export default function BlogScreen() {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Custom Alert State
   const [alertConfig, setAlertConfig] = useState<{
-      visible: boolean;
-      type: AlertType;
-      title: string;
-      message: string;
-      onConfirm?: () => void;
-  }>({
-      visible: false,
-      type: 'info',
-      title: '',
-      message: '',
-  });
+    visible: boolean;
+    type: AlertType;
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+  }>({ visible: false, type: "info", title: "", message: "" });
 
-  const showAlert = (type: AlertType, title: string, message: string, onConfirm?: () => void) => {
-      setAlertConfig({ visible: true, type, title, message, onConfirm });
-  }
+  const showAlert = (type: AlertType, title: string, message: string, onConfirm?: () => void) =>
+    setAlertConfig({ visible: true, type, title, message, onConfirm });
 
-  const hideAlert = () => {
-      setAlertConfig(prev => ({ ...prev, visible: false }));
-  }
+  const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
 
-  // Secret Login Logic
   const [secretTaps, setSecretTaps] = useState(0);
-
   const handleSecretLogin = () => {
-    if (user) return; // Already logged in
-
-    const newTaps = secretTaps + 1;
-    setSecretTaps(newTaps);
+    if (user) return;
+    const taps = secretTaps + 1;
+    setSecretTaps(taps);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-    if (newTaps >= 5) {
+    if (taps >= 5) {
       setSecretTaps(0);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.push('/login');
+      router.push("/login");
     }
-
-    // Reset taps if no activity for 2 seconds
-    setTimeout(() => {
-        setSecretTaps(0);
-    }, 2000);
+    setTimeout(() => setSecretTaps(0), 2000);
   };
 
   useEffect(() => {
-    // Auth Listener
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-
-    // Real-time Blog Fetching
+    const unsubAuth = onAuthStateChanged(auth, setUser);
     const q = query(collection(db, "blogs"), orderBy("createdAt", "desc"));
-    const unsubscribeBlogs = onSnapshot(q, (snapshot) => {
-      const blogList: BlogPost[] = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as BlogPost));
-      setBlogs(blogList);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error fetching blogs: ", error);
-      setLoading(false);
-    });
+    const unsubBlogs = onSnapshot(
+      q,
+      snap => {
+        const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as BlogPost));
+        setBlogs(list);
+        setLoading(false);
+      },
+      () => setLoading(false)
+    );
 
     return () => {
-      unsubscribeAuth();
-      unsubscribeBlogs();
+      unsubAuth();
+      unsubBlogs();
     };
   }, []);
 
-  const handleReadMore = (url?: string) => {
-    if (url) {
-        Haptics.selectionAsync();
-        Linking.openURL(url);
+  const openPdfBlog = (pdfUrl: string) => {
+    Haptics.selectionAsync();
+    let finalUrl = pdfUrl;
+    if (finalUrl.includes("dropbox.com") && finalUrl.includes("dl=0")) {
+      finalUrl = finalUrl.replace("dl=0", "raw=1");
+    }
+    if (Platform.OS === 'web') {
+      window.open(finalUrl, '_blank');
+    } else {
+      WebBrowser.openBrowserAsync(finalUrl).catch(() => showAlert("error", "Error", "Could not open link."));
     }
   };
 
   const handleDelete = (id: string) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    showAlert(
-        "confirm",
-        "Delete Blog",
-        "Are you sure you want to delete this blog post?",
-        async () => {
-            try {
-                await deleteDoc(doc(db, "blogs", id));
-                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                hideAlert(); // Auto close on success (snapshot updates UI)
-            } catch (error: any) {
-                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-                hideAlert();
-                setTimeout(() => {
-                    showAlert("error", "Error", error.message);
-                }, 400); // Wait for anim
-            }
-        }
-    );
+    showAlert("confirm", "Delete Blog", "Delete this blog?", async () => {
+      try {
+        await deleteDoc(doc(db, "blogs", id));
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        hideAlert();
+      } catch (e: any) {
+        hideAlert();
+        showAlert("error", "Error", e.message);
+      }
+    });
   };
 
   const handleLogout = async () => {
-    try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await signOut(auth);
-    } catch (error) {
-      console.error("Error signing out: ", error);
-    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await signOut(auth);
   };
 
-  const openAddModal = () => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      setModalVisible(true);
-  }
+  const filteredBlogs = blogs.filter(blog => {
+    const query = searchQuery.toLowerCase();
+    return blog.title.toLowerCase().includes(query) || blog.summary.toLowerCase().includes(query);
+  });
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.contentContainer}>
-         <View style={styles.headerContainer}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                 <View style={{ width: 40 }} /> 
-                 {/* Spacer to center the title */}
+      <ScrollView contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+        <View style={styles.headerContainer}>
+          <View style={styles.headerRow}>
+            <View style={{ width: 40 }} />
+            <TouchableOpacity onPress={handleSecretLogin}>
+              <Text style={styles.headerText}>
+                My <Text style={styles.purpleText}>Blogs</Text>
+              </Text>
+            </TouchableOpacity>
+            {user ? (
+              <TouchableOpacity onPress={handleLogout}>
+                <Ionicons name="log-out-outline" size={24} color={COLORS.textSec} />
+              </TouchableOpacity>
+            ) : <View style={{ width: 40 }} />}
+          </View>
+          <Text style={styles.subText}>Thoughts, tutorials, and tech ramblings.</Text>
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color={COLORS.textSec} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search blogs..."
+              placeholderTextColor={COLORS.textSec}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery("")}>
+                <Ionicons name="close-circle" size={20} color={COLORS.textSec} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
 
-                <TouchableOpacity activeOpacity={1} onPress={handleSecretLogin}>
-                    <Text style={styles.headerText}>
-                        My <Text style={styles.purpleText}>Blogs</Text>
-                    </Text>
-                </TouchableOpacity>
-
-                {/* Logout Button */}
-                {user ? (
-                    <TouchableOpacity onPress={handleLogout} style={{ padding: 5 }}>
-                        <Ionicons name="log-out-outline" size={24} color={COLORS.textSec} />
+        {loading ? (
+          <ActivityIndicator size="large" color={COLORS.purple} style={{ marginTop: 50 }} />
+        ) : (
+          <View style={styles.listContainer}>
+            {filteredBlogs.length === 0 ? (
+              <Text style={styles.emptyText}>
+                {searchQuery ? "No blogs matching your search." : "No blog posts yet."}
+              </Text>
+            ) : (
+              filteredBlogs.map((blog, index) => (
+                <Animatable.View
+                  key={blog.id}
+                  animation="fadeInUp"
+                  duration={800}
+                  delay={index * 150}
+                  style={styles.blogCard}
+                >
+                  <View style={styles.cardBody}>
+                    <Text style={styles.blogTitle}>{blog.title}</Text>
+                    <Text style={styles.blogDate}>{blog.date}</Text>
+                    <Text style={styles.blogSummary}>{blog.summary}</Text>
+                    <TouchableOpacity style={styles.readMoreBtn} onPress={() => openPdfBlog(blog.pdfPath)}>
+                      <Ionicons name="document-text-outline" size={20} color={COLORS.textPrim} />
+                      <Text style={styles.readMoreText}>Read</Text>
                     </TouchableOpacity>
-                ) : (
-                    <View style={{ width: 40 }} />
-                )}
-            </View>
-            <Text style={styles.subText}>Thoughts, tutorials, and tech ramblings.</Text>
-         </View>
-  
-         {loading ? (
-            <ActivityIndicator size="large" color={COLORS.purple} style={{ marginTop: 50 }} />
-         ) : (
-            <View style={styles.listContainer}>
-               {blogs.length === 0 ? (
-                 <Text style={styles.emptyText}>No blog posts yet.</Text>
-               ) : (
-                 blogs.map((blog, index) => (
-                    <Animatable.View 
-                        key={blog.id} 
-                        style={styles.blogCard}
-                        animation="fadeInUp"
-                        duration={800}
-                        delay={index * 150}
-                    >
-                       <View style={styles.imageContainer}>
-                            <Image 
-                                source={blog.imageUrl ? { uri: blog.imageUrl } : require('../assets/images/favicon.png')} 
-                                style={styles.blogImage} 
-                                contentFit="cover"
-                                transition={500}
-                            />
-                            {user && (
-                                <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(blog.id)}>
-                                    <Ionicons name="trash" size={20} color="#FFF" />
-                                </TouchableOpacity>
-                            )}
-                       </View>
-
-                       <View style={styles.cardBody}>
-                           <View>
-                             <Text style={styles.blogTitle}>{blog.title}</Text>
-                             <Text style={styles.blogDate}>{blog.date}</Text>
-                           </View>
-                           
-                           <Text style={styles.blogSummary}>{blog.summary}</Text>
-                           
-                           <TouchableOpacity 
-                               style={styles.readMoreBtn}
-                               onPress={() => handleReadMore(blog.mediumLink)}
-                           >
-                               <Ionicons name="book-outline" size={20} color={COLORS.textPrim} />
-                               <Text style={styles.readMoreText}>Read Article</Text>
-                           </TouchableOpacity>
-                       </View>
-                    </Animatable.View>
-                 ))
-               )}
-            </View>
-         )}
+                  </View>
+                  {user && (
+                    <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(blog.id)}>
+                      <Ionicons name="trash" size={20} color="#FFF" />
+                    </TouchableOpacity>
+                  )}
+                </Animatable.View>
+              ))
+            )}
+          </View>
+        )}
       </ScrollView>
 
-      {/* Floating Action Button for Admin */}
       {user && (
         <Animatable.View animation="zoomIn" delay={500} style={styles.fabContainer}>
-            <TouchableOpacity 
-            style={styles.fab} 
-            onPress={openAddModal}
-            >
+          <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)}>
             <Ionicons name="add" size={30} color="#FFF" />
-            </TouchableOpacity>
+          </TouchableOpacity>
         </Animatable.View>
       )}
 
-      <AddBlogModal 
-        visible={modalVisible} 
-        onClose={() => setModalVisible(false)} 
+      <AddBlogModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSuccess={() => {
+          showAlert('success', 'Published!', 'Blog successfully published.');
+          setTimeout(hideAlert, 1500);
+        }}
       />
 
       <CustomAlertModal
@@ -250,131 +224,27 @@ export default function BlogScreen() {
   );
 }
 
+// STYLES
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.primaryBg,
-  },
-  contentContainer: {
-    padding: 20,
-    paddingTop: 60,
-  },
-  headerContainer: {
-      alignItems: 'center',
-      marginBottom: 30
-  },
-  headerText: {
-      fontSize: 28,
-      fontWeight: 'bold',
-      color: COLORS.textPrim,
-  },
-  purpleText: {
-      color: COLORS.purple
-  },
-  iconBtn: {
-    padding: 5
-  },
-  subText: {
-      color: COLORS.textSec,
-      fontSize: 16
-  },
-  listContainer: {
-      gap: 20
-  },
-  emptyText: {
-    color: COLORS.textSec,
-    textAlign: 'center',
-    marginTop: 50,
-  },
-  blogCard: {
-      backgroundColor: COLORS.cardBg,
-      borderRadius: 10,
-      overflow: 'hidden',
-      borderWidth: 1,
-      borderColor: 'rgba(199, 112, 240, 0.2)'
-  },
-  imageContainer: {
-      height: 180,
-      width: '100%',
-      backgroundColor: '#2a2a2a',
-      justifyContent: 'center',
-      alignItems: 'center',
-      position: 'relative'
-  },
-  blogImage: {
-      width: '100%',
-      height: '100%'
-  },
-  deleteBtn: {
-      position: 'absolute',
-      top: 10,
-      right: 10,
-      backgroundColor: 'rgba(255, 68, 68, 0.8)',
-      padding: 8,
-      borderRadius: 20
-  },
-  cardBody: {
-      padding: 20
-  },
-  blogTitle: {
-      color: COLORS.textPrim,
-      fontSize: 20,
-      fontWeight: 'bold',
-      marginBottom: 5,
-      textAlign: 'center'
-  },
-  blogDate: {
-      color: COLORS.textSec,
-      fontSize: 12,
-      fontStyle: 'italic',
-      marginBottom: 10,
-      textAlign: 'center'
-  },
-  blogSummary: {
-      color: COLORS.textSec,
-      fontSize: 15,
-      lineHeight: 22,
-      marginBottom: 20,
-      textAlign: 'justify'
-  },
-  readMoreBtn: {
-      backgroundColor: COLORS.darkPurple,
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderRadius: 5,
-      gap: 8,
-      alignSelf: 'center'
-  },
-  readMoreText: {
-      color: COLORS.textPrim,
-      fontWeight: 'bold'
-  },
-  fabContainer: {
-    position: 'absolute',
-    bottom: 100,
-    right: 20,
-  },
-  fab: {
-    backgroundColor: COLORS.purple,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-    ...Platform.select({
-      web: {
-        boxShadow: '0px 2px 3px rgba(0, 0, 0, 0.3)',
-      },
-      default: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 3,
-      }
-    }),
-  }
+  container: { flex: 1, backgroundColor: COLORS.primaryBg },
+  contentContainer: { padding: 20, paddingTop: 60, paddingBottom: 100 },
+  headerContainer: { alignItems: "center", marginBottom: 30 },
+  headerRow: { flexDirection: "row", justifyContent: "space-between", width: "100%", alignItems: "center" },
+  headerText: { fontSize: 28, fontWeight: "bold", color: COLORS.textPrim },
+  purpleText: { color: COLORS.purple },
+  subText: { color: COLORS.textSec, fontSize: 16 },
+  listContainer: { gap: 20 },
+  emptyText: { color: COLORS.textSec, textAlign: "center", marginTop: 50 },
+  blogCard: { backgroundColor: COLORS.cardBg, borderRadius: 10, overflow: "hidden", borderWidth: 1, borderColor: "rgba(199,112,240,0.2)" },
+  deleteBtn: { position: "absolute", top: 10, right: 10, backgroundColor: "rgba(255,68,68,0.8)", padding: 8, borderRadius: 20, zIndex: 10 },
+  cardBody: { padding: 20 },
+  blogTitle: { color: COLORS.textPrim, fontSize: 20, fontWeight: "bold", textAlign: "center" },
+  blogDate: { color: COLORS.textSec, fontSize: 12, textAlign: "center", marginBottom: 10 },
+  blogSummary: { color: COLORS.textSec, fontSize: 15, lineHeight: 22, marginBottom: 20, textAlign: "center" },
+  readMoreBtn: { backgroundColor: COLORS.darkPurple, flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 5, alignSelf: "center" },
+  readMoreText: { color: COLORS.textPrim, fontWeight: "bold" },
+  fabContainer: { position: "absolute", bottom: 100, right: 20 },
+  fab: { backgroundColor: COLORS.purple, width: 60, height: 60, borderRadius: 30, justifyContent: "center", alignItems: "center", elevation: 5 },
+  searchContainer: { flexDirection: "row", alignItems: "center", backgroundColor: COLORS.cardBg, borderRadius: 8, paddingHorizontal: 15, paddingVertical: 10, marginTop: 20, width: "100%", borderWidth: 1, borderColor: "rgba(199,112,240,0.1)" },
+  searchInput: { flex: 1, color: COLORS.textPrim, marginLeft: 10, fontSize: 16 },
 });
-

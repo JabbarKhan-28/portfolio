@@ -1,11 +1,12 @@
 {
   "expo": {
-    "name": "portfolio",
-    "slug": "portfolio",
+    "name": "Jabbar Khan",
+    "slug": "jabbarKhan",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.jpeg",
-    "scheme": "portfolio",
+    
+    "icon": "./assets/icon.png",
+    "scheme": "jabbarkhan",
     "userInterfaceStyle": "automatic",
     "backgroundColor": "#03045e",
     "newArchEnabled": true,
@@ -14,32 +15,22 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#03045e",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#03045e"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/icon.png"
     },
     "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#03045e",
-          "dark": {
-            "backgroundColor": "#03045e"
-          }
-        }
-      ]
+      ["expo-image-picker",
+      {
+        "photosPermission": "The app accesses your photos to let you share them with your friends."
+      }]
+
     ],
     "experiments": {
       "typedRoutes": true,

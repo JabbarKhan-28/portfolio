@@ -102,7 +102,7 @@ export default function ProjectsScreen() {
   const handleDelete = (id: string) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     showAlert(
-        "confirm",
+        "destructive",
         "Delete Project",
         "Are you sure you want to delete this project?",
         async () => {
@@ -201,6 +201,10 @@ export default function ProjectsScreen() {
         <AddProjectModal 
             visible={modalVisible} 
             onClose={() => setModalVisible(false)} 
+            onSuccess={() => {
+                showAlert('success', 'Published!', 'Project successfully added.');
+                setTimeout(() => hideAlert(), 1500); // Auto-close alert
+            }}
         />
 
         <CustomAlertModal
@@ -224,15 +228,20 @@ function ProjectCard({ project, onDelete }: { project: Project, onDelete?: () =>
         }
     }
 
+    const [imgSource, setImgSource] = useState(
+        project.imageUrl ? { uri: project.imageUrl } : require('../assets/icon.png')
+    );
+
     return (
         <View style={styles.card}>
             {/* Image Placeholder or Custom Image */}
             <View style={styles.imageContainer}>
                  <Image 
-                    source={project.imageUrl ? { uri: project.imageUrl } : require('../assets/images/favicon.png')} 
+                    source={imgSource}
                     style={styles.projectImage} 
-                    contentFit="cover"
+                    contentFit="contain" 
                     transition={500}
+                    onError={() => setImgSource(require('../assets/icon.png'))} 
                  />
                  {onDelete && (
                      <TouchableOpacity style={styles.deleteBtn} onPress={onDelete}>
@@ -340,7 +349,7 @@ const styles = StyleSheet.create({
   },
   cardDescription: {
       color: COLORS.textPrim,
-      textAlign: 'justify',
+      textAlign: 'center',
       marginBottom: 20,
       lineHeight: 20
   },

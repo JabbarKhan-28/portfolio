@@ -4,24 +4,25 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import React from "react";
 import {
-    Alert,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 
 /* ------------------ GITHUB RAW PDF LINK ------------------ */
 const RESUME_URL =
   "https://raw.githubusercontent.com/JabbarKhan-28/portfolio/master/assets/Jabbar_khan_resume.pdf";
 
+
 export default function ResumeScreen() {
   const { width } = useWindowDimensions();
   const isWeb = Platform.OS === "web";
-  const showPdf = false; // Disable PDF viewer to prevent auto-download issues
+  const [showPdf, setShowPdf] = React.useState(false);
 
   /* ------------------ MOBILE DOWNLOAD HANDLER ------------------ */
   const handleDownloadMobile = async () => {
@@ -61,35 +62,54 @@ export default function ResumeScreen() {
             Check out my resume below or download it for later.
           </Text>
 
-          {/* ------------------ DOWNLOAD BUTTON ------------------ */}
-          {isWeb ? (
-            <a
-              href={RESUME_URL}
-              download="Jabbar_Khan_Resume.pdf"
-              style={{ textDecoration: "none" }}
-            >
-              <View style={styles.downloadBtn}>
+          {/* ------------------ ACTION BUTTONS ------------------ */}
+          <View style={styles.actionRow}>
+            {isWeb ? (
+              <a
+                href={RESUME_URL}
+                download="Jabbar_Khan_Resume.pdf"
+                style={{ textDecoration: "none" }}
+              >
+                <View style={styles.downloadBtn}>
+                  <Text style={styles.btnText}>Download CV</Text>
+                  <Ionicons
+                    name="cloud-download-outline"
+                    size={20}
+                    color={COLORS.textPrim}
+                  />
+                </View>
+              </a>
+            ) : (
+              <TouchableOpacity
+                style={styles.downloadBtn}
+                onPress={handleDownloadMobile}
+              >
                 <Text style={styles.btnText}>Download CV</Text>
                 <Ionicons
                   name="cloud-download-outline"
                   size={20}
                   color={COLORS.textPrim}
                 />
-              </View>
-            </a>
-          ) : (
-            <TouchableOpacity
-              style={styles.downloadBtn}
-              onPress={handleDownloadMobile}
-            >
-              <Text style={styles.btnText}>Download CV</Text>
-              <Ionicons
-                name="cloud-download-outline"
-                size={20}
-                color={COLORS.textPrim}
-              />
-            </TouchableOpacity>
-          )}
+              </TouchableOpacity>
+            )}
+
+            {/* Toggle PDF View Button (Web Only for now as iframe is used) */}
+            {isWeb && (
+                <TouchableOpacity 
+                    style={[styles.downloadBtn, { backgroundColor: 'transparent', borderWidth: 1, borderColor: COLORS.purple }]}
+                    onPress={() => setShowPdf(!showPdf)}
+                >
+                    <Text style={[styles.btnText, { color: COLORS.purple }]}>
+                        {showPdf ? "View Text" : "View PDF"}
+                    </Text>
+                    <Ionicons
+                        name={showPdf ? "document-text-outline" : "eye-outline"}
+                        size={20}
+                        color={COLORS.purple}
+                    />
+                </TouchableOpacity>
+            )}
+          </View>
         </View>
 
         {/* ------------------ WEB PDF VIEW ------------------ */}
@@ -214,6 +234,13 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     width: "100%",
   },
+  actionRow: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 15,
+    marginTop: 15
+  },
   headerText: {
     fontSize: 32,
     fontWeight: "bold",
@@ -263,7 +290,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 50,
+    paddingBottom: 100,
   },
 
   section: {

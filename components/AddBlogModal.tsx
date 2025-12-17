@@ -1,25 +1,34 @@
-
 import CustomAlertModal, { AlertType } from '@/components/CustomAlertModal';
 import { COLORS } from '@/constants/theme';
 import { db } from '@/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import React, { useState } from 'react';
-import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 interface AddBlogModalProps {
   visible: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export default function AddBlogModal({ visible, onClose }: AddBlogModalProps) {
+export default function AddBlogModal({ visible, onClose, onSuccess }: AddBlogModalProps) {
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
-  const [mediumLink, setMediumLink] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [pdfUrl, setPdfUrl] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Custom Alert State
   const [alertConfig, setAlertConfig] = useState<{
     visible: boolean;
     title: string;
@@ -37,54 +46,61 @@ export default function AddBlogModal({ visible, onClose }: AddBlogModalProps) {
     setAlertConfig({ visible: true, type, title, message, onConfirm });
   };
 
-  const hideAlert = () => {
-    setAlertConfig(prev => ({ ...prev, visible: false }));
-  };
+  const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
 
   const handleSubmit = async () => {
-    if (!title || !summary) {
-      showAlert('error', 'Error', 'Please fill in Title and Summary');
+    if (!title || !summary || !pdfUrl) {
+      showAlert('error', 'Error', 'Please fill all fields');
+      return;
+    }
+
+    try {
+      new URL(pdfUrl);
+    } catch {
+      showAlert('error', 'Invalid URL', 'Please enter a valid URL.');
       return;
     }
 
     setLoading(true);
+
     try {
       await addDoc(collection(db, 'blogs'), {
         title,
         summary,
-        mediumLink,
-        imageUrl,
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        createdAt: new Date().toISOString()
-      });
-      setTitle('');
-      setSummary('');
-      setMediumLink('');
-      setImageUrl('');
-      
-      showAlert('success', 'Success', 'Blog post added!', () => {
-          hideAlert();
-          onClose();
+        pdfPath: pdfUrl,
+        createdAt: serverTimestamp(),
       });
 
+      setTitle('');
+      setSummary('');
+      setPdfUrl('');
+
+      onClose();
+
+      if (onSuccess) onSuccess();
     } catch (error: any) {
-        showAlert('error', 'Error', error.message);
+      console.error('Firebase Details:', error);
+      showAlert(
+        'error',
+        'Failed',
+        `Code: ${error?.code || 'N/A'}\nMessage: ${error?.message || error}`
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <View style={styles.overlay}>
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         <View style={styles.container}>
           <View style={styles.header}>
-            <Text style={styles.title}>Add New <Text style={styles.highlight}>Blog</Text></Text>
+            <Text style={styles.title}>
+              Add New <Text style={styles.highlight}>Blog</Text>
+            </Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color={COLORS.textSec} />
             </TouchableOpacity>
@@ -117,33 +133,25 @@ export default function AddBlogModal({ visible, onClose }: AddBlogModalProps) {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Image URL (Optional)</Text>
+              <Text style={styles.label}>Link URL (PDF/HTML)</Text>
               <TextInput
                 style={styles.input}
-                placeholder="https://..."
+                placeholder="https://example.com/document.pdf"
                 placeholderTextColor={COLORS.textSec}
-                value={imageUrl}
-                onChangeText={setImageUrl}
+                value={pdfUrl}
+                onChangeText={setPdfUrl}
                 autoCapitalize="none"
+                keyboardType="url"
               />
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Link (Optional)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="https://medium.com/..."
-                placeholderTextColor={COLORS.textSec}
-                value={mediumLink}
-                onChangeText={setMediumLink}
-                autoCapitalize="none"
-              />
-            </View>
-
-            <TouchableOpacity 
-              style={styles.submitButton} 
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                (loading || !title || !summary || !pdfUrl) && { opacity: 0.6 },
+              ]}
               onPress={handleSubmit}
-              disabled={loading}
+              disabled={loading || !title || !summary || !pdfUrl}
             >
               {loading ? (
                 <ActivityIndicator color={COLORS.primaryBg} />
@@ -162,74 +170,22 @@ export default function AddBlogModal({ visible, onClose }: AddBlogModalProps) {
             onConfirm={alertConfig.onConfirm}
           />
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  container: {
-    backgroundColor: COLORS.primaryBg,
-    borderRadius: 20,
-    maxHeight: '80%',
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#333',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: COLORS.textPrim,
-  },
-  highlight: {
-    color: COLORS.purple,
-  },
-  form: {
-    padding: 20,
-    gap: 20,
-  },
-  inputGroup: {
-    gap: 8,
-  },
-  label: {
-    color: COLORS.textSec,
-    fontSize: 14,
-    marginLeft: 4,
-  },
-  input: {
-    backgroundColor: COLORS.cardBg,
-    borderRadius: 12,
-    padding: 15,
-    color: COLORS.textPrim,
-    fontSize: 16,
-    // Removed border
-  },
-  textArea: {
-    height: 100,
-  },
-  submitButton: {
-    backgroundColor: COLORS.purple,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  submitButtonText: {
-    color: COLORS.primaryBg,
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 20 },
+  container: { backgroundColor: COLORS.primaryBg, borderRadius: 20, maxHeight: '80%', borderWidth: 1, borderColor: '#333' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#333' },
+  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.textPrim },
+  highlight: { color: COLORS.purple },
+  form: { padding: 20, gap: 20 },
+  inputGroup: { gap: 8 },
+  label: { color: COLORS.textSec, fontSize: 14, marginLeft: 4 },
+  input: { backgroundColor: COLORS.cardBg, borderRadius: 12, padding: 15, color: COLORS.textPrim, fontSize: 16 },
+  textArea: { height: 100 },
+  submitButton: { backgroundColor: COLORS.darkPurple, padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 10 },
+  submitButtonText: { color: COLORS.primaryBg, fontSize: 18, fontWeight: 'bold' },
 });

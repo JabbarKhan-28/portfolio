@@ -3,7 +3,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from 'expo-blur';
 import { Tabs } from "expo-router";
 import React, { useEffect } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { LogBox, Platform, StyleSheet, View } from "react-native";
+
+LogBox.ignoreLogs([
+  "props.pointerEvents is deprecated",
+  "Shadow props have been deprecated",
+]);
 
 function GlassTabBar() {
   if (Platform.OS === 'web') {
@@ -126,8 +131,9 @@ export default function TabLayout() {
           href: null,
         }}
       />
+
       <Tabs.Screen
-        name="react-native-typewriter.d"
+        name="pdf/[id]"
         options={{
           href: null,
         }}

@@ -147,6 +147,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
       flexGrow: 1,
+      paddingBottom: 100,
   },
   page: {
       width: '100%',
@@ -240,6 +241,7 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       color: COLORS.textPrim,
       textAlign:'center',
+      alignContent:'center',
       alignItems:'center',
       justifyContent:'center',
       marginBottom: 15
@@ -260,7 +262,6 @@ const styles = StyleSheet.create({
       backgroundColor: COLORS.purple,
       flexDirection: 'row',
       alignItems: 'center',
-      alignContent:'center',
       paddingVertical: 12,
       paddingHorizontal: 25,
       borderRadius: 8,

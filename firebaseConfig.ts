@@ -1,32 +1,35 @@
-// Import the functions you need from the SDKs you need
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { Auth, getAuth, initializeAuth } from 'firebase/auth';
+// @ts-ignore
+import { getReactNativePersistence } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from "firebase/storage";
+import { Platform } from 'react-native';
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDrvBFPQ3PlO9w0Sa47cW6zABFzp_qZyj8",
-  authDomain: "jabbarkhan-portfolio.firebaseapp.com",
-  projectId: "jabbarkhan-portfolio",
-  storageBucket: "jabbarkhan-portfolio.firebasestorage.app",
-  messagingSenderId: "1034314694186",
-  appId: "1:1034314694186:web:acc3aa38421a7ee133cd53",
-  measurementId: "G-3X1SX73Y5V"
+  apiKey: "AIzaSyCuYF8zL_9PXdaN2oXk-v5vrGxdcLWlATY",
+  authDomain: "baro-portfolio.firebaseapp.com",
+  projectId: "baro-portfolio",
+  storageBucket: "baro-portfolio.firebasestorage.app",
+  messagingSenderId: "602533365802",
+  appId: "1:602533365802:web:675b9823eec33db8501b53",
+  measurementId: "G-T83ND09QJM"
 };
 
-// Initialize Firebase
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Auth and Firestore
-import { getAuth, initializeAuth, inMemoryPersistence } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+let auth: Auth;
+if (Platform.OS === 'web') {
+  auth = getAuth(app);
+} else {
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage)
+  });
+}
 
-// Initialize Auth with in-memory persistence (no auto-login)
-export const auth = initializeAuth(app, {
-  persistence: inMemoryPersistence
-});
-export const db = getFirestore(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-export default app;
+export { app, auth, db, storage };
+

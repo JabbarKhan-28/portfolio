@@ -1,10 +1,11 @@
+import CustomAlertModal, { AlertType } from '@/components/CustomAlertModal';
 import { COLORS } from '@/constants/theme';
 import { auth } from '@/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -12,9 +13,36 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Custom Alert State
+  const [alertConfig, setAlertConfig] = useState<{
+    visible: boolean;
+    type: AlertType;
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+  }>({
+    visible: false,
+    type: 'info',
+    title: "",
+    message: "",
+  });
+
+  const showAlert = (
+    type: AlertType,
+    title: string,
+    message: string,
+    onConfirm?: () => void
+  ) => {
+    setAlertConfig({ visible: true, type, title, message, onConfirm });
+  };
+
+  const hideAlert = () => {
+    setAlertConfig((prev) => ({ ...prev, visible: false }));
+  };
+
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
+      showAlert('error', 'Error', 'Please enter both email and password');
       return;
     }
 
@@ -24,7 +52,18 @@ export default function LoginScreen() {
       // Login successful, navigate back
       router.back(); 
     } catch (error: any) {
-      Alert.alert('Login Failed', error.message);
+      console.error(error.code);
+      let errorMessage = "An unexpected error occurred.";
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+         errorMessage = "Invalid Email or Password. Please try again.";
+      } else if (error.code === 'auth/invalid-email') {
+          errorMessage = "The email address is badly formatted.";
+      } else {
+          errorMessage = error.message;
+      }
+      // @ts-ignore
+      const currentProjectId = auth.app.options.projectId;
+      showAlert('error', 'Login Failed', `Code: ${error.code}\nProject: ${currentProjectId}\nMessage: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -88,6 +127,15 @@ export default function LoginScreen() {
           )}
         </TouchableOpacity>
       </View>
+
+      <CustomAlertModal
+        visible={alertConfig.visible}
+        type={alertConfig.type}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onClose={hideAlert}
+        onConfirm={alertConfig.onConfirm}
+      />
     </View>
   );
 }
@@ -138,8 +186,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: COLORS.textPrim,
     fontSize: 16,
-    // @ts-ignore
-    outlineStyle: 'none' as any, // Remove web focus outline
+    ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}) as any,
   },
   loginButton: {
     backgroundColor: COLORS.purple,

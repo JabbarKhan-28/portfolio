@@ -5,7 +5,7 @@ import React from "react";
 import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import * as Animatable from "react-native-animatable";
 
-export type AlertType = "success" | "error" | "confirm" | "info";
+export type AlertType = "success" | "error" | "confirm" | "info" | "destructive";
 
 interface CustomAlertModalProps {
   visible: boolean;
@@ -34,6 +34,7 @@ export default function CustomAlertModal({
       case "success": return "checkmark-circle";
       case "error": return "alert-circle";
       case "confirm": return "help-circle";
+      case "destructive": return "trash";
       default: return "information-circle";
     }
   };
@@ -43,6 +44,7 @@ export default function CustomAlertModal({
       case "success": return COLORS.success;
       case "error": return COLORS.error;
       case "confirm": return COLORS.purple; // Theme color for queries
+      case "destructive": return COLORS.error;
       default: return COLORS.textHighlight;
     }
   };
@@ -64,8 +66,8 @@ export default function CustomAlertModal({
           <Text style={styles.message}>{message}</Text>
 
           <View style={styles.buttonContainer}>
-            {/* Show Cancel button only for 'confirm' type */}
-            {type === "confirm" && (
+            {/* Show Cancel button only for 'confirm' or 'destructive' type */}
+            {(type === "confirm" || type === "destructive") && (
                 <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onClose}>
                     <Text style={styles.cancelText}>{cancelText}</Text>
                 </TouchableOpacity>
@@ -76,7 +78,7 @@ export default function CustomAlertModal({
                 onPress={onConfirm || onClose}
             >
                 <Text style={styles.confirmText}>
-                    {type === 'confirm' ? confirmText : 'Okay'}
+                    {(type === 'confirm' || type === 'destructive') ? confirmText : 'Okay'}
                 </Text>
             </TouchableOpacity>
           </View>

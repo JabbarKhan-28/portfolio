@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
       paddingHorizontal: 20,
-      paddingBottom: 60
+      paddingBottom: 100
   },
   contentWrapper: {
       width: '100%',
