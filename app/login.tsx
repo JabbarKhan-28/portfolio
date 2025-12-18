@@ -77,9 +77,9 @@ export default function LoginScreen() {
           input:-webkit-autofill:hover, 
           input:-webkit-autofill:focus, 
           input:-webkit-autofill:active {
-              -webkit-box-shadow: 0 0 0 30px #03045e inset !important;
-              -webkit-text-fill-color: #caf0f8 !important;
-              caret-color: #caf0f8;
+              -webkit-box-shadow: 0 0 0 30px ${COLORS.surface} inset !important;
+              -webkit-text-fill-color: ${COLORS.textPrim} !important;
+              caret-color: ${COLORS.textPrim};
           }
         `}</style>
       )}
@@ -90,7 +90,7 @@ export default function LoginScreen() {
       <Text style={styles.title}>Admin <Text style={styles.highlight}>Login</Text></Text>
       
       <View style={styles.form}>
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, { backgroundColor: COLORS.surface }]}>
           <Ionicons name="mail-outline" size={20} color={COLORS.textSec} style={styles.icon} />
           <TextInput
             style={styles.input}
@@ -103,7 +103,7 @@ export default function LoginScreen() {
           />
         </View>
 
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, { backgroundColor: COLORS.surface }]}>
           <Ionicons name="lock-closed-outline" size={20} color={COLORS.textSec} style={styles.icon} />
           <TextInput
             style={styles.input}

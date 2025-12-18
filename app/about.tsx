@@ -147,7 +147,7 @@ export default function AboutScreen() {
       </View>
 
 
-      {/* --- PAGE 4: PHILOSOPHY & CTA --- */}
+      {/* --- PAGE 4: PHILOSOPHY --- */}
       <View style={[styles.page, pageStyle] as any}>
          <View style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
             <Text style={[styles.headerText, isWeb && styles.webHeader]}>
@@ -161,9 +161,18 @@ export default function AboutScreen() {
                     Every bug is a lesson, and every successful build is a stepping stone. I strive to write clean, maintainable code that stands the test of time.
                  </Text>
             </View>
+            
+            <Animatable.View animation="pulse" iterationCount="infinite" style={{ marginTop: 20 }}>
+                <Ionicons name="chevron-down" size={20} color={COLORS.textSec} />
+            </Animatable.View>
+         </View>
+      </View>
 
+      {/* --- PAGE 5: QUOTE & CTA --- */}
+      <View style={[styles.page, pageStyle] as any}>
+         <View style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
             <View style={styles.quoteContainer}>
-                <Ionicons name="options-outline" size={40} color={COLORS.purple} style={{ opacity: 0.5, marginBottom: 10 }} />
+                <Ionicons name="chatbubble-ellipses-outline" size={40} color={COLORS.purple} style={{ opacity: 0.8, marginBottom: 20 }} />
                 <Text style={styles.quoteText}>
                     "Strive to build things that make a difference!"
                 </Text>
@@ -173,7 +182,7 @@ export default function AboutScreen() {
             <Link href="/contact" asChild>
                 <TouchableOpacity style={styles.hireBtn}>
                     <Text style={styles.hireBtnText}>Hire Me</Text>
-                    <Ionicons name="briefcase-outline" size={20} color={COLORS.textPrim} />
+                    <Ionicons name="briefcase-outline" size={20} color={COLORS.primaryBg} />
                 </TouchableOpacity>
             </Link>
          </View>
@@ -203,8 +212,7 @@ const styles = StyleSheet.create({
       width: '100%',
       justifyContent: 'center',
       alignItems: 'center',
-      paddingHorizontal: 20,
-      paddingBottom: 100
+      paddingHorizontal: 20
   },
   contentWrapper: {
       width: '100%',
@@ -239,17 +247,17 @@ const styles = StyleSheet.create({
 
   // Card / Bio
   cardContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: COLORS.cardBg,
     padding: 30,
-    borderRadius: 20,
+    borderRadius: 16,
     width: '100%',
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.purple,
+    borderLeftColor: COLORS.textHighlight,
     marginBottom: 30,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: COLORS.border,
     ...Platform.select({
-        web: { backdropFilter: 'blur(4px)' },
+        web: {},
         default: {}
     })
   },
@@ -283,12 +291,12 @@ const styles = StyleSheet.create({
       marginTop: 10
   },
   badge: {
-      borderColor: 'rgba(199, 112, 240, 0.3)',
+      borderColor: COLORS.border,
       borderWidth: 1,
       paddingVertical: 10,
       paddingHorizontal: 20,
       borderRadius: 50, // Pill shape
-      backgroundColor: 'rgba(255, 255, 255, 0.05)'
+      backgroundColor: COLORS.surface // Subtle difference
   },
   badgeText: {
       color: COLORS.textPrim,
@@ -304,7 +312,7 @@ const styles = StyleSheet.create({
   timelineItem: {
       marginLeft: 20,
       borderLeftWidth: 2,
-      borderLeftColor: 'rgba(255, 255, 255, 0.1)',
+      borderLeftColor: COLORS.border,
       paddingLeft: 25,
       paddingBottom: 45,
       position: 'relative'

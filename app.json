@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     
-    "icon": "./assets/icon.png",
+    "icon": "./assets/jabbar.png",
     "scheme": "jabbarkhan",
     "userInterfaceStyle": "automatic",
     "backgroundColor": "#03045e",
@@ -15,7 +15,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/jabbar.png",
         "backgroundColor": "#03045e"
       },
       "edgeToEdgeEnabled": true,
@@ -23,7 +23,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/icon.png"
+      "favicon": "./assets/jabbar.png"
     },
     "plugins": [
       ["expo-image-picker",

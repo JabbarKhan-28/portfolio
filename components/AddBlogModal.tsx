@@ -2,32 +2,56 @@ import CustomAlertModal, { AlertType } from '@/components/CustomAlertModal';
 import { COLORS } from '@/constants/theme';
 import { db } from '@/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import React, { useState } from 'react';
+import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
+
+export interface BlogPost {
+    id: string;
+    title: string;
+    summary: string;
+    pdfPath: string;
+    date?: string;
+    // ... any other fields
+}
 
 interface AddBlogModalProps {
   visible: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  blogToEdit?: BlogPost | null;
 }
 
-export default function AddBlogModal({ visible, onClose, onSuccess }: AddBlogModalProps) {
+export default function AddBlogModal({ visible, onClose, onSuccess, blogToEdit }: AddBlogModalProps) {
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
   const [pdfUrl, setPdfUrl] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+      if (visible) {
+          if (blogToEdit) {
+              setTitle(blogToEdit.title);
+              setSummary(blogToEdit.summary);
+              setPdfUrl(blogToEdit.pdfPath);
+          } else {
+              setTitle('');
+              setSummary('');
+              setPdfUrl('');
+          }
+      }
+  }, [visible, blogToEdit]);
 
   const [alertConfig, setAlertConfig] = useState<{
     visible: boolean;
@@ -64,12 +88,23 @@ export default function AddBlogModal({ visible, onClose, onSuccess }: AddBlogMod
     setLoading(true);
 
     try {
-      await addDoc(collection(db, 'blogs'), {
-        title,
-        summary,
-        pdfPath: pdfUrl,
-        createdAt: serverTimestamp(),
-      });
+      if (blogToEdit) {
+          // Update existing
+          await updateDoc(doc(db, 'blogs', blogToEdit.id), {
+              title,
+              summary,
+              pdfPath: pdfUrl,
+              updatedAt: serverTimestamp(),
+          });
+      } else {
+          // Create new
+          await addDoc(collection(db, 'blogs'), {
+            title,
+            summary,
+            pdfPath: pdfUrl,
+            createdAt: serverTimestamp(),
+          });
+      }
 
       setTitle('');
       setSummary('');
@@ -99,7 +134,7 @@ export default function AddBlogModal({ visible, onClose, onSuccess }: AddBlogMod
         <View style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.title}>
-              Add New <Text style={styles.highlight}>Blog</Text>
+              {blogToEdit ? "Edit" : "Add New"} <Text style={styles.highlight}>Blog</Text>
             </Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color={COLORS.textSec} />
@@ -156,7 +191,9 @@ export default function AddBlogModal({ visible, onClose, onSuccess }: AddBlogMod
               {loading ? (
                 <ActivityIndicator color={COLORS.primaryBg} />
               ) : (
-                <Text style={styles.submitButtonText}>Publish Blog</Text>
+                <Text style={styles.submitButtonText}>
+                  {blogToEdit ? "Update Blog" : "Publish Blog"}
+                </Text>
               )}
             </TouchableOpacity>
           </ScrollView>

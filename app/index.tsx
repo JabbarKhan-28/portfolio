@@ -159,19 +159,19 @@ const styles = StyleSheet.create({
   heroContent: {
       width: '100%',
       justifyContent: 'center',
-      alignItems: 'flex-start'
+      alignItems: 'center' // Centered
   },
   contentWrapper: {
       width: '100%',
       maxWidth: 600,
-      alignItems: 'flex-start',
-      backgroundColor: 'rgba(255, 255, 255, 0.03)',
+      alignItems: 'center', // Centered
+      backgroundColor: COLORS.cardBg,
       padding: 30,
-      borderRadius: 20,
+      borderRadius: 16,
       borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
+      borderColor: COLORS.border,
       ...Platform.select({
-          web: { backdropFilter: 'blur(4px)' },
+          web: {},
           default: {}
       })
   },
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
       fontSize: 16,
       lineHeight: 24,
       marginBottom: 20,
-      textAlign: 'justify'
+      textAlign: 'center' // Centered text
   },
   
   // Buttons
@@ -287,6 +287,9 @@ const styles = StyleSheet.create({
   
   // Contact section
   contactLinks: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
       gap: 15,
       width: '100%',
       marginBottom: 10
@@ -295,11 +298,11 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'center',
       gap: 15,
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      backgroundColor: COLORS.surfaceLight, // Distinct active-like color
       padding: 15,
-      borderRadius: 15,
+      borderRadius: 12,
       borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)'
+      borderColor: COLORS.border
   },
   contactText: {
       color: COLORS.textPrim,

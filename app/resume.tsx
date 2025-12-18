@@ -1,18 +1,16 @@
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
-import * as FileSystem from "expo-file-system";
-import * as Sharing from "expo-sharing";
 import React from "react";
 import {
-  Alert,
-  Linking,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  useWindowDimensions,
+    Alert,
+    Linking,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    useWindowDimensions,
 } from "react-native";
 
 /* ------------------ GOOGLE DRIVE LINKS ------------------ */
@@ -27,27 +25,19 @@ export default function ResumeScreen() {
   const [showPdf, setShowPdf] = React.useState(false);
 
   /* ------------------ MOBILE DOWNLOAD HANDLER ------------------ */
+  /* ------------------ MOBILE DOWNLOAD HANDLER ------------------ */
   const handleDownloadMobile = async () => {
     try {
-      // Cast to any because documentDirectory might be missing in some type definitions
-      const fileSystem = FileSystem as any;
-      const fileUri =
-        (fileSystem.documentDirectory || fileSystem.cacheDirectory) + "Jabbar_Khan_Resume.pdf";
-
-      const download = FileSystem.createDownloadResumable(
-        RESUME_DOWNLOAD_URL,
-        fileUri
-      );
-
-      await download.downloadAsync();
-
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri);
+      // Simply open the URL in the browser/system handler
+      // This allows Android/iOS to handle the download natively (e.g. saving to Downloads folder)
+      const supported = await Linking.canOpenURL(RESUME_DOWNLOAD_URL);
+      if (supported) {
+        await Linking.openURL(RESUME_DOWNLOAD_URL);
       } else {
-        Alert.alert("Downloaded", "Resume saved to your device.");
+        Alert.alert("Error", "Cannot open download link.");
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to download resume");
+      Alert.alert("Error", "Failed to initiate download.");
     }
   };
 
@@ -240,6 +230,7 @@ const styles = StyleSheet.create({
     maxWidth: 800,
     paddingHorizontal: 20,
     paddingTop: 40,
+    paddingBottom: 80, // Added to prevent navbar overlap
   },
   webContentCentered: {
     alignItems: "center",
@@ -312,15 +303,15 @@ const styles = StyleSheet.create({
 
   section: {
     marginBottom: 30,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: COLORS.surface,
     padding: 25,
-    borderRadius: 20,
+    borderRadius: 12, // Slightly sharper corners for professional look
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.purple,
+    borderLeftColor: COLORS.textHighlight, // Use the teal highlight
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: COLORS.border,
     ...Platform.select({
-        web: { backdropFilter: 'blur(4px)' },
+        web: {}, // Clean, no blur needed for solid surface
         default: {}
     })
   },
@@ -340,7 +331,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.1)",
+    borderBottomColor: COLORS.border,
   },
   itemRole: {
     color: COLORS.textPrim,

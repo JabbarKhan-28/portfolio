@@ -113,6 +113,7 @@ export default function ContactScreen() {
         <ScrollView
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           {/* HEADER */}
           <View style={styles.headerWrapper}>
@@ -324,7 +325,11 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.1)',
     gap: 24,
     ...Platform.select({
-        web: { backdropFilter: 'blur(4px)' },
+        web: { 
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0px 10px 40px rgba(0,0,0,0.5)', // Strong web shadow
+            maxWidth: 600, // Slightly wider on web
+        },
         default: {}
     })
   },
@@ -358,7 +363,15 @@ const styles = StyleSheet.create({
     padding: 18,
     borderRadius: 16,
     gap: 12,
-    marginTop: 10
+    marginTop: 10,
+    ...Platform.select({
+        web: {
+           cursor: 'pointer',
+           boxShadow: '0px 0px 15px rgba(72, 202, 228, 0.4)', // Glow effect based on highlight color
+           transition: '0.2s',
+        },
+        default: {}
+    })
   },
   submitButtonText: {
     color: COLORS.primaryBg, // Dark text

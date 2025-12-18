@@ -2,30 +2,32 @@
 import { Platform } from 'react-native';
 
 export const COLORS = {
-  // Base Backgrounds - Blue Palette
-  primaryBg: '#03045e',      // Main deep background (Midnight Blue)
-  darkBg: '#023e8a',         // Darker alternative (Dark Blue)
-  cardBg: 'rgba(72, 202, 228, 0.05)', // Glassmorphism effect (Cyan tint)
-  
+  // Base Backgrounds - Ocean Blue Palette
+  primaryBg: '#03045e',      // Darkest Midnight Blue
+  darkBg: '#020344',         // Slightly darker for contrast
+  surface: '#023e8a',        // Deep Royal Blue
+  surfaceLight: '#0077b6',   // Star Command Blue
+  cardBg: 'rgba(2, 62, 138, 0.95)', // Glassy Royal Blue
+
   // Text Colors
-  textPrim: '#caf0f8',       // Lightest Cyan (almost white) for primary text
-  textSec: '#90e0ef',        // Light Cyan for subtitles
-  textHighlight: '#48cae4',  // Bright Cyan for emphasis
-  
-  // Accents
-  purple: '#0096c7',         // Darker Cyan for better contrast
-  darkPurple: '#0077b6',     // Star Command Blue (darker accent)
-  border: 'rgba(72, 202, 228, 0.3)', // Subtle cyan border
+  textPrim: '#caf0f8',       // Lightest Cyan (White-ish)
+  textSec: 'rgba(202, 240, 248, 0.7)', // Muted Light Cyan
+  textHighlight: '#48cae4',  // Bright Cyan
+
+  // Accents (Mapped from 'purple')
+  purple: '#00b4d8',         // Vivid Cerulean
+  darkPurple: '#0077b6',     // Secondary Accent
+  border: 'rgba(144, 224, 239, 0.2)', // Pale Cyan Border
 
   // UI Elements
   inputBg: 'rgba(255, 255, 255, 0.1)',
-  success: '#4ade80',
-  error: '#f87171',
+  success: '#48cae4',        // Cyan for success
+  error: '#FF6B6B',          // Keeping distinct Red for errors
   
   // Tab Bar
-  tabBarBg: '#03045ec0',     // Semi-transparent Midnight Blue
-  tabBarActive: '#0096c7',   // Darker Cyan match
-  tabBarInactive: '#90e0ef', // Light Cyan
+  tabBarBg: '#03045e',
+  tabBarActive: '#48cae4',
+  tabBarInactive: 'rgba(173, 232, 244, 0.5)',
 };
 
 export const FONTS = Platform.select({

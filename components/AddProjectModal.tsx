@@ -2,7 +2,7 @@ import CustomAlertModal, { AlertType } from '@/components/CustomAlertModal';
 import { COLORS } from '@/constants/theme';
 import { db } from '@/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
 import {
     ActivityIndicator,
@@ -17,31 +17,49 @@ import {
     View,
 } from 'react-native';
 
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  ghLink: string;
+  demoLink: string;
+  imageUrl?: string;
+}
+
 interface AddProjectModalProps {
   visible: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  projectToEdit?: Project | null;
 }
 
-export default function AddProjectModal({ visible, onClose, onSuccess }: AddProjectModalProps) {
+export default function AddProjectModal({ visible, onClose, onSuccess, projectToEdit }: AddProjectModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [ghLink, setGhLink] = useState('');
   const [demoLink, setDemoLink] = useState('');
-  const [imageUrl, setImageUrl] = useState(''); // Changed to store URL string directly
+  const [imageUrl, setImageUrl] = useState(''); 
   const [loading, setLoading] = useState(false);
 
   /* State Reset on Open */
   React.useEffect(() => {
     if (visible) {
-      setTitle('');
-      setDescription('');
-      setGhLink('');
-      setDemoLink('');
-      setImageUrl('');
+      if (projectToEdit) {
+          setTitle(projectToEdit.title);
+          setDescription(projectToEdit.description);
+          setGhLink(projectToEdit.ghLink);
+          setDemoLink(projectToEdit.demoLink);
+          setImageUrl(projectToEdit.imageUrl || '');
+      } else {
+          setTitle('');
+          setDescription('');
+          setGhLink('');
+          setDemoLink('');
+          setImageUrl('');
+      }
       setLoading(false);
     }
-  }, [visible]);
+  }, [visible, projectToEdit]);
 
   // Alert State
   const [alertConfig, setAlertConfig] = useState<{
@@ -74,14 +92,27 @@ export default function AddProjectModal({ visible, onClose, onSuccess }: AddProj
     setLoading(true);
 
     try {
-      await addDoc(collection(db, 'projects'), {
-        title,
-        description,
-        ghLink,
-        demoLink,
-        imageUrl, // Store the manually entered URL
-        createdAt: serverTimestamp(),
-      });
+      if (projectToEdit) {
+          // Update Existing
+          await updateDoc(doc(db, 'projects', projectToEdit.id), {
+              title,
+              description,
+              ghLink,
+              demoLink,
+              imageUrl,
+              updatedAt: serverTimestamp(),
+          });
+      } else {
+          // Add New
+          await addDoc(collection(db, 'projects'), {
+            title,
+            description,
+            ghLink,
+            demoLink,
+            imageUrl, 
+            createdAt: serverTimestamp(),
+          });
+      }
 
       // Reset Form
       setTitle('');
@@ -95,9 +126,9 @@ export default function AddProjectModal({ visible, onClose, onSuccess }: AddProj
       onClose();
       onSuccess?.();
     } catch (error: any) {
-      console.error('Error adding project:', error);
+      console.error('Error adding/updating project:', error);
       setLoading(false);
-      showAlert('error', 'Submission Failed', error.message || 'Could not add project.');
+      showAlert('error', 'Submission Failed', error.message || 'Could not save project.');
     }
   };
 
@@ -111,7 +142,7 @@ export default function AddProjectModal({ visible, onClose, onSuccess }: AddProj
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>
-              Add <Text style={styles.highlight}>Project</Text>
+              {projectToEdit ? "Edit" : "Add"} <Text style={styles.highlight}>Project</Text>
             </Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color={COLORS.textSec} />
@@ -192,7 +223,9 @@ export default function AddProjectModal({ visible, onClose, onSuccess }: AddProj
               {loading ? (
                 <ActivityIndicator color={COLORS.primaryBg} />
               ) : (
-                <Text style={styles.submitButtonText}>Publish Project</Text>
+                <Text style={styles.submitButtonText}>
+                  {projectToEdit ? "Save Changes" : "Publish Project"}
+                </Text>
               )}
             </TouchableOpacity>
           </ScrollView>

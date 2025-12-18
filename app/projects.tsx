@@ -1,5 +1,5 @@
 
-import AddProjectModal from "@/components/AddProjectModal";
+import AddProjectModal, { type Project } from "@/components/AddProjectModal";
 import CustomAlertModal, { AlertType } from "@/components/CustomAlertModal";
 import { COLORS } from "@/constants/theme";
 import { auth, db } from "@/firebaseConfig";
@@ -13,21 +13,13 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import * as Animatable from 'react-native-animatable';
 
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-  ghLink: string;
-  demoLink: string;
-  imageUrl?: string;
-}
-
 export default function ProjectsScreen() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
 
     // Custom Alert State
   const [alertConfig, setAlertConfig] = useState<{
@@ -121,6 +113,12 @@ export default function ProjectsScreen() {
     );
   };
 
+  const handleEdit = (project: Project) => {
+      Haptics.selectionAsync();
+      setEditingProject(project);
+      setModalVisible(true);
+  }
+
   const handleLogout = async () => {
       try {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -132,12 +130,15 @@ export default function ProjectsScreen() {
 
   const openAddModal = () => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      setEditingProject(null);
       setModalVisible(true);
   }
 
   return (
     <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.contentContainer}>
+        <ScrollView contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+        >
         <View style={styles.headerContainer}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                  <View style={{ width: 40 }} /> 
@@ -173,6 +174,7 @@ export default function ProjectsScreen() {
                             <ProjectCard 
                                 project={project} 
                                 onDelete={user ? () => handleDelete(project.id) : undefined} 
+                                onEdit={user ? () => handleEdit(project) : undefined}
                             />
                         </ProjectCardWrapper>
                     ))
@@ -195,9 +197,10 @@ export default function ProjectsScreen() {
 
         <AddProjectModal 
             visible={modalVisible} 
-            onClose={() => setModalVisible(false)} 
+            onClose={() => { setModalVisible(false); setEditingProject(null); }} 
+            projectToEdit={editingProject}
             onSuccess={() => {
-                showAlert('success', 'Published!', 'Project successfully added.');
+                showAlert('success', 'Success!', `Project ${editingProject ? 'updated' : 'added'} successfully.`);
                 setTimeout(() => hideAlert(), 1500); // Auto-close alert
             }}
         />
@@ -235,7 +238,7 @@ function ProjectCardWrapper({ children, index }: { children: React.ReactNode, in
     );
 }
 
-function ProjectCard({ project, onDelete }: { project: Project, onDelete?: () => void }) {
+function ProjectCard({ project, onDelete, onEdit }: { project: Project, onDelete?: () => void, onEdit?: () => void }) {
     const handleLink = (url: string) => {
         if (url) {
             Haptics.selectionAsync();
@@ -244,7 +247,7 @@ function ProjectCard({ project, onDelete }: { project: Project, onDelete?: () =>
     }
 
     const [imgSource, setImgSource] = useState(
-        project.imageUrl ? { uri: project.imageUrl } : require('../assets/icon.png')
+        project.imageUrl ? { uri: project.imageUrl } : require('../assets/project.jpg')
     );
 
     return (
@@ -256,13 +259,18 @@ function ProjectCard({ project, onDelete }: { project: Project, onDelete?: () =>
                     style={styles.projectImage} 
                     contentFit="cover" // Changed to cover for fuller, premium look
                     transition={500}
-                    onError={() => setImgSource(require('../assets/icon.png'))} 
+                    onError={() => setImgSource(require('../assets/project.jpg'))} 
                  />
-                 {/* Gradient Overlay for Text Readability if we overlapped, but here separate */}
-                 {onDelete && (
-                     <TouchableOpacity style={styles.deleteBtn} onPress={onDelete}>
-                         <Ionicons name="trash" size={18} color="#FFF" />
-                     </TouchableOpacity>
+                 {/* Admin Actions */}
+                 {onDelete && onEdit && (
+                     <View style={styles.adminActions}>
+                         <TouchableOpacity style={[styles.actionBtn, { backgroundColor: COLORS.textHighlight }]} onPress={onEdit}>
+                             <Ionicons name="create" size={16} color={COLORS.primaryBg} />
+                         </TouchableOpacity>
+                         <TouchableOpacity style={[styles.actionBtn, { backgroundColor: 'rgba(255, 59, 48, 0.8)' }]} onPress={onDelete}>
+                             <Ionicons name="trash" size={16} color="#FFF" />
+                         </TouchableOpacity>
+                     </View>
                  )}
             </View>
             
@@ -332,16 +340,25 @@ const styles = StyleSheet.create({
     marginTop: 50,
   },
   card: {
-      backgroundColor: 'rgba(255, 255, 255, 0.03)', // Ultra subtle glass
-      borderRadius: 20,
+      backgroundColor: COLORS.cardBg, // Solid/High opacity surface
+      borderRadius: 16,
       overflow: 'hidden',
-      borderWidth: 0.5,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
+      borderWidth: 1,
+      borderColor: COLORS.border,
+      // No shadows or blur for Android optimization
       ...Platform.select({
           web: {
-              backdropFilter: 'blur(4px)',
+             boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.4)', // Stronger Web Shadow
           },
-          default: {}
+          default: {
+              // iOS
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 5,
+              // Android
+              elevation: 8,
+          }
       })
   },
   imageContainer: {
@@ -356,15 +373,21 @@ const styles = StyleSheet.create({
       width: '100%',
       height: '100%'
   },
-  deleteBtn: {
+  adminActions: {
       position: 'absolute',
       top: 15,
       right: 15,
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      flexDirection: 'row',
+      gap: 10,
+      zIndex: 10
+  },
+  actionBtn: {
       padding: 10,
       borderRadius: 30, // Full circle
       borderWidth: 0.5,
-      borderColor: 'rgba(255,255,255,0.2)'
+      borderColor: 'rgba(255,255,255,0.2)',
+      justifyContent: 'center',
+      alignItems: 'center'
   },
   cardBody: {
       padding: 24,

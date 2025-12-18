@@ -1,4 +1,4 @@
-import AddBlogModal from "@/components/AddBlogModal";
+import AddBlogModal, { type BlogPost } from "@/components/AddBlogModal";
 import CustomAlertModal, { AlertType } from "@/components/CustomAlertModal";
 import { COLORS } from "@/constants/theme";
 import { auth, db } from "@/firebaseConfig";
@@ -22,15 +22,6 @@ import {
 } from "react-native";
 import * as Animatable from "react-native-animatable";
 
-interface BlogPost {
-  id: string;
-  title: string;
-  date?: string;
-  summary: string;
-  pdfPath: string;
-  imageUrl?: string;
-}
-
 export default function BlogScreen() {
   const router = useRouter();
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
@@ -38,6 +29,7 @@ export default function BlogScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [editingBlog, setEditingBlog] = useState<BlogPost | null>(null);
 
   const [alertConfig, setAlertConfig] = useState<{
     visible: boolean;
@@ -112,6 +104,12 @@ export default function BlogScreen() {
     });
   };
 
+  const handleEdit = (blog: BlogPost) => {
+      Haptics.selectionAsync();
+      setEditingBlog(blog);
+      setModalVisible(true);
+  }
+
   const handleLogout = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await signOut(auth);
@@ -179,9 +177,14 @@ export default function BlogScreen() {
                             </TouchableOpacity>
                         </View>
                         {user && (
-                            <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(blog.id)}>
-                                <Ionicons name="trash" size={18} color="#FFF" />
-                            </TouchableOpacity>
+                            <View style={styles.adminActions}>
+                                <TouchableOpacity style={[styles.actionBtn, { backgroundColor: COLORS.textHighlight }]} onPress={() => handleEdit(blog)}>
+                                    <Ionicons name="create" size={16} color={COLORS.primaryBg} />
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.actionBtn, { backgroundColor: 'rgba(255, 59, 48, 0.8)' }]} onPress={() => handleDelete(blog.id)}>
+                                    <Ionicons name="trash" size={16} color="#FFF" />
+                                </TouchableOpacity>
+                            </View>
                         )}
                     </View>
                 </BlogCardWrapper>
@@ -193,7 +196,7 @@ export default function BlogScreen() {
 
       {user && (
         <Animatable.View animation="zoomIn" delay={500} style={styles.fabContainer}>
-          <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)}>
+          <TouchableOpacity style={styles.fab} onPress={() => { setEditingBlog(null); setModalVisible(true); }}>
             <Ionicons name="add" size={30} color="#FFF" />
           </TouchableOpacity>
         </Animatable.View>
@@ -201,9 +204,10 @@ export default function BlogScreen() {
 
       <AddBlogModal
         visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        onClose={() => { setModalVisible(false); setEditingBlog(null); }}
+        blogToEdit={editingBlog}
         onSuccess={() => {
-          showAlert('success', 'Published!', 'Blog successfully published.');
+          showAlert('success', 'Success!', `Blog ${editingBlog ? 'updated' : 'published'} successfully.`);
           setTimeout(hideAlert, 1500);
         }}
       />
@@ -254,14 +258,22 @@ const styles = StyleSheet.create({
   emptyText: { color: COLORS.textSec, textAlign: "center", marginTop: 50 },
   
   blogCard: { 
-      backgroundColor: 'rgba(255, 255, 255, 0.03)', 
-      borderRadius: 20, 
+      backgroundColor: COLORS.cardBg, 
+      borderRadius: 16, 
       overflow: "hidden", 
       borderWidth: 1, 
-      borderColor: 'rgba(255, 255, 255, 0.1)',
+      borderColor: COLORS.border,
       ...Platform.select({
-          web: { backdropFilter: 'blur(4px)' },
-          default: {}
+          web: {
+              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.4)',
+          },
+          default: {
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 5,
+              elevation: 8,
+          }
       })
   },
   
@@ -282,16 +294,21 @@ const styles = StyleSheet.create({
   },
   readMoreText: { color: COLORS.primaryBg, fontWeight: "bold" },
   
-  deleteBtn: { 
-      position: "absolute", 
-      top: 15, 
-      right: 15, 
-      backgroundColor: "rgba(0,0,0,0.6)", 
-      padding: 8, 
-      borderRadius: 20, 
-      zIndex: 10,
+  adminActions: {
+      position: "absolute",
+      top: 15,
+      right: 15,
+      flexDirection: 'row',
+      gap: 10,
+      zIndex: 10
+  },
+  actionBtn: {
+      padding: 8,
+      borderRadius: 20,
       borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.2)'
+      borderColor: 'rgba(255,255,255,0.2)',
+      justifyContent: 'center',
+      alignItems: 'center'
   },
   
   fabContainer: { position: "absolute", bottom: 100, right: 20 },
@@ -300,7 +317,7 @@ const styles = StyleSheet.create({
   searchContainer: { 
       flexDirection: "row", 
       alignItems: "center", 
-      backgroundColor: 'rgba(255,255,255,0.05)', 
+      backgroundColor: COLORS.inputBg, 
       borderRadius: 12, 
       paddingHorizontal: 15, 
       paddingVertical: 12, 
@@ -308,7 +325,7 @@ const styles = StyleSheet.create({
       width: "100%", 
       maxWidth: 600,
       borderWidth: 1, 
-      borderColor: "rgba(255,255,255,0.1)" 
+      borderColor: COLORS.border 
   },
   searchInput: { flex: 1, color: COLORS.textPrim, marginLeft: 10, fontSize: 16 },
 });

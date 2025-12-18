@@ -1,11 +1,7 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initializeApp } from "firebase/app";
-import { Auth, getAuth, initializeAuth } from 'firebase/auth';
-// @ts-ignore
-import { getReactNativePersistence } from 'firebase/auth';
+import { initializeAuth, inMemoryPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from "firebase/storage";
-import { Platform } from 'react-native';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCuYF8zL_9PXdaN2oXk-v5vrGxdcLWlATY",
@@ -19,14 +15,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-let auth: Auth;
-if (Platform.OS === 'web') {
-  auth = getAuth(app);
-} else {
-  auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage)
-  });
-}
+// Use in-memory persistence to ensure user is logged out by default
+// This requires the user to login via the secret key flow every time they restart the app.
+const auth = initializeAuth(app, {
+  persistence: inMemoryPersistence
+});
 
 const db = getFirestore(app);
 const storage = getStorage(app);

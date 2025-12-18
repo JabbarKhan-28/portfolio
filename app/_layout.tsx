@@ -15,13 +15,15 @@ function GlassTabBar() {
     return (
       <View style={{
         flex: 1,
-        backgroundColor: 'rgba(255, 255, 255, 0.15)', // Semi-transparent based on primaryBg
-        backdropFilter: 'blur(10px)', // Standard CSS blur
+        backgroundColor: 'rgba(3, 4, 94, 0.6)', // Semi-transparent Ocean Blue
+        backdropFilter: 'blur(20px)', // Stronger CSS blur
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
+        borderTopWidth: 1,
+        borderColor: 'rgba(144, 224, 239, 0.3)' // Subtle bright border
       } as any} />
     );
   }
@@ -29,9 +31,9 @@ function GlassTabBar() {
   // Native Blur
   return (
     <BlurView 
-      intensity={50} 
+      intensity={80} 
       tint="dark" 
-      style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(27, 26, 46, 0.5)' }]}
+      style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(3, 4, 94, 0.5)' }]}
     />
   );
 }
