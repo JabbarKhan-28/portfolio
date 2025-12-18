@@ -10,6 +10,21 @@ LogBox.ignoreLogs([
   "Shadow props have been deprecated",
 ]);
 
+// Polyfill/Hack to silence the terminal warnings during web build (SSR)
+if (typeof console !== 'undefined') {
+  const originalWarn = console.warn;
+  console.warn = (...args) => {
+    const msg = args[0];
+    if (typeof msg === 'string' && (
+      msg.includes("props.pointerEvents is deprecated") || 
+      msg.includes("Shadow props have been deprecated")
+    )) {
+      return;
+    }
+    originalWarn(...args);
+  };
+}
+
 function GlassTabBar() {
   if (Platform.OS === 'web') {
     return (
