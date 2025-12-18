@@ -43,7 +43,7 @@ export default function CustomAlertModal({
     switch (type) {
       case "success": return COLORS.success;
       case "error": return COLORS.error;
-      case "confirm": return COLORS.purple; // Theme color for queries
+      case "confirm": return COLORS.success; // Green for confirmation
       case "destructive": return COLORS.error;
       default: return COLORS.textHighlight;
     }

@@ -16,11 +16,19 @@ import {
 } from "react-native";
 import * as Animatable from "react-native-animatable";
 
+import emailjs from '@emailjs/browser';
+
+// ---------------- EMAILJS VALIDATION ----------------
+// PLEASE FILL THESE WITH YOUR EMAILJS CREDENTIALS
+const EMAILJS_SERVICE_ID = "service_ytxjbl4";
+const EMAILJS_TEMPLATE_ID = "template_u7hpd38";
+const EMAILJS_PUBLIC_KEY = "70UUo9eMlSEZH2fE0";
+
 export default function ContactScreen() {
   const router = useRouter();
 
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(""); 
   const [message, setMessage] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,49 +63,43 @@ export default function ContactScreen() {
       return;
     }
 
+
+
     setIsSubmitting(true);
 
     try {
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("email", email);
-      formData.append("message", message);
-      formData.append("_subject", `Portfolio Contact from ${name}`);
+      const templateParams = {
+          name, // Matches {{name}} in your template
+          email, // Matches {{email}} in your template
+          from_name: name,
+          from_email: email,
+          message,
+          to_name: "Jabbar Khan"
+      };
 
-      const response = await fetch(
-        "https://formsubmit.co/ajax/jabbar118114@gmail.com",
-        {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-          },
-          body: formData,
-        }
+      await emailjs.send(
+          EMAILJS_SERVICE_ID,
+          EMAILJS_TEMPLATE_ID,
+          templateParams,
+          EMAILJS_PUBLIC_KEY
       );
 
-      const result = await response.json();
+      showStatus(
+        "success",
+        "Message Sent!",
+        "Thanks for reaching out. I'll get back to you as soon as possible."
+      );
+      setName("");
+      setEmail("");
+      setMessage("");
 
-      if (response.ok && result.success === "true") {
-        showStatus(
-          "success",
-          "Message Sent!",
-          "Thanks for reaching out. I'll get back to you as soon as possible."
-        );
-        setName("");
-        setEmail("");
-        setMessage("");
-      } else {
-        showStatus(
-          "error",
-          "Oops!",
-          "Something went wrong. Please try again later."
-        );
-      }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("EmailJS Error:", error);
+      const errorMessage = error?.text || error?.message || "Could not send message. Please check your connection.";
       showStatus(
         "error",
-        "Network Error",
-        "Failed to send message. Please check your internet connection."
+        "Sending Failed",
+        `Error: ${errorMessage}`
       );
     } finally {
       setIsSubmitting(false);
@@ -232,7 +234,7 @@ export default function ContactScreen() {
                   size={60}
                   color={
                     statusModal.type === "success"
-                      ? COLORS.purple
+                      ? COLORS.success
                       : COLORS.error
                   }
                 />
@@ -418,7 +420,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 40,
     borderRadius: 16,
-    backgroundColor: COLORS.purple,
+    backgroundColor: COLORS.success,
     width: "100%",
     alignItems: "center",
   },

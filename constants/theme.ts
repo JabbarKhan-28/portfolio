@@ -21,7 +21,7 @@ export const COLORS = {
 
   // UI Elements
   inputBg: 'rgba(255, 255, 255, 0.1)',
-  success: '#48cae4',        // Cyan for success
+  success: '#2ecc71',        // Emerald Green for success
   error: '#FF6B6B',          // Keeping distinct Red for errors
   
   // Tab Bar

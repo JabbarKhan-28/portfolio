@@ -43,11 +43,21 @@ export default function ProjectsScreen() {
         setAlertConfig(prev => ({ ...prev, visible: false }));
     }
 
-  // Secret Login Logic
+  /* ------------------ AUTH STATE ------------------ */
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  /* ------------------ SECRET LOGIN (5 TAPS) ------------------ */
   const [secretTaps, setSecretTaps] = useState(0);
 
   const handleSecretLogin = () => {
-    if (user) return; // Already logged in
+    if (user) {
+        return; 
+    };
 
     const newTaps = secretTaps + 1;
     setSecretTaps(newTaps);
@@ -66,11 +76,6 @@ export default function ProjectsScreen() {
   };
 
   useEffect(() => {
-    // Auth Listener
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-
     // Real-time Project Fetching
     const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
     const unsubscribeProjects = onSnapshot(q, (snapshot) => {
@@ -86,7 +91,6 @@ export default function ProjectsScreen() {
     });
 
     return () => {
-      unsubscribeAuth();
       unsubscribeProjects();
     };
   }, []);
