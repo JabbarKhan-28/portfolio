@@ -112,18 +112,18 @@ export default function HomeScreen() {
                 <Link href="/contact" asChild>
                     <TouchableOpacity style={styles.primaryButton}>
                         <Ionicons name="mail" size={24} color={COLORS.purple} />
-                        <Text style={styles.contactText}>Email Me</Text>
+                        <Text style={styles.primaryButtonText}>Email Me</Text>
                     </TouchableOpacity>
                 </Link>
 
                 <TouchableOpacity style={styles.primaryButton} onPress={() => Linking.openURL('https://github.com/JabbarKhan-28')}>
                     <Ionicons name="logo-github" size={24} color={COLORS.purple} />
-                    <Text style={styles.contactText}>GitHub</Text>
+                    <Text style={styles.primaryButtonText}>GitHub</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.primaryButton} onPress={() => Linking.openURL('https://www.linkedin.com/in/jabbar-khan-824868366/')}>
                     <Ionicons name="logo-linkedin" size={24} color={COLORS.purple} />
-                    <Text style={styles.contactText}>LinkedIn</Text>
+                    <Text style={styles.primaryButtonText}>LinkedIn</Text>
                 </TouchableOpacity>
             </View>
 
