@@ -110,18 +110,18 @@ export default function HomeScreen() {
             
             <View style={[styles.contactLinks, isWeb && { width: 'auto', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }]}>
                 <Link href="/contact" asChild>
-                    <TouchableOpacity style={styles.contactItem}>
+                    <TouchableOpacity style={styles.primaryButton}>
                         <Ionicons name="mail" size={24} color={COLORS.purple} />
                         <Text style={styles.contactText}>Email Me</Text>
                     </TouchableOpacity>
                 </Link>
 
-                <TouchableOpacity style={styles.contactItem} onPress={() => Linking.openURL('https://github.com/JabbarKhan-28')}>
+                <TouchableOpacity style={styles.primaryButton} onPress={() => Linking.openURL('https://github.com/JabbarKhan-28')}>
                     <Ionicons name="logo-github" size={24} color={COLORS.purple} />
                     <Text style={styles.contactText}>GitHub</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.contactItem} onPress={() => Linking.openURL('https://www.linkedin.com/in/jabbar-khan-824868366/')}>
+                <TouchableOpacity style={styles.primaryButton} onPress={() => Linking.openURL('https://www.linkedin.com/in/jabbar-khan-824868366/')}>
                     <Ionicons name="logo-linkedin" size={24} color={COLORS.purple} />
                     <Text style={styles.contactText}>LinkedIn</Text>
                 </TouchableOpacity>

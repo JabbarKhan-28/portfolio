@@ -1,20 +1,21 @@
 import CustomAlertModal, { AlertType } from '@/components/CustomAlertModal';
+import { URL_REGEX } from '@/constants/regex';
 import { COLORS } from '@/constants/theme';
 import { db } from '@/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
 import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export interface BlogPost {
@@ -78,9 +79,7 @@ export default function AddBlogModal({ visible, onClose, onSuccess, blogToEdit }
       return;
     }
 
-    try {
-      new URL(pdfUrl);
-    } catch {
+    if (!URL_REGEX.test(pdfUrl)) {
       showAlert('error', 'Invalid URL', 'Please enter a valid URL.');
       return;
     }

@@ -63,6 +63,15 @@ export default function ContactScreen() {
       return;
     }
 
+    if (!EMAIL_REGEX.test(email)) {
+      showStatus(
+        "error",
+        "Invalid Email",
+        "Please enter a valid email address."
+      );
+      return;
+    }
+
 
 
     setIsSubmitting(true);

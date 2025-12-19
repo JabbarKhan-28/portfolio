@@ -1,4 +1,5 @@
 import CustomAlertModal, { AlertType } from '@/components/CustomAlertModal';
+import { URL_REGEX } from '@/constants/regex';
 import { COLORS } from '@/constants/theme';
 import { db } from '@/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
@@ -86,6 +87,13 @@ export default function AddProjectModal({ visible, onClose, onSuccess, projectTo
   const handleSubmit = async () => {
     if (!title || !description) {
       showAlert('error', 'Missing Fields', 'Title and Description are required.');
+      return;
+    }
+
+    if ((imageUrl && !URL_REGEX.test(imageUrl)) || 
+        (ghLink && !URL_REGEX.test(ghLink)) || 
+        (demoLink && !URL_REGEX.test(demoLink))) {
+      showAlert('error', 'Invalid URL', 'Please enter valid URLs (starting with http/https is valid, or just domain.com).');
       return;
     }
 
