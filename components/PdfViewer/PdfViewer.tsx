@@ -1,6 +1,7 @@
 import { COLORS } from "@/constants/theme";
+import * as WebBrowser from "expo-web-browser";
 import React from "react";
-import { ActivityIndicator, Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface PdfViewerProps {
   uri: string;
@@ -45,15 +46,10 @@ export default function PdfViewer({ uri }: PdfViewerProps) {
       )
   }
 
-  // On Native, open externally (or use WebView if added later)
+  // On Native, open in-app browser for better experience
   const handleOpenPdf = async () => {
     try {
-      const supported = await Linking.canOpenURL(uri);
-      if (supported) {
-        await Linking.openURL(uri);
-      } else {
-        console.error("Don't know how to open URI: " + uri);
-      }
+      await WebBrowser.openBrowserAsync(uri);
     } catch (error) {
        console.error("An error occurred", error);
     }

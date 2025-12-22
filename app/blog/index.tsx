@@ -4,21 +4,24 @@ import { COLORS } from "@/constants/theme";
 import { auth, db } from "@/firebaseConfig";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    useWindowDimensions,
-    View,
+  ActivityIndicator,
+
+  Platform,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from "react-native";
 import * as Animatable from "react-native-animatable";
 
@@ -77,16 +80,16 @@ export default function BlogScreen() {
     };
   }, []);
 
-  const openPdfBlog = (pdfUrl: string) => {
+  const openPdfBlog = async (pdfUrl: string) => {
     Haptics.selectionAsync();
-    let finalUrl = pdfUrl;
-    if (finalUrl.includes("dropbox.com") && finalUrl.includes("dl=0")) {
-      finalUrl = finalUrl.replace("dl=0", "raw=1");
-    }
-    if (Platform.OS === 'web') {
-      window.open(finalUrl, '_blank');
-    } else {
-      WebBrowser.openBrowserAsync(finalUrl).catch(() => showAlert("error", "Error", "Could not open link."));
+    try {
+        // Open directly in browser / system viewer
+        // This handles Google Drive links much better than an in-app generic PDF viewer
+        await WebBrowser.openBrowserAsync(pdfUrl);
+    } catch (e) {
+        console.error("Failed to open link", e);
+        // Fallback
+        Linking.openURL(pdfUrl);
     }
   };
 
@@ -113,6 +116,54 @@ export default function BlogScreen() {
   const handleLogout = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await signOut(auth);
+  };
+
+  const handleShare = async (blog: BlogPost) => {
+    Haptics.selectionAsync();
+    try {
+      // 1. Generate URL
+      // On Web: Use current window location to ensure it works in deployments
+      // On Native: Use Linking.createURL or deep link scheme
+      let url = "";
+      if (Platform.OS === 'web') {
+          // e.g. https://my-portfolio.com/blog/123
+          url = `${window.location.origin}/blog/${blog.id}`;
+      } else {
+          url = Linking.createURL(`/blog/${blog.id}`);
+      }
+      
+      const message = `Check out this blog: "${blog.title}"\n\n${blog.summary}`;
+      
+      // 2. Share
+      const result = await Share.share({
+        message: `${message}\n\nRead here: ${url}`,
+        url: url, // iOS/Web
+        title: blog.title, // Android
+      });
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (error) {
+      console.error("Share failed:", error);
+      // Fallback: Copy to clipboard if Share API fails (common on some desktop browsers)
+      if (Platform.OS === 'web') {
+          try {
+              let url = `${window.location.origin}/blog/${blog.id}`;
+              await navigator.clipboard.writeText(url);
+              showAlert('success', 'Link Copied', 'The link has been copied to your clipboard.');
+              setTimeout(hideAlert, 2000);
+          } catch (clipErr) {
+              console.error("Clipboard failed", clipErr);
+          }
+      }
+    }
   };
 
   const filteredBlogs = blogs.filter(blog => {
@@ -171,21 +222,29 @@ export default function BlogScreen() {
                             <Text style={styles.blogTitle}>{blog.title}</Text>
                             <Text style={styles.blogDate}>{blog.date}</Text>
                             <Text style={styles.blogSummary}>{blog.summary}</Text>
+                            
                             <TouchableOpacity style={styles.readMoreBtn} onPress={() => openPdfBlog(blog.pdfPath)}>
                                 <Ionicons name="document-text-outline" size={18} color={COLORS.primaryBg} />
                                 <Text style={styles.readMoreText}>Read Article</Text>
                             </TouchableOpacity>
                         </View>
-                        {user && (
-                            <View style={styles.adminActions}>
-                                <TouchableOpacity style={[styles.actionBtn, { backgroundColor: COLORS.textHighlight }]} onPress={() => handleEdit(blog)}>
-                                    <Ionicons name="create" size={16} color={COLORS.primaryBg} />
-                                </TouchableOpacity>
-                                <TouchableOpacity style={[styles.actionBtn, { backgroundColor: 'rgba(255, 59, 48, 0.8)' }]} onPress={() => handleDelete(blog.id)}>
-                                    <Ionicons name="trash" size={16} color="#FFF" />
-                                </TouchableOpacity>
-                            </View>
-                        )}
+                        
+                        <View style={styles.topActions}>
+                            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: 'rgba(255, 255, 255, 0.1)' }]} onPress={() => handleShare(blog)}>
+                                <Ionicons name="share-social-outline" size={18} color={COLORS.textPrim} />
+                            </TouchableOpacity>
+
+                            {user && (
+                                <>
+                                    <TouchableOpacity style={[styles.actionBtn, { backgroundColor: COLORS.textHighlight }]} onPress={() => handleEdit(blog)}>
+                                        <Ionicons name="create" size={18} color={COLORS.primaryBg} />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[styles.actionBtn, { backgroundColor: 'rgba(255, 59, 48, 0.8)' }]} onPress={() => handleDelete(blog.id)}>
+                                        <Ionicons name="trash" size={18} color="#FFF" />
+                                    </TouchableOpacity>
+                                </>
+                            )}
+                        </View>
                     </View>
                 </BlogCardWrapper>
               ))
@@ -250,7 +309,7 @@ const styles = StyleSheet.create({
   contentContainer: { padding: 20, paddingTop: 60, paddingBottom: 100 },
   headerContainer: { alignItems: "center", marginBottom: 30 },
   headerRow: { flexDirection: "row", justifyContent: "space-between", width: "100%", alignItems: "center" },
-  headerText: { fontSize: 28, fontWeight: "bold", color: COLORS.textPrim },
+  headerText: { fontSize: Platform.OS === 'web' ? 28 : 24, fontWeight: "bold", color: COLORS.textPrim },
   purpleText: { color: COLORS.purple },
   subText: { color: COLORS.textSec, fontSize: 16, textAlign: 'center', marginTop: 5 },
   
@@ -277,11 +336,17 @@ const styles = StyleSheet.create({
       })
   },
   
-  cardBody: { padding: 24, alignItems: 'center' },
+  cardBody: { padding: 16, alignItems: 'center' },
   
-  blogTitle: { color: COLORS.textPrim, fontSize: 22, fontWeight: "800", textAlign: "center", marginBottom: 5 },
+  blogTitle: { color: COLORS.textPrim, fontSize: Platform.OS === 'web' ? 22 : 18, fontWeight: "800", textAlign: "center", marginBottom: 5 },
   blogDate: { color: COLORS.purple, fontSize: 12, fontWeight: 'bold', textAlign: "center", marginBottom: 15, textTransform: 'uppercase', letterSpacing: 1 },
   blogSummary: { color: COLORS.textSec, fontSize: 15, lineHeight: 24, marginBottom: 25, textAlign: "center" },
+  
+  cardActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+  },
   
   readMoreBtn: { 
       backgroundColor: COLORS.textHighlight, 
@@ -289,12 +354,22 @@ const styles = StyleSheet.create({
       alignItems: "center", 
       gap: 8, 
       paddingVertical: 12, 
-      paddingHorizontal: 25, 
-      borderRadius: 50 
+      paddingHorizontal: 20, 
+      borderRadius: 12 
   },
   readMoreText: { color: COLORS.primaryBg, fontWeight: "bold" },
   
-  adminActions: {
+  shareBtn: {
+      backgroundColor: COLORS.inputBg,
+      padding: 12,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+      justifyContent: 'center',
+      alignItems: 'center'
+  },
+  
+  topActions: {
       position: "absolute",
       top: 15,
       right: 15,

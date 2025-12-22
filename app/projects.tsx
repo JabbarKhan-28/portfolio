@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
       marginBottom: 30
   },
   headerText: {
-      fontSize: 28,
+      fontSize: Platform.OS === 'web' ? 32 : 24,
       fontWeight: 'bold',
       color: COLORS.textPrim,
       marginBottom: 10
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
       })
   },
   imageContainer: {
-      height: 220,
+      height: 180,
       width: '100%',
       backgroundColor: 'rgba(0,0,0,0.2)', // Slightly darker for contrast
       justifyContent: 'center',
@@ -394,11 +394,11 @@ const styles = StyleSheet.create({
       alignItems: 'center'
   },
   cardBody: {
-      padding: 24,
+      padding: 16,
       alignItems: 'center'
   },
   cardTitle: {
-      fontSize: 24,
+      fontSize: Platform.OS === 'web' ? 24 : 20,
       fontWeight: '800', // Extra bold
       color: COLORS.textPrim,
       marginBottom: 8,
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       paddingVertical: 12,
       paddingHorizontal: 20,
-      borderRadius: 10, // Pill shape
+      borderRadius: 12, // Standardized
       gap: 8,
       flex: 1, // Equal width buttons
       minWidth: 120

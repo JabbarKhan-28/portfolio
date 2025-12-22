@@ -310,7 +310,8 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: COLORS.darkPurple,
-    padding: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 10,

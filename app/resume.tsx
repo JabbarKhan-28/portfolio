@@ -1,8 +1,8 @@
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
+import * as WebBrowser from "expo-web-browser";
 import React from "react";
 import {
-    Alert,
     Linking,
     Platform,
     ScrollView,
@@ -10,7 +10,7 @@ import {
     Text,
     TouchableOpacity,
     View,
-    useWindowDimensions,
+    useWindowDimensions
 } from "react-native";
 
 /* ------------------ GOOGLE DRIVE LINKS ------------------ */
@@ -25,19 +25,13 @@ export default function ResumeScreen() {
   const [showPdf, setShowPdf] = React.useState(false);
 
   /* ------------------ MOBILE DOWNLOAD HANDLER ------------------ */
-  /* ------------------ MOBILE DOWNLOAD HANDLER ------------------ */
   const handleDownloadMobile = async () => {
     try {
-      // Simply open the URL in the browser/system handler
-      // This allows Android/iOS to handle the download natively (e.g. saving to Downloads folder)
-      const supported = await Linking.canOpenURL(RESUME_DOWNLOAD_URL);
-      if (supported) {
-        await Linking.openURL(RESUME_DOWNLOAD_URL);
-      } else {
-        Alert.alert("Error", "Cannot open download link.");
-      }
+      // Use WebBrowser for reliable download/viewing on Android
+      await WebBrowser.openBrowserAsync(RESUME_DOWNLOAD_URL);
     } catch (error) {
-      Alert.alert("Error", "Failed to initiate download.");
+       // Fallback
+       Linking.openURL(RESUME_DOWNLOAD_URL);
     }
   };
 
@@ -272,7 +266,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 14,
     paddingHorizontal: 30,
-    borderRadius: 50,
+    borderRadius: 12,
     gap: 10,
     elevation: 5,
   },

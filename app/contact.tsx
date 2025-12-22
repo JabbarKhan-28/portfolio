@@ -1,3 +1,4 @@
+import { EMAIL_REGEX } from "@/constants/regex";
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -170,6 +171,9 @@ export default function ContactScreen() {
                 placeholderTextColor={COLORS.textSec}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoComplete="off"
+                textContentType="none"
+                importantForAutofill="no"
                 value={email}
                 onChangeText={setEmail}
               />
@@ -371,8 +375,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    padding: 18,
-    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     gap: 12,
     marginTop: 10,
     ...Platform.select({
