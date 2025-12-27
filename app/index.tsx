@@ -229,8 +229,8 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   homeImage: {
-      width: 280,
-      height: 280
+      width: 400,
+      height: 300
   },
   scrollIndicator: {
       position: 'absolute',

@@ -1,5 +1,6 @@
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
+import { Analytics } from "@vercel/analytics/react";
 import { BlurView } from 'expo-blur';
 import { Tabs } from "expo-router";
 import React, { useEffect } from "react";
@@ -30,7 +31,7 @@ function GlassTabBar() {
     return (
       <View style={{
         flex: 1,
-        backgroundColor: 'rgba(3, 4, 94, 0.6)', // Semi-transparent Ocean Blue
+        backgroundColor: 'rgba(49, 0, 85, 0.8)', // Semi-transparent Deep Purple
         backdropFilter: 'blur(20px)', // Stronger CSS blur
         position: 'absolute',
         top: 0,
@@ -38,7 +39,7 @@ function GlassTabBar() {
         right: 0,
         bottom: 0,
         borderTopWidth: 1,
-        borderColor: 'rgba(144, 224, 239, 0.3)' // Subtle bright border
+        borderColor: 'rgba(171, 81, 227, 0.3)' // Subtle purple border
       } as any} />
     );
   }
@@ -48,7 +49,7 @@ function GlassTabBar() {
     <BlurView 
       intensity={80} 
       tint="dark" 
-      style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(3, 4, 94, 0.5)' }]}
+      style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(49, 0, 85, 0.7)' }]}
     />
   );
 }
@@ -72,6 +73,8 @@ export default function TabLayout() {
   }, []);
 
   return (
+    <>
+
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: COLORS.tabBarActive,
@@ -156,5 +159,7 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    <Analytics />
+    </>
   );
 }

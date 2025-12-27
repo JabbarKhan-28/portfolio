@@ -2,32 +2,32 @@
 import { Platform } from 'react-native';
 
 export const COLORS = {
-  // Base Backgrounds - Ocean Blue Palette
-  primaryBg: '#03045e',      // Darkest Midnight Blue
-  darkBg: '#020344',         // Slightly darker for contrast
-  surface: '#023e8a',        // Deep Royal Blue
-  surfaceLight: '#0077b6',   // Star Command Blue
-  cardBg: 'rgba(2, 62, 138, 0.95)', // Glassy Royal Blue
+  // Base Backgrounds - Royal Imperial Palette 
+  primaryBg: '#310055',      // Darkest Purple
+  darkBg: '#240046',         // Deepest Shadow (Manual darker shade for contrast)
+  surface: '#3c0663',        // Deep Purple Surface
+  surfaceLight: '#4a0a77',   // Lighter Surface
+  cardBg: 'rgba(60, 6, 99, 0.95)', // Glassy Deep Purple
 
   // Text Colors
-  textPrim: '#caf0f8',       // Lightest Cyan (White-ish)
-  textSec: 'rgba(202, 240, 248, 0.7)', // Muted Light Cyan
-  textHighlight: '#48cae4',  // Bright Cyan
+  textPrim: '#ffffff',       // Pure White for max contrast
+  textSec: '#d283ff',        // Pale Violet
+  textHighlight: '#dc97ff',  // Brightest Neon Violet
 
-  // Accents (Mapped from 'purple')
-  purple: '#00b4d8',         // Vivid Cerulean
-  darkPurple: '#0077b6',     // Secondary Accent
-  border: 'rgba(144, 224, 239, 0.2)', // Pale Cyan Border
+  // Accents
+  purple: '#8b2fc9',         // Vivid Violet (Primary Brand)
+  darkPurple: '#6818a5',     // Secondary Accent
+  border: 'rgba(171, 81, 227, 0.3)', // #ab51e3 with opacity
 
   // UI Elements
   inputBg: 'rgba(255, 255, 255, 0.1)',
-  success: '#2ecc71',        // Emerald Green for success
-  error: '#FF6B6B',          // Keeping distinct Red for errors
+  success: '#2ecc71',        // Emerald Green
+  error: '#ff4757',          // Bright Red
   
   // Tab Bar
-  tabBarBg: '#03045e',
-  tabBarActive: '#48cae4',
-  tabBarInactive: 'rgba(173, 232, 244, 0.5)',
+  tabBarBg: '#310055',
+  tabBarActive: '#dc97ff',
+  tabBarInactive: 'rgba(210, 131, 255, 0.5)',
 };
 
 export const FONTS = Platform.select({

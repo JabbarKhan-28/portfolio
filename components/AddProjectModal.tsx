@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     maxHeight: '90%',
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: COLORS.border,
     overflow: 'hidden',
   },
   header: {

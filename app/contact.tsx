@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
         web: {
            cursor: 'pointer',
-           boxShadow: '0px 0px 15px rgba(72, 202, 228, 0.4)', // Glow effect based on highlight color
+           boxShadow: '0px 0px 15px rgba(220, 151, 255, 0.4)', // Glow effect based on highlight color
            transition: '0.2s',
         },
         default: {}
