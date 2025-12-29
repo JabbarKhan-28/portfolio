@@ -2,13 +2,26 @@ import CustomAlertModal, { AlertType } from '@/components/CustomAlertModal';
 import { COLORS } from '@/constants/theme';
 import { auth } from '@/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
-import { ActivityIndicator, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  useWindowDimensions
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function LoginScreen() {
-  const router = useRouter();
+  const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -71,62 +84,86 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Background Glows */}
+      <View style={styles.glowTop} />
+      <View style={styles.glowBottom} />
+
       {Platform.OS === 'web' && (
         <style type="text/css">{`
           input:-webkit-autofill,
           input:-webkit-autofill:hover, 
           input:-webkit-autofill:focus, 
           input:-webkit-autofill:active {
-              -webkit-box-shadow: 0 0 0 30px ${COLORS.surface} inset !important;
+              -webkit-box-shadow: 0 0 0 30px ${COLORS.darkBg} inset !important;
               -webkit-text-fill-color: ${COLORS.textPrim} !important;
               caret-color: ${COLORS.textPrim};
           }
         `}</style>
       )}
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+
+      {/* Back Button */}
+      <TouchableOpacity 
+        onPress={() => router.back()} 
+        style={[styles.backButton, { top: Math.max(insets.top + 10, 20) }]}
+      >
         <Ionicons name="arrow-back" size={24} color={COLORS.textPrim} />
       </TouchableOpacity>
 
-      <Text style={styles.title}>Admin <Text style={styles.highlight}>Login</Text></Text>
-      
-      <View style={styles.form}>
-        <View style={[styles.inputContainer, { backgroundColor: COLORS.surface }]}>
-          <Ionicons name="mail-outline" size={20} color={COLORS.textSec} style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            placeholderTextColor={COLORS.textSec}
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-        </View>
-
-        <View style={[styles.inputContainer, { backgroundColor: COLORS.surface }]}>
-          <Ionicons name="lock-closed-outline" size={20} color={COLORS.textSec} style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor={COLORS.textSec}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-        </View>
-
-        <TouchableOpacity 
-          style={styles.loginButton} 
-          onPress={handleLogin}
-          disabled={loading}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView 
+          contentContainerStyle={[styles.scrollContent, { minHeight: height }]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          {loading ? (
-            <ActivityIndicator color={COLORS.primaryBg} />
-          ) : (
-            <Text style={styles.loginButtonText}>Login</Text>
-          )}
-        </TouchableOpacity>
-      </View>
+          <View style={styles.contentContainer}>
+             <Text style={StyleSheet.flatten([styles.title, width < 400 && { fontSize: 32 }])}>
+              Admin <Text style={styles.highlight}>Area</Text>
+            </Text>
+
+            <View style={StyleSheet.flatten([styles.form, { padding: width < 400 ? 20 : 32 }])}>
+              <View style={styles.inputContainer}>
+                <Ionicons name="mail" size={20} color={COLORS.textHighlight} style={styles.icon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Email Address"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Ionicons name="lock-closed" size={20} color={COLORS.textHighlight} style={styles.icon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Password"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                />
+              </View>
+
+              <TouchableOpacity 
+                style={styles.loginButton} 
+                onPress={handleLogin}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color={COLORS.primaryBg} />
+                ) : (
+                  <Text style={styles.loginButtonText}>Authenticate</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <CustomAlertModal
         visible={alertConfig.visible}
@@ -144,60 +181,120 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.primaryBg,
-    padding: 20,
-    paddingBottom:100,
+    position: 'relative',
+    overflow: 'hidden'
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
+    paddingBottom: 20
+  },
+  contentContainer: {
+    width: '100%',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    zIndex: 1
+  },
+  glowTop: {
+    position: 'absolute',
+    top: -100,
+    right: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: COLORS.glowPurple,
+    opacity: 0.4,
+  },
+  glowBottom: {
+    position: 'absolute',
+    bottom: -100,
+    left: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: COLORS.glowCyan,
+    opacity: 0.2,
   },
   backButton: {
     position: 'absolute',
-    top: 50,
     left: 20,
-    padding: 10,
-    zIndex: 10,
+    padding: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    zIndex: 10
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontSize: Platform.OS === 'android' ? 40 : 42,
+    fontWeight: "900",
     color: COLORS.textPrim,
     marginBottom: 40,
-    textAlign: 'center',
+    textAlign: "center",
+    letterSpacing: -1,
   },
   highlight: {
-    color: COLORS.purple,
+    color: COLORS.textHighlight,
   },
   form: {
-    gap: 20,
+    gap: 24,
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: COLORS.cardBg,
+    padding: 32,
+    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...Platform.select({
+        web: {
+          backdropFilter: 'blur(15px)',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.4)',
+        } as any,
+    default: {
+            elevation: 12,
+            shadowColor: COLORS.textHighlight,
+            shadowOpacity: 0.1,
+            shadowRadius: 20
+        }
+    })
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.cardBg, // Use theme color
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    // Removed border to fix "white line" issue
-    // borderWidth: 1, 
-    // borderColor: 'rgba(255, 255, 255, 0.1)', 
+    backgroundColor: COLORS.darkBg,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
   },
   icon: {
-    marginRight: 10,
+    marginRight: 12,
   },
   input: {
     flex: 1,
     color: COLORS.textPrim,
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: '500',
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}) as any,
   },
   loginButton: {
-    backgroundColor: COLORS.purple,
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: COLORS.textHighlight,
+    padding: 18,
+    borderRadius: 16,
     alignItems: 'center',
     marginTop: 10,
+    elevation: 8,
+    shadowColor: COLORS.textHighlight,
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
   },
   loginButtonText: {
     color: COLORS.primaryBg,
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: "900",
+    letterSpacing: 0.5
   },
 });
+
+

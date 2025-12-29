@@ -161,7 +161,7 @@ export default function AddBlogModal({ visible, onClose, onSuccess, blogToEdit }
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Summary</Text>
                             <TextInput
-                                style={[styles.input, styles.textArea]}
+                                style={StyleSheet.flatten([styles.input, styles.textArea])}
                                 placeholder="What is this blog about?"
                                 placeholderTextColor={COLORS.textSec}
                                 value={summary}
@@ -170,6 +170,7 @@ export default function AddBlogModal({ visible, onClose, onSuccess, blogToEdit }
                                 numberOfLines={4}
                                 textAlignVertical="top"
                             />
+
                         </View>
 
                         <View style={styles.inputGroup}>
@@ -187,13 +188,14 @@ export default function AddBlogModal({ visible, onClose, onSuccess, blogToEdit }
                         </View>
 
                         <TouchableOpacity
-                            style={[
+                            style={StyleSheet.flatten([
                                 styles.submitButton,
                                 (loading || !title || !summary || !pdfUrl) && { opacity: 0.6 }
-                            ]}
+                            ])}
                             onPress={handleSubmit}
                             disabled={loading}
                         >
+
                             {loading ? (
                                 <ActivityIndicator color="#FFF" />
                             ) : (

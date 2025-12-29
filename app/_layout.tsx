@@ -3,8 +3,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { Analytics } from "@vercel/analytics/react";
 import { BlurView } from 'expo-blur';
 import { Tabs } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import { LogBox, Platform, StyleSheet, View } from "react-native";
+
 
 LogBox.ignoreLogs([
   "props.pointerEvents is deprecated",
@@ -31,15 +33,15 @@ function GlassTabBar() {
     return (
       <View style={{
         flex: 1,
-        backgroundColor: 'rgba(49, 0, 85, 0.8)', // Semi-transparent Deep Purple
-        backdropFilter: 'blur(20px)', // Stronger CSS blur
+        backgroundColor: `${COLORS.primaryBg}CC`, // Semi-transparent using theme color
+        backdropFilter: 'blur(25px)', 
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
         borderTopWidth: 1,
-        borderColor: 'rgba(171, 81, 227, 0.3)' // Subtle purple border
+        borderColor: COLORS.border
       } as any} />
     );
   }
@@ -49,8 +51,14 @@ function GlassTabBar() {
     <BlurView 
       intensity={80} 
       tint="dark" 
-      style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(49, 0, 85, 0.7)' }]}
+      style={{
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: `${COLORS.primaryBg}F2`, // Slightly more opaque for better legibility on Android
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255, 255, 255, 0.1)'
+      }}
     />
+
   );
 }
 
@@ -74,6 +82,8 @@ export default function TabLayout() {
 
   return (
     <>
+    <StatusBar style="light" />
+
 
     <Tabs
       screenOptions={{
@@ -86,9 +96,10 @@ export default function TabLayout() {
           backgroundColor: 'transparent',
           borderTopWidth: 0,
           elevation: 0,
-          height: 60,
-          paddingBottom: 5,
+          height: Platform.OS === 'android' ? 80 : 60, 
+          paddingBottom: Platform.OS === 'android' ? 20 : 5,
         },
+
       }}
     >
       <Tabs.Screen
@@ -159,7 +170,7 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
-    <Analytics />
+    {Platform.OS === 'web' && <Analytics />}
     </>
   );
 }

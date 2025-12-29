@@ -55,12 +55,14 @@ export default function CustomAlertModal({
         <Animatable.View 
             animation="zoomIn" 
             duration={300} 
-            style={[styles.container, { borderColor: getColor() }]}
+            style={StyleSheet.flatten([styles.container, { borderColor: getColor() }])}
         >
+
           {/* Icon Circle */}
-          <View style={[styles.iconContainer, { backgroundColor: `${getColor()}20` }]}>
+          <View style={StyleSheet.flatten([styles.iconContainer, { backgroundColor: `${getColor()}20` }])}>
             <Ionicons name={getIcon()} size={50} color={getColor()} />
           </View>
+
 
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.message}>{message}</Text>
@@ -68,15 +70,17 @@ export default function CustomAlertModal({
           <View style={styles.buttonContainer}>
             {/* Show Cancel button only for 'confirm' or 'destructive' type */}
             {(type === "confirm" || type === "destructive") && (
-                <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onClose}>
+                <TouchableOpacity style={StyleSheet.flatten([styles.button, styles.cancelButton])} onPress={onClose}>
                     <Text style={styles.cancelText}>{cancelText}</Text>
                 </TouchableOpacity>
             )}
 
+
             <TouchableOpacity 
-                style={[styles.button, { backgroundColor: getColor() }]} 
+                style={StyleSheet.flatten([styles.button, { backgroundColor: getColor() }])} 
                 onPress={onConfirm || onClose}
             >
+
                 <Text style={styles.confirmText}>
                     {(type === 'confirm' || type === 'destructive') ? confirmText : 'Okay'}
                 </Text>

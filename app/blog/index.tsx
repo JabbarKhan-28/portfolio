@@ -2,6 +2,7 @@ import AddBlogModal, { type BlogPost } from "@/components/AddBlogModal";
 import CustomAlertModal, { AlertType } from "@/components/CustomAlertModal";
 import { COLORS } from "@/constants/theme";
 import { auth, db } from "@/firebaseConfig";
+
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
@@ -21,11 +22,14 @@ import {
   TextInput,
   TouchableOpacity,
   useWindowDimensions,
-  View,
+  View
 } from "react-native";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import * as Animatable from "react-native-animatable";
 
 export default function BlogScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -171,15 +175,23 @@ export default function BlogScreen() {
     return blog.title.toLowerCase().includes(query) || blog.summary.toLowerCase().includes(query);
   });
 
+  const { width } = useWindowDimensions();
+
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={StyleSheet.flatten([styles.contentContainer, { paddingHorizontal: width < 400 ? 15 : 20, paddingTop: insets.top + 20, paddingBottom: insets.bottom + 100 }])} showsVerticalScrollIndicator={false}>
+
+
+        {/* Background Glows */}
+        <View style={styles.glowTop} />
+        <View style={styles.glowBottom} />
+
         <View style={styles.headerContainer}>
           <View style={styles.headerRow}>
             <View style={{ width: 40 }} />
             <TouchableOpacity onPress={handleSecretLogin}>
               <Text style={styles.headerText}>
-                My <Text style={styles.purpleText}>Blogs</Text>
+                The <Text style={styles.purpleText}>Notebook</Text>
               </Text>
             </TouchableOpacity>
             {user ? (
@@ -188,13 +200,14 @@ export default function BlogScreen() {
               </TouchableOpacity>
             ) : <View style={{ width: 40 }} />}
           </View>
-          <Text style={styles.subText}>Thoughts, tutorials, and tech ramblings.</Text>
-          <View style={styles.searchContainer}>
-            <Ionicons name="search" size={20} color={COLORS.textSec} />
+          <Text style={styles.subText}>Exploring the intersection of code, design, and creativity.</Text>
+          
+          <Animatable.View animation="fadeIn" delay={300} style={styles.searchContainer}>
+            <Ionicons name="search" size={22} color={COLORS.textHighlight} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search blogs..."
-              placeholderTextColor={COLORS.textSec}
+              placeholder="Search articles..."
+              placeholderTextColor={COLORS.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
@@ -203,7 +216,7 @@ export default function BlogScreen() {
                 <Ionicons name="close-circle" size={20} color={COLORS.textSec} />
               </TouchableOpacity>
             )}
-          </View>
+          </Animatable.View>
         </View>
 
         {loading ? (
@@ -212,40 +225,50 @@ export default function BlogScreen() {
           <View style={styles.listContainer}>
             {filteredBlogs.length === 0 ? (
               <Text style={styles.emptyText}>
-                {searchQuery ? "No blogs matching your search." : "No blog posts yet."}
+                {searchQuery ? "No matching articles found." : "The notebook is currently empty."}
               </Text>
             ) : (
               filteredBlogs.map((blog, index) => (
                 <BlogCardWrapper key={blog.id} index={index}>
-                    <View style={styles.blogCard}>
-                        <View style={styles.cardBody}>
-                            <Text style={styles.blogTitle}>{blog.title}</Text>
-                            <Text style={styles.blogDate}>{blog.date}</Text>
-                            <Text style={styles.blogSummary}>{blog.summary}</Text>
-                            
-                            <TouchableOpacity style={styles.readMoreBtn} onPress={() => openPdfBlog(blog.pdfPath)}>
-                                <Ionicons name="document-text-outline" size={18} color={COLORS.primaryBg} />
-                                <Text style={styles.readMoreText}>Read Article</Text>
-                            </TouchableOpacity>
-                        </View>
-                        
-                        <View style={styles.topActions}>
-                            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: 'rgba(255, 255, 255, 0.1)' }]} onPress={() => handleShare(blog)}>
-                                <Ionicons name="share-social-outline" size={18} color={COLORS.textPrim} />
-                            </TouchableOpacity>
+                    <TouchableOpacity activeOpacity={0.9} onPress={() => openPdfBlog(blog.pdfPath)}>
+                      <View style={styles.blogCard}>
+                          <View style={StyleSheet.flatten([styles.cardBody, { padding: width < 450 ? 20 : 30 }])}>
+                              <Text style={styles.blogDate}>{blog.date}</Text>
+                              <Text style={StyleSheet.flatten([styles.blogTitle, { fontSize: width < 450 ? 20 : 22, height: width < 450 ? 56 : 60 }])} numberOfLines={2}>{blog.title}</Text>
 
-                            {user && (
-                                <>
-                                    <TouchableOpacity style={[styles.actionBtn, { backgroundColor: COLORS.textHighlight }]} onPress={() => handleEdit(blog)}>
-                                        <Ionicons name="create" size={18} color={COLORS.primaryBg} />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={[styles.actionBtn, { backgroundColor: 'rgba(255, 59, 48, 0.8)' }]} onPress={() => handleDelete(blog.id)}>
-                                        <Ionicons name="trash" size={18} color="#FFF" />
-                                    </TouchableOpacity>
-                                </>
-                            )}
-                        </View>
-                    </View>
+
+
+
+                              <View style={styles.cardDivider} />
+                              <View style={styles.summaryContainer}>
+                                <Text style={styles.blogSummary} numberOfLines={3}>{blog.summary}</Text>
+                              </View>
+                              
+                              <View style={styles.readMoreBtn}>
+                                  <Text style={styles.readMoreText}>Continue Reading</Text>
+                                  <Ionicons name="arrow-forward" size={18} color={COLORS.primaryBg} />
+                              </View>
+                          </View>
+                          
+                          <View style={styles.topActions}>
+                              <TouchableOpacity style={styles.actionBtnIcon} onPress={() => handleShare(blog)}>
+                                  <Ionicons name="share-social" size={16} color={COLORS.textPrim} />
+                              </TouchableOpacity>
+
+                              {user && (
+                                  <>
+                                       <TouchableOpacity style={StyleSheet.flatten([styles.actionBtnIcon, { backgroundColor: COLORS.textHighlight }])} onPress={() => handleEdit(blog)}>
+                                           <Ionicons name="create" size={16} color={COLORS.primaryBg} />
+                                       </TouchableOpacity>
+                                       <TouchableOpacity style={StyleSheet.flatten([styles.actionBtnIcon, { backgroundColor: COLORS.error }])} onPress={() => handleDelete(blog.id)}>
+                                           <Ionicons name="trash" size={16} color="#FFF" />
+                                       </TouchableOpacity>
+
+                                  </>
+                              )}
+                          </View>
+                      </View>
+                    </TouchableOpacity>
                 </BlogCardWrapper>
               ))
             )}
@@ -291,6 +314,8 @@ function BlogCardWrapper({ children, index }: { children: React.ReactNode, index
     const isDesktop = width > 1024;
     const cardWidth = isDesktop ? '31%' : isTablet ? '48%' : '100%';
 
+
+
     return (
         <Animatable.View
             animation="fadeInUp"
@@ -305,68 +330,179 @@ function BlogCardWrapper({ children, index }: { children: React.ReactNode, index
 
 // STYLES
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.primaryBg },
-  contentContainer: { padding: 20, paddingTop: 60, paddingBottom: 100 },
-  headerContainer: { alignItems: "center", marginBottom: 30 },
-  headerRow: { flexDirection: "row", justifyContent: "space-between", width: "100%", alignItems: "center" },
-  headerText: { fontSize: Platform.OS === 'web' ? 28 : 24, fontWeight: "bold", color: COLORS.textPrim },
-  purpleText: { color: COLORS.purple },
-  subText: { color: COLORS.textSec, fontSize: 16, textAlign: 'center', marginTop: 5 },
+  container: { 
+    flex: 1, 
+    backgroundColor: COLORS.primaryBg 
+  },
+  contentContainer: { 
+    position: 'relative'
+  },
+
+  glowTop: {
+    position: 'absolute',
+    top: -50,
+    right: -50,
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    backgroundColor: COLORS.glowPurple,
+    opacity: 0.5,
+  },
+  glowBottom: {
+    position: 'absolute',
+    bottom: 50,
+    left: -50,
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    backgroundColor: COLORS.glowCyan,
+    opacity: 0.3,
+  },
+  headerContainer: { 
+    alignItems: "center", 
+    marginBottom: 40 
+  },
+  headerRow: { 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    width: "100%", 
+    alignItems: "center" 
+  },
+  headerText: { 
+    fontSize: Platform.OS === 'android' ? 36 : 34, 
+    fontWeight: "900", 
+    color: COLORS.textPrim,
+    letterSpacing: -1,
+    ...Platform.select({
+        web: { fontSize: 52 } as any
+    })
+  },
+
+
+
+  purpleText: { 
+    color: COLORS.textHighlight 
+  },
+  subText: { 
+    color: COLORS.textSec, 
+    fontSize: Platform.OS === 'android' ? 18 : 16, 
+ 
+    textAlign: 'center', 
+    marginTop: 10,
+    maxWidth: 500,
+    lineHeight: 24
+  },
+
+
   
-  listContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 20, justifyContent: 'center' },
-  emptyText: { color: COLORS.textSec, textAlign: "center", marginTop: 50 },
+  listContainer: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    gap: 25, 
+    justifyContent: 'center' 
+  },
+  emptyText: { 
+    color: COLORS.textMuted, 
+    textAlign: "center", 
+    marginTop: 60,
+    fontSize: 20
+  },
   
   blogCard: { 
-      backgroundColor: COLORS.cardBg, 
-      borderRadius: 16, 
+      borderRadius: 32, 
       overflow: "hidden", 
-      borderWidth: 1, 
+      borderWidth: 1.5, 
       borderColor: COLORS.border,
       ...Platform.select({
           web: {
-              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.4)',
-          },
+              boxShadow: '0 10px 40px 0 rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(15px)',
+              transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          } as any,
+
           default: {
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 5,
-              elevation: 8,
+              // elevation removed
+              shadowColor: COLORS.textHighlight,
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.2,
+              shadowRadius: 20,
           }
       })
   },
   
-  cardBody: { padding: 16, alignItems: 'center' },
-  
-  blogTitle: { color: COLORS.textPrim, fontSize: Platform.OS === 'web' ? 22 : 18, fontWeight: "800", textAlign: "center", marginBottom: 5 },
-  blogDate: { color: COLORS.purple, fontSize: 12, fontWeight: 'bold', textAlign: "center", marginBottom: 15, textTransform: 'uppercase', letterSpacing: 1 },
-  blogSummary: { color: COLORS.textSec, fontSize: 15, lineHeight: 24, marginBottom: 25, textAlign: "center" },
-  
-  cardActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
+  cardBody: { 
+    alignItems: 'center',
+    width: '100%' 
   },
+  
+  blogTitle: { 
+    fontSize: Platform.OS === 'android' ? 26 : 22,
+    color: COLORS.textPrim, 
+    fontWeight: "900", 
+    textAlign: "center", 
+    marginBottom: 12,
+    lineHeight: 28,
+    letterSpacing: -0.5,
+  },
+
+
+  blogDate: { 
+    color: COLORS.textHighlight, 
+    fontSize: Platform.OS === 'android' ? 14 : 12, 
+ 
+    fontWeight: '800', 
+    textAlign: "center", 
+    marginBottom: 8, 
+    textTransform: 'uppercase', 
+    letterSpacing: 2 
+  },
+
+
+  cardDivider: {
+    width: 30,
+    height: 3,
+    backgroundColor: COLORS.textHighlight,
+    borderRadius: 2,
+    marginBottom: 20
+  },
+  summaryContainer: {
+    height: 72, // 3 lines approx
+    marginBottom: 25,
+    justifyContent: 'center',
+    width: '100%'
+  },
+  blogSummary: { 
+    color: COLORS.textSec, 
+    fontSize: Platform.OS === 'android' ? 18 : 16, 
+ 
+    lineHeight: 22, 
+    textAlign: "center",
+    opacity: 0.9
+  },
+
+
   
   readMoreBtn: { 
       backgroundColor: COLORS.textHighlight, 
       flexDirection: "row", 
       alignItems: "center", 
-      gap: 8, 
-      paddingVertical: 12, 
-      paddingHorizontal: 20, 
-      borderRadius: 12 
-  },
-  readMoreText: { color: COLORS.primaryBg, fontWeight: "bold" },
-  
-  shareBtn: {
-      backgroundColor: COLORS.inputBg,
-      padding: 12,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: COLORS.border,
       justifyContent: 'center',
-      alignItems: 'center'
+      gap: 12, 
+      paddingVertical: 14, 
+      paddingHorizontal: 28, 
+      borderRadius: 20,
+      width: '100%',
+      shadowColor: COLORS.textHighlight,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8 // Enhanced Android elevation
+  },
+  readMoreText: { 
+    color: COLORS.primaryBg, 
+    fontWeight: "900",
+    fontSize: 16,
+    letterSpacing: 0.5
   },
   
   topActions: {
@@ -377,30 +513,56 @@ const styles = StyleSheet.create({
       gap: 10,
       zIndex: 10
   },
-  actionBtn: {
-      padding: 8,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.2)',
+  actionBtnIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
       justifyContent: 'center',
-      alignItems: 'center'
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.1)'
   },
   
-  fabContainer: { position: "absolute", bottom: 100, right: 20 },
-  fab: { backgroundColor: COLORS.purple, width: 60, height: 60, borderRadius: 30, justifyContent: "center", alignItems: "center", elevation: 5 },
+  fabContainer: { 
+    position: "absolute", 
+    bottom: 110, 
+    right: 25 
+  },
+  fab: { 
+    backgroundColor: COLORS.textHighlight, 
+    width: 64, 
+    height: 64, 
+    borderRadius: 32, 
+    justifyContent: "center", 
+    alignItems: "center", 
+    elevation: 10,
+    shadowColor: COLORS.textHighlight,
+    shadowOpacity: 0.5,
+    shadowRadius: 10
+  },
   
   searchContainer: { 
       flexDirection: "row", 
       alignItems: "center", 
-      backgroundColor: COLORS.inputBg, 
-      borderRadius: 12, 
-      paddingHorizontal: 15, 
-      paddingVertical: 12, 
-      marginTop: 20, 
+      backgroundColor: COLORS.darkBg, 
+      borderRadius: 20, 
+      paddingHorizontal: 20, 
+      paddingVertical: Platform.OS === 'android' ? 8 : 14, 
+      marginTop: 30, 
       width: "100%", 
       maxWidth: 600,
-      borderWidth: 1, 
-      borderColor: COLORS.border 
+      borderWidth: 1.5, 
+      borderColor: COLORS.border,
+      elevation: 4 
   },
-  searchInput: { flex: 1, color: COLORS.textPrim, marginLeft: 10, fontSize: 16 },
+
+
+  searchInput: { 
+    flex: 1, 
+    color: COLORS.textPrim, 
+    marginLeft: 12, 
+    fontSize: 18,
+    fontWeight: '500'
+  },
 });

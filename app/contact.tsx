@@ -4,17 +4,21 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+    useWindowDimensions
 } from "react-native";
+
+
 import * as Animatable from "react-native-animatable";
 
 import emailjs from '@emailjs/browser';
@@ -27,6 +31,7 @@ const EMAILJS_PUBLIC_KEY = "70UUo9eMlSEZH2fE0";
 
 export default function ContactScreen() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState(""); 
@@ -118,6 +123,9 @@ export default function ContactScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.primaryBg }}>
+      {/* Background Glows */}
+      <View style={styles.glowTop} />
+      <View style={styles.glowBottom} />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.keyboardView}
@@ -142,16 +150,24 @@ export default function ContactScreen() {
 
             <View style={styles.headerTextContainer}>
               <Text style={styles.headerText}>
-                Contact <Text style={styles.purpleText}>Me</Text>
+                Let's <Text style={styles.purpleText}>Design</Text> Something Amazing
               </Text>
+              <View style={styles.headerDivider} />
               <Text style={styles.subText}>
-                Have a project in mind or just want to chat? Send me a message!
+                Whether it's a new project or just a quick brainstorm, I'm always open to talking tech.
               </Text>
             </View>
           </View>
 
           {/* FORM */}
-          <Animatable.View animation="fadeInUp" duration={800} style={styles.formContainer}>
+          <Animatable.View 
+            animation="fadeInUp" 
+            duration={800} 
+            style={StyleSheet.flatten([styles.formContainer, { padding: width < 450 ? 20 : 40 }])}
+          >
+
+
+
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Name</Text>
               <TextInput
@@ -288,159 +304,212 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.primaryBg,
   },
+  glowTop: {
+    position: 'absolute',
+    top: -100,
+    left: -100, // Shift to Left for variety
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: COLORS.glowPurple,
+    opacity: 0.5,
+  },
+  glowBottom: {
+    position: 'absolute',
+    bottom: -100,
+    right: -100, // Shift to Right for variety
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: COLORS.glowCyan,
+    opacity: 0.3,
+  },
   container: {
     flexGrow: 1,
     padding: 24,
-    paddingTop: 50,
-    paddingBottom: 100,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 20 : 40,
+    paddingBottom: 120,
+
+
+
     justifyContent: "center",
-    backgroundColor: COLORS.primaryBg,
   },
   headerWrapper: {
-    marginBottom: 40,
-    flexDirection: "column",
+    marginBottom: 50,
     alignItems: "center",
   },
   headerTextContainer: {
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 20,
+    width: '100%'
   },
   backButton: {
     alignSelf: "flex-start",
     padding: 12,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 50, // Circle
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: COLORS.border,
   },
   headerText: {
-    fontSize: 32,
-    fontWeight: "800",
+    fontSize: Platform.OS === 'android' ? 36 : 34,
+    fontWeight: "900",
     color: COLORS.textPrim,
     textAlign: "center",
+    letterSpacing: -1,
+    lineHeight: Platform.OS === 'android' ? 42 : 40,
+
+
+    ...Platform.select({
+        web: { fontSize: 52, lineHeight: 58 } as any
+    })
   },
+
+
+
   purpleText: {
-    color: COLORS.purple,
+    color: COLORS.textHighlight,
+  },
+  headerDivider: {
+    width: 60,
+    height: 4,
+    backgroundColor: COLORS.textHighlight,
+    borderRadius: 2,
+    marginVertical: 20
   },
   subText: {
     color: COLORS.textSec,
-    fontSize: 16,
+    fontSize: Platform.OS === 'android' ? 18 : 16,
     textAlign: "center",
-    marginTop: 10,
-    marginBottom: 40,
+    maxWidth: 500,
+    lineHeight: 26
   },
+
+
   formContainer: {
     width: "100%",
     alignSelf: "center",
-    maxWidth: 500, // Limit width on large screens
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    padding: 30,
+    maxWidth: 600,
+    borderRadius: 32,
+    // backgroundColor removed
+    padding: 40,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    gap: 24,
+    borderColor: COLORS.border,
+    gap: 30,
+
+
     ...Platform.select({
         web: { 
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0px 10px 40px rgba(0,0,0,0.5)', // Strong web shadow
-            maxWidth: 600, // Slightly wider on web
-        },
-        default: {}
+            backdropFilter: 'blur(15px)',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.4)',
+        } as any,
+        default: {
+            // elevation removed
+        }
     })
   },
   inputGroup: {
-    gap: 10,
+    gap: 12,
   },
   label: {
     color: COLORS.textPrim,
-    fontSize: 14,
-    fontWeight: "700",
-    letterSpacing: 1,
-    marginLeft: 5
+    fontSize: Platform.OS === 'android' ? 14 : 13,
+    fontWeight: "800",
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    marginLeft: 4,
+    opacity: 0.8
   },
+
+
+
   input: {
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: COLORS.darkBg,
     color: COLORS.textPrim,
-    padding: 18,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 20,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
     fontSize: 16,
+    fontWeight: '500'
   },
+
+
   textArea: {
-    minHeight: 140,
+    minHeight: 160,
   },
   submitButton: {
-    backgroundColor: COLORS.textHighlight, // Bright Cyan
+    backgroundColor: COLORS.textHighlight,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 12,
+    paddingVertical: 18,
+    borderRadius: 20,
     gap: 12,
     marginTop: 10,
-    ...Platform.select({
-        web: {
-           cursor: 'pointer',
-           boxShadow: '0px 0px 15px rgba(220, 151, 255, 0.4)', // Glow effect based on highlight color
-           transition: '0.2s',
-        },
-        default: {}
-    })
+    elevation: 8,
+    shadowColor: COLORS.textHighlight,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
   },
   submitButtonText: {
-    color: COLORS.primaryBg, // Dark text
-    fontSize: 18,
-    fontWeight: "bold",
+    color: COLORS.primaryBg,
+    fontSize: 20,
+    fontWeight: "900",
+    letterSpacing: 0.5
   },
+
+
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.85)",
+    backgroundColor: "rgba(15, 0, 31, 0.95)",
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
   },
   modalContent: {
-    backgroundColor: COLORS.cardBg,
-    borderRadius: 30,
-    padding: 40,
-    width: "100%",
-    maxWidth: 380,
+    backgroundColor: COLORS.surface,
+    borderRadius: 32,
+    padding: 30,
+    width: "90%",
+    maxWidth: 400,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: COLORS.purple,
+    borderColor: COLORS.border,
   },
   iconContainer: {
-    marginBottom: 24,
-    backgroundColor: "rgba(110,84,255,0.1)",
+    marginBottom: 20,
+    backgroundColor: 'rgba(213, 0, 249, 0.1)',
     padding: 20,
-    borderRadius: 50,
+    borderRadius: 24,
   },
   modalTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 28,
+    fontWeight: "900",
     color: COLORS.textPrim,
-    marginBottom: 10,
+    marginBottom: 12,
     textAlign: "center",
+    letterSpacing: -0.5
   },
   modalMessage: {
     fontSize: 16,
     color: COLORS.textSec,
     textAlign: "center",
-    marginBottom: 30,
+    lineHeight: 24,
+    marginBottom: 40,
   },
   modalButton: {
-    paddingVertical: 16,
+    paddingVertical: 20,
     paddingHorizontal: 40,
-    borderRadius: 16,
-    backgroundColor: COLORS.success,
+    borderRadius: 20,
+    backgroundColor: COLORS.textHighlight,
     width: "100%",
     alignItems: "center",
   },
   modalButtonText: {
-    color: COLORS.textPrim,
-    fontSize: 16,
-    fontWeight: "600",
+    color: COLORS.primaryBg,
+    fontSize: 18,
+    fontWeight: "900",
   },
 });

@@ -2,26 +2,33 @@
 import { COLORS } from "@/constants/theme";
 import { db } from "@/firebaseConfig";
 import { Ionicons } from "@expo/vector-icons";
+import { createURL } from "expo-linking";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Linking,
-    Platform,
-    ScrollView,
-    Share,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Linking,
+  Platform,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions
 } from "react-native";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import * as Animatable from "react-native-animatable";
 
 export default function BlogDetailScreen() {
   const { id } = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isWeb = Platform.OS === 'web';
 
   const [blog, setBlog] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,7 +63,7 @@ export default function BlogDetailScreen() {
       if (!blog) return;
     try {
         // Share this page's URL
-        const url = Linking.createURL(`/blog/${blog.id}`);
+        const url = createURL(`/blog/${blog.id}`);
         await Share.share({
             message: `Read this blog: "${blog.title}"\n\n${blog.summary}\n\nLink: ${url}`,
             url: url,
@@ -92,7 +99,7 @@ export default function BlogDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top + 10, 20) }]}>
         <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/blog')}>
           <Ionicons name="arrow-back" size={24} color={COLORS.textPrim} />
         </TouchableOpacity>
@@ -102,14 +109,28 @@ export default function BlogDetailScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Animatable.View animation="fadeInUp" duration={800} style={styles.card}>
+        {/* Background Glows */}
+        <View style={styles.glowTop} />
+        <View style={styles.glowBottom} />
+
+        <Animatable.View 
+            animation="fadeInUp" 
+            duration={800} 
+            style={StyleSheet.flatten([styles.card, { padding: width < 450 ? 20 : 35 }])}
+        >
+
+
+
             <Text style={styles.date}>{blog.date}</Text>
-            <Text style={styles.title}>{blog.title}</Text>
+            <Text style={StyleSheet.flatten([styles.title, width < 450 && { fontSize: 24 }])}>{blog.title}</Text>
             <View style={styles.divider} />
-            <Text style={styles.summary}>{blog.summary}</Text>
+            <Text style={StyleSheet.flatten([styles.summary, width < 450 && { fontSize: 16, lineHeight: 24 }])}>{blog.summary}</Text>
+
+
+
 
             <TouchableOpacity style={styles.readBtn} onPress={openPdfBlog}>
-                <Ionicons name="document-text" size={20} color="#FFF" />
+                <Ionicons name="document-text" size={20} color={COLORS.primaryBg} />
                 <Text style={styles.readBtnText}>Read Full Article</Text>
             </TouchableOpacity>
         </Animatable.View>
@@ -128,7 +149,29 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
-    paddingTop: Platform.OS === 'web' ? 20 : 60,
+    zIndex: 20
+  },
+
+
+  glowTop: {
+    position: 'absolute',
+    top: -50,
+    right: -50,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: COLORS.glowPurple,
+    opacity: 0.2,
+  },
+  glowBottom: {
+    position: 'absolute',
+    bottom: 50,
+    left: -50,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: COLORS.glowCyan,
+    opacity: 0.1,
   },
   loader: {
     flex: 1,
@@ -139,30 +182,42 @@ const styles = StyleSheet.create({
       padding: 20,
       alignItems: 'center'
   },
+
+
   card: {
       backgroundColor: COLORS.cardBg,
-      padding: 30,
-      borderRadius: 20,
+      borderRadius: 24,
       width: '100%',
       maxWidth: 800,
       borderWidth: 1,
       borderColor: COLORS.border,
-      alignItems: 'center'
+      alignItems: 'center',
+      elevation: 8,
+      shadowColor: COLORS.textHighlight,
+      shadowOpacity: 0.1,
+      shadowRadius: 15
   },
   date: {
-      color: COLORS.purple,
-      fontWeight: 'bold',
+      color: COLORS.textHighlight,
+      fontWeight: '900',
       marginBottom: 10,
       textTransform: 'uppercase',
-      letterSpacing: 1
+      letterSpacing: 2,
+      fontSize: Platform.OS === 'android' ? 16 : 12
+
   },
+
+
   title: {
       color: COLORS.textPrim,
-      fontSize: 28,
+      fontSize: Platform.OS === 'android' ? 36 : 28,
+
       fontWeight: 'bold',
       textAlign: 'center',
       marginBottom: 20
   },
+
+
   divider: {
       height: 1,
       backgroundColor: COLORS.border,
@@ -171,28 +226,34 @@ const styles = StyleSheet.create({
   },
   summary: {
       color: COLORS.textSec,
-      fontSize: 18,
+      fontSize: Platform.OS === 'android' ? 22 : 18,
+
       lineHeight: 28,
       textAlign: 'center',
       marginBottom: 40
   },
+
+
   readBtn: {
-      backgroundColor: COLORS.purple,
+      backgroundColor: COLORS.textHighlight,
       flexDirection: 'row',
-      gap: 10,
-      paddingVertical: 16,
-      paddingHorizontal: 32,
-      borderRadius: 100,
+      gap: 12,
+      paddingVertical: 14,
+      paddingHorizontal: 28,
+      borderRadius: 20,
       alignItems: 'center',
-      shadowColor: COLORS.purple,
+      shadowColor: COLORS.textHighlight,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
       shadowRadius: 10,
       elevation: 8
   },
   readBtnText: {
-      color: '#FFF',
+      color: COLORS.primaryBg,
       fontSize: 18,
-      fontWeight: 'bold'
+      fontWeight: '900',
+      letterSpacing: 0.5
   }
+
+
 });

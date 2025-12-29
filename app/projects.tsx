@@ -3,6 +3,7 @@ import AddProjectModal, { type Project } from "@/components/AddProjectModal";
 import CustomAlertModal, { AlertType } from "@/components/CustomAlertModal";
 import { COLORS } from "@/constants/theme";
 import { auth, db } from "@/firebaseConfig";
+
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from 'expo-haptics';
 import { Image } from "expo-image";
@@ -10,11 +11,22 @@ import { useRouter } from "expo-router";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { ActivityIndicator, Linking, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+
 import * as Animatable from 'react-native-animatable';
 
 export default function ProjectsScreen() {
+  const { width } = useWindowDimensions();
   const router = useRouter();
+  const isWeb = Platform.OS === 'web';
+  
+   // Calculate dynamic card width
+  const numColumns = width > 1024 ? 3 : width > 768 ? 2 : 1;
+  const horizontalPadding = 20;
+  const gap = 20;
+  const itemWidth = (width - horizontalPadding * 2 - (numColumns - 1) * gap) / numColumns;
+
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
@@ -140,6 +152,9 @@ export default function ProjectsScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Background Glows */}
+      <View style={styles.glowTop} />
+      <View style={styles.glowBottom} />
         <ScrollView contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
         >
@@ -153,6 +168,7 @@ export default function ProjectsScreen() {
                         My Recent <Text style={styles.purpleText}>Works</Text>
                     </Text>
                 </TouchableOpacity>
+
 
                 {/* Logout Button */}
                 {user ? (
@@ -174,7 +190,7 @@ export default function ProjectsScreen() {
                     <Text style={styles.emptyText}>No projects added yet.</Text>
                 ) : (
                     projects.map((project, index) => (
-                        <ProjectCardWrapper key={project.id} index={index}>
+                        <ProjectCardWrapper key={project.id} index={index} itemWidth={itemWidth}>
                             <ProjectCard 
                                 project={project} 
                                 onDelete={user ? () => handleDelete(project.id) : undefined} 
@@ -222,20 +238,13 @@ export default function ProjectsScreen() {
   );
 }
 
-function ProjectCardWrapper({ children, index }: { children: React.ReactNode, index: number }) {
-    const { width } = useWindowDimensions();
-    const isTablet = width > 768;
-    const isDesktop = width > 1024;
-    
-    // Calculate width: 100% on mobile, ~48% on tablet, ~31% on desktop
-    const cardWidth = isDesktop ? '31%' : isTablet ? '48%' : '100%';
-
+function ProjectCardWrapper({ children, index, itemWidth }: { children: React.ReactNode, index: number, itemWidth: number }) {
     return (
         <Animatable.View 
             animation="fadeInUp"
             duration={800}
             delay={index * 100}
-            style={{ width: cardWidth }}
+            style={{ width: itemWidth }}
         >
             {children}
         </Animatable.View>
@@ -243,6 +252,8 @@ function ProjectCardWrapper({ children, index }: { children: React.ReactNode, in
 }
 
 function ProjectCard({ project, onDelete, onEdit }: { project: Project, onDelete?: () => void, onEdit?: () => void }) {
+    const { width } = useWindowDimensions();
+
     const handleLink = (url: string) => {
         if (url) {
             Haptics.selectionAsync();
@@ -254,128 +265,183 @@ function ProjectCard({ project, onDelete, onEdit }: { project: Project, onDelete
         project.imageUrl ? { uri: project.imageUrl } : require('../assets/project.jpg')
     );
 
+
     return (
-        <View style={styles.card}>
-            {/* Image Placeholder or Custom Image */}
-            <View style={styles.imageContainer}>
-                 <Image 
-                    source={imgSource}
-                    style={styles.projectImage} 
-                    contentFit="cover" // Changed to cover for fuller, premium look
-                    transition={500}
-                    onError={() => setImgSource(require('../assets/project.jpg'))} 
-                 />
-                 {/* Admin Actions */}
-                 {onDelete && onEdit && (
-                     <View style={styles.adminActions}>
-                         <TouchableOpacity style={[styles.actionBtn, { backgroundColor: COLORS.textHighlight }]} onPress={onEdit}>
-                             <Ionicons name="create" size={16} color={COLORS.primaryBg} />
-                         </TouchableOpacity>
-                         <TouchableOpacity style={[styles.actionBtn, { backgroundColor: 'rgba(255, 59, 48, 0.8)' }]} onPress={onDelete}>
-                             <Ionicons name="trash" size={16} color="#FFF" />
-                         </TouchableOpacity>
-                     </View>
-                 )}
-            </View>
-            
-            <View style={styles.cardBody}>
-                <Text style={styles.cardTitle}>{project.title}</Text>
-                <Text style={styles.cardDescription}>{project.description}</Text>
-                
-                <View style={styles.buttonsContainer}>
-                    {project.ghLink ? (
-                        <TouchableOpacity style={styles.button} onPress={() => handleLink(project.ghLink)}>
-                            <Ionicons name="logo-github" size={18} color={COLORS.primaryBg} />
-                            <Text style={styles.buttonText}>Code</Text>
-                        </TouchableOpacity>
-                    ) : null}
-                    
-                    {project.demoLink ? (
-                         <TouchableOpacity style={[styles.button, styles.demoButton]} onPress={() => handleLink(project.demoLink)}>
-                            <Ionicons name="rocket-outline" size={18} color="#FFF" />
-                            <Text style={[styles.buttonText, { color: '#FFF' }]}>Live Demo</Text>
-                        </TouchableOpacity>
-                    ) : null}
-                </View>
-            </View>
-        </View>
+        <TouchableOpacity activeOpacity={0.9} style={styles.cardContainer}>
+          <View style={styles.card}>
+              {/* Image Container with Overlay */}
+              <View style={StyleSheet.flatten([styles.imageContainer, { height: width < 400 ? 180 : 220 }])}>
+
+
+
+
+                   <Image 
+                      source={imgSource}
+                      style={styles.projectImage} 
+                      contentFit="cover" 
+                      transition={500}
+                      onError={() => setImgSource(require('../assets/project.jpg'))} 
+                   />
+                   <View style={styles.imageOverlay} />
+                   
+                   {/* Admin Actions */}
+                   {onDelete && onEdit && (
+                       <View style={styles.adminActions}>
+                           <TouchableOpacity style={StyleSheet.flatten([styles.actionBtn, { backgroundColor: COLORS.textHighlight }])} onPress={onEdit}>
+                               <Ionicons name="create" size={16} color={COLORS.primaryBg} />
+                           </TouchableOpacity>
+                           <TouchableOpacity style={StyleSheet.flatten([styles.actionBtn, { backgroundColor: COLORS.error }])} onPress={onDelete}>
+                               <Ionicons name="trash" size={16} color="#FFF" />
+                           </TouchableOpacity>
+                       </View>
+
+                   )}
+              </View>
+              
+              <View style={StyleSheet.flatten([styles.cardBody, { padding: width < 400 ? 16 : 24 }])}>
+
+
+
+
+                  <Text style={styles.cardTitle}>{project.title}</Text>
+                  <View style={styles.cardDivider} />
+                  <Text style={styles.cardDescription} numberOfLines={3}>{project.description}</Text>
+                  
+                  <View style={styles.buttonsContainer}>
+                      {project.ghLink ? (
+                          <TouchableOpacity style={styles.button} onPress={() => handleLink(project.ghLink)}>
+                              <Ionicons name="logo-github" size={18} color={COLORS.textHighlight} />
+                              <Text style={styles.buttonText}>Source</Text>
+                          </TouchableOpacity>
+                      ) : null}
+                      
+                      {project.demoLink ? (
+                           <TouchableOpacity style={StyleSheet.flatten([styles.button, styles.demoButton])} onPress={() => handleLink(project.demoLink)}>
+                              <Ionicons name="rocket-outline" size={18} color={COLORS.primaryBg} />
+                              <Text style={[styles.buttonText, { color: COLORS.primaryBg }]}>Live Demo</Text>
+                          </TouchableOpacity>
+                      ) : null}
+                  </View>
+              </View>
+          </View>
+        </TouchableOpacity>
     )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingBottom: 100,
     backgroundColor: COLORS.primaryBg,
+  },
+  glowTop: {
+    position: 'absolute',
+    top: -100,
+    left: -100, // Shift to Left
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: COLORS.glowPurple,
+    opacity: 0.5,
+  },
+  glowBottom: {
+    position: 'absolute',
+    bottom: -100,
+    right: -100, // Shift to Right
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: COLORS.glowCyan,
+    opacity: 0.3,
   },
   contentContainer: {
     padding: 20,
-    paddingTop: 60,
-    paddingBottom: 100
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 20 : 40,
+    paddingBottom: 120
   },
+
+
   headerContainer: {
       alignItems: 'center',
-      marginBottom: 30
+      marginBottom: 40
   },
   headerText: {
-      fontSize: Platform.OS === 'web' ? 32 : 24,
-      fontWeight: 'bold',
+    fontSize: Platform.OS === 'android' ? 36 : 34,
+
+      fontWeight: '900',
       color: COLORS.textPrim,
-      marginBottom: 10
+      marginBottom: 10,
+      letterSpacing: -1,
+      ...Platform.select({
+          web: { fontSize: 52 } as any
+      })
   },
+
+
+
   purpleText: {
-      color: COLORS.purple
+      color: COLORS.textHighlight
   },
   subText: {
-      color: COLORS.textPrim,
-      fontSize: 16,
+      color: COLORS.textSec,
+      fontSize: Platform.OS === 'android' ? 18 : 16,
+
       textAlign: 'center',
-      marginTop: 5
+      marginTop: 8,
+      maxWidth: 500,
+      lineHeight: 24
   },
+
+
   projectsContainer: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 20,
-      justifyContent: 'center' // Center cards when wrapping
+      gap: 20, // Adjusted gap for itemWidth calculation
+      justifyContent: 'center'
   },
   emptyText: {
     color: COLORS.textSec,
     textAlign: 'center',
     marginTop: 50,
+    fontSize: 18
+  },
+  cardContainer: {
+    marginBottom: 20 // Adjusted margin for itemWidth calculation
   },
   card: {
-      backgroundColor: COLORS.cardBg, // Solid/High opacity surface
-      borderRadius: 16,
+      backgroundColor: COLORS.cardBg,
+      borderRadius: 24,
       overflow: 'hidden',
       borderWidth: 1,
-      borderColor: COLORS.border,
-      // No shadows or blur for Android optimization
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      width: '100%',
       ...Platform.select({
           web: {
-             boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.4)', // Stronger Web Shadow
-          },
+             boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+             backdropFilter: 'blur(8px)',
+             transition: 'transform 0.3s ease-in-out',
+          } as any,
+
           default: {
-              // iOS
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 5,
-              // Android
-              elevation: 8,
+              elevation: 5,
+              shadowColor: COLORS.textHighlight,
+              shadowOpacity: 0.2,
+              shadowRadius: 15
           }
       })
   },
   imageContainer: {
-      height: 180,
       width: '100%',
-      backgroundColor: 'rgba(0,0,0,0.2)', // Slightly darker for contrast
-      justifyContent: 'center',
-      alignItems: 'center',
-      position: 'relative'
+      backgroundColor: COLORS.darkBg,
+      position: 'relative',
+      overflow: 'hidden'
   },
   projectImage: {
       width: '100%',
       height: '100%'
+  },
+  imageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(26, 0, 51, 0.2)'
   },
   adminActions: {
       position: 'absolute',
@@ -386,32 +452,47 @@ const styles = StyleSheet.create({
       zIndex: 10
   },
   actionBtn: {
-      padding: 10,
-      borderRadius: 30, // Full circle
-      borderWidth: 0.5,
-      borderColor: 'rgba(255,255,255,0.2)',
+      width: 36,
+      height: 36,
+      borderRadius: 18,
       justifyContent: 'center',
-      alignItems: 'center'
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.2)'
   },
   cardBody: {
-      padding: 16,
       alignItems: 'center'
   },
   cardTitle: {
-      fontSize: Platform.OS === 'web' ? 24 : 20,
-      fontWeight: '800', // Extra bold
+      fontSize: Platform.OS === 'android' ? 26 : 24,
+
+      fontWeight: '800',
       color: COLORS.textPrim,
-      marginBottom: 8,
+      marginBottom: 12,
       textAlign: 'center',
-      letterSpacing: 0.5
+      letterSpacing: -0.5
+  },
+
+
+
+  cardDivider: {
+    width: 40,
+    height: 3,
+    backgroundColor: COLORS.textHighlight,
+    borderRadius: 2,
+    marginBottom: 15
   },
   cardDescription: {
-      color: COLORS.textSec, // Softer color
+      color: COLORS.textSec,
       textAlign: 'center',
-      marginBottom: 24,
+      marginBottom: 25,
       lineHeight: 24,
-      fontSize: 15
+      fontSize: Platform.OS === 'android' ? 18 : 16,
+
+      height: 72
   },
+
+
   buttonsContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
@@ -419,49 +500,48 @@ const styles = StyleSheet.create({
       width: '100%'
   },
   button: {
-      backgroundColor: COLORS.textHighlight, // Bright Cyan
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: 12,
+      paddingVertical: 14,
       paddingHorizontal: 20,
-      borderRadius: 12, // Standardized
+      borderRadius: 18,
+      borderWidth: 1.5,
+      borderColor: 'rgba(56, 189, 248, 0.4)',
+      backgroundColor: 'rgba(56, 189, 248, 0.05)',
       gap: 8,
-      flex: 1, // Equal width buttons
-      minWidth: 120
+      flex: 1
   },
   demoButton: {
-      backgroundColor: COLORS.purple, // Different color for Demo
+      backgroundColor: COLORS.textHighlight,
+      borderColor: COLORS.textHighlight,
+      borderWidth: 0
   },
   buttonText: {
-      color: COLORS.primaryBg, // Dark text on bright button
-      fontWeight: 'bold',
-      fontSize: 14
+      color: COLORS.textHighlight,
+      fontWeight: '900',
+      fontSize: 13,
+      textTransform: 'uppercase',
+      letterSpacing: 1
   },
+
   fabContainer: {
       position: 'absolute',
-      bottom: 100,
-      right: 20,
+      bottom: 110,
+      right: 25,
   },
   fab: {
-    backgroundColor: COLORS.purple,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    backgroundColor: COLORS.textHighlight,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5,
-    ...Platform.select({
-      web: {
-        boxShadow: '0px 2px 3px rgba(0, 0, 0, 0.3)',
-      },
-      default: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 3,
-      }
-    }),
+    elevation: 8,
+    shadowColor: COLORS.textHighlight,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
   }
 });
 

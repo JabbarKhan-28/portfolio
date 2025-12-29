@@ -173,7 +173,7 @@ export default function AddProjectModal({ visible, onClose, onSuccess, projectTo
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Description *</Text>
               <TextInput
-                style={[styles.input, styles.textArea]}
+                style={StyleSheet.flatten([styles.input, styles.textArea])}
                 placeholder="What does this project do?"
                 placeholderTextColor={COLORS.textSec}
                 value={description}
@@ -182,6 +182,7 @@ export default function AddProjectModal({ visible, onClose, onSuccess, projectTo
                 numberOfLines={4}
                 textAlignVertical="top"
               />
+
             </View>
 
             <View style={styles.inputGroup}>
@@ -224,10 +225,11 @@ export default function AddProjectModal({ visible, onClose, onSuccess, projectTo
             </View>
 
             <TouchableOpacity
-              style={[styles.submitButton, loading && { opacity: 0.7 }]}
+              style={StyleSheet.flatten([styles.submitButton, loading && { opacity: 0.7 }])}
               onPress={handleSubmit}
               disabled={loading}
             >
+
               {loading ? (
                 <ActivityIndicator color={COLORS.primaryBg} />
               ) : (

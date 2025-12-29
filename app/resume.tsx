@@ -3,15 +3,19 @@ import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import React from "react";
 import {
-    Linking,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useWindowDimensions
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions
 } from "react-native";
+
+
+import * as Animatable from 'react-native-animatable';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 /* ------------------ GOOGLE DRIVE LINKS ------------------ */
 const GOOGLE_DRIVE_ID = "1Abh6vZLuBVRvN0OoOEIeVxAKhpy14ALD";
@@ -21,6 +25,7 @@ const RESUME_PREVIEW_URL = `https://drive.google.com/file/d/${GOOGLE_DRIVE_ID}/p
 
 export default function ResumeScreen() {
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const isWeb = Platform.OS === "web";
   const [showPdf, setShowPdf] = React.useState(false);
 
@@ -49,55 +54,65 @@ export default function ResumeScreen() {
   const renderHeader = () => (
     <View style={styles.headerSection}>
       <Text style={[styles.headerText, isWeb && styles.webHeader]}>
-        My <Text style={styles.purpleText}>Resume</Text>
+        Professional <Text style={styles.purpleText}>Profile</Text>
       </Text>
+      <View style={styles.headerDivider} />
 
       <Text style={styles.subText}>
-        Check out my resume below or download it for later.
+        Deep dive into my technical journey, academic background, and core expertise.
       </Text>
 
-      <View style={styles.actionRow}>
+      <View style={StyleSheet.flatten([
+        styles.actionRow,
+        width < 450 && { flexDirection: 'column', gap: 12 }
+      ])}>
+
+
         {isWeb ? (
           <a
             href={RESUME_DOWNLOAD_URL}
             download="Jabbar_Khan_Resume.pdf"
-            style={{ textDecoration: "none" }}
+            style={{ textDecoration: "none", width: (width < 450 ? '100%' : 'auto') as any }}
+
           >
-            <View style={styles.downloadBtn}>
+            <View style={StyleSheet.flatten([styles.downloadBtn, width < 450 && { width: '100%', justifyContent: 'center' }])}>
+
               <Text style={styles.btnText}>Download CV</Text>
               <Ionicons
-                name="cloud-download-outline"
-                size={20}
+                name="cloud-download"
+                size={22}
                 color={COLORS.primaryBg}
               />
             </View>
           </a>
         ) : (
           <TouchableOpacity
-            style={styles.downloadBtn}
+            style={StyleSheet.flatten([styles.downloadBtn, width < 450 && { width: '100%', justifyContent: 'center' }])}
             onPress={handleDownloadMobile}
           >
+
             <Text style={styles.btnText}>Download CV</Text>
             <Ionicons
-              name="cloud-download-outline"
-              size={20}
+              name="cloud-download"
+              size={22}
               color={COLORS.primaryBg}
             />
           </TouchableOpacity>
         )}
 
-        {/* View PDF Button (Supported on all platforms now) */}
+        {/* View PDF Button */}
         <TouchableOpacity 
-            style={[styles.downloadBtn, { backgroundColor: 'transparent', borderWidth: 1, borderColor: COLORS.purple }]}
+            style={StyleSheet.flatten([styles.viewPdfBtn, width < 450 && { width: '100%', justifyContent: 'center' }])}
             onPress={handleViewPdf}
         >
-            <Text style={[styles.btnText, { color: COLORS.purple }]}>
-                {isWeb && showPdf ? "View Text" : "View PDF"}
+
+            <Text style={styles.viewPdfBtnText}>
+                {isWeb && showPdf ? "View Digital" : "View PDF"}
             </Text>
             <Ionicons
-                name={isWeb && showPdf ? "document-text-outline" : "eye-outline"}
-                size={20}
-                color={COLORS.purple}
+                name={isWeb && showPdf ? "document-text" : "eye"}
+                size={22}
+                color={COLORS.accent}
             />
         </TouchableOpacity>
       </View>
@@ -106,83 +121,115 @@ export default function ResumeScreen() {
 
   return (
     <View style={styles.container}>
-      {showPdf ? (
-        /* ------------------ PDF VIEW (Header Fixed, Web Only) ------------------ */
-        <View style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
-           {renderHeader()}
-           <View style={styles.pdfContainer}>
-              <iframe
-                src={RESUME_PREVIEW_URL}
-                title="Resume PDF"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  border: "none",
-                }}
-              />
-           </View>
-        </View>
-      ) : (
-        /* ------------------ DIGITAL RESUME (Whole Page Scroll) ------------------ */
-        <ScrollView
-            style={styles.digitalResumeScroll}
-            contentContainerStyle={[styles.scrollContent, { alignItems: 'center' }]} 
-            showsVerticalScrollIndicator={false}
+      {/* Background Glows */}
+      <View style={styles.glowTop} />
+      <View style={styles.glowBottom} />
+
+      <ScrollView 
+        style={styles.digitalResumeScroll}
+        contentContainerStyle={StyleSheet.flatten([
+          styles.scrollContent, 
+          { 
+            alignItems: 'center',
+            paddingTop: insets.top + (isWeb ? 60 : 20),
+            paddingBottom: insets.bottom + 100
+          }
+        ])} 
+        showsVerticalScrollIndicator={false}
+
+      >
+        <Animatable.View 
+            animation="fadeIn" 
+            duration={800} 
+            style={StyleSheet.flatten([
+                styles.contentWrapper, 
+                isWeb && styles.webContentCentered, 
+                { flex: 0, paddingHorizontal: width < 400 ? 15 : 20 }
+            ])}
         >
-            <View style={[styles.contentWrapper, isWeb && styles.webContentCentered, { flex: 0 }]}>
-                {renderHeader()}
 
-                {/* SUMMARY */}
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Summary</Text>
-                  <Text style={styles.bodyText}>
-                    Passionate React Native Developer with strong experience in
-                    building cross-platform mobile applications using modern
-                    technologies. Currently pursuing BS Computer Science.
-                  </Text>
-                </View>
 
-                {/* EXPERIENCE */}
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Experience</Text>
+            {showPdf ? (
+                /* --- PDF VIEW --- */
+                <>
+                    {renderHeader()}
+                    <View style={styles.pdfContainer}>
+                        <iframe
+                            src={RESUME_PREVIEW_URL}
+                            title="Resume PDF"
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                border: "none",
+                            }}
+                        />
+                    </View>
+                </>
+            ) : (
+                /* --- DIGITAL RESUME --- */
+                <>
+                    {renderHeader()}
 
-                  <ResumeItem
-                    role="Freelance Full Stack Developer"
-                    company="Self-Employed"
-                    date="2024 – Present"
-                    desc="Developing mobile and web applications using React Native, backend integrations, and modern UI practices."
-                  />
+                    {/* SUMMARY */}
+                    <View style={StyleSheet.flatten([styles.section, { padding: width < 450 ? 24 : 35 }])}>
 
-                  <ResumeItem
-                    role="Open Source Contributor"
-                    company="GitHub"
-                    date="2023 – 2024"
-                    desc="Contributed to React Native projects, bug fixes, and documentation improvements."
-                  />
-                </View>
+                      <Text style={styles.sectionTitle}>Summary</Text>
+                      <Text style={styles.bodyText}>
+                        Dynamic <Text style={styles.highlightText}>React Native Developer</Text> with a strong foundation in 
+                        cross-platform architecture and user-centric design. Driven by the passion to build efficient, 
+                        scalable, and high-performance applications from the ground up.
+                      </Text>
+                    </View>
 
-                {/* EDUCATION */}
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Education</Text>
-                  <ResumeItem
-                    role="BS Computer Science"
-                    company="Sir Syed CASE Institute of Technology"
-                    date="2024 – 2028 (Expected)"
-                    desc="Relevant Coursework: Data Structures, Algorithms, OOP, Databases."
-                  />
-                </View>
+                    {/* EXPERIENCE */}
+                    <View style={StyleSheet.flatten([styles.section, { padding: width < 450 ? 24 : 35 }])}>
 
-                {/* SKILLS */}
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Technical Skills</Text>
-                  <Text style={styles.skillBadges}>
-                    React Native • TypeScript • JavaScript • Node.js • Firebase • Git
-                    • UI/UX
-                  </Text>
-                </View>
-            </View>
-        </ScrollView>
-      )}
+                      <Text style={styles.sectionTitle}>Experience</Text>
+
+                      <ResumeItem
+                        role="Freelance Full Stack Developer"
+                        company="Self-Employed"
+                        date="2024 – Present"
+                        desc="Architecting mobile-first solutions using the MERN stack and Expo. Focused on optimizing bridge communication and UI responsiveness."
+                      />
+
+                      <ResumeItem
+                        role="Software Development Enthusiast"
+                        company="Open Source Communities"
+                        date="2023 – 2024"
+                        desc="Actively contributing to various GitHub repositories, improving application logic and UI consistency."
+                      />
+                    </View>
+
+                    {/* EDUCATION */}
+                    <View style={StyleSheet.flatten([styles.section, { padding: width < 450 ? 24 : 35 }])}>
+
+                      <Text style={styles.sectionTitle}>Education</Text>
+                      <ResumeItem
+                        role="BS Computer Science"
+                        company="Sir Syed CASE Institute of Technology"
+                        date="2024 – 2028 (Expected)"
+                        desc="Engaging in core CS fundamentals including DSA, Operating Systems, and Advanced Web Engineering."
+                      />
+                    </View>
+
+                    {/* SKILLS */}
+                    <View style={StyleSheet.flatten([styles.section, { borderBottomWidth: 0, paddingBottom: 30, padding: width < 450 ? 24 : 35 }])}>
+
+                      <Text style={styles.sectionTitle}>Core Expertise</Text>
+
+                      <View style={styles.skillRow}>
+                        {["React Native", "TypeScript", "Node.js", "Firebase", "Git", "UI/UX"].map((skill, i) => (
+                          <View key={i} style={styles.skillBadge}>
+                            <Text style={styles.skillBadgeText}>{skill}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                </>
+            )}
+        </Animatable.View>
+      </ScrollView>
     </View>
   );
 }
@@ -216,75 +263,157 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.primaryBg,
-    alignItems: "center",
+  },
+  glowTop: {
+    position: 'absolute',
+    top: -100,
+    right: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: COLORS.glowPurple,
+    opacity: 0.5,
+  },
+  glowBottom: {
+    position: 'absolute',
+    bottom: -100,
+    left: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: COLORS.glowCyan,
+    opacity: 0.3,
   },
   contentWrapper: {
-    flex: 1,
-    width: "100%",
-    maxWidth: 800,
-    paddingHorizontal: 20,
-    paddingTop: 40,
-    paddingBottom: 80, // Added to prevent navbar overlap
+    paddingBottom: 40,
+    width: '100%',
+    maxWidth: 900
   },
+
+
+
   webContentCentered: {
     alignItems: "center",
   },
 
   headerSection: {
     alignItems: "center",
-    marginBottom: 30,
+    marginBottom: 40,
     width: "100%",
   },
-  actionRow: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 15,
-    marginTop: 15
-  },
   headerText: {
-    fontSize: 32,
-    fontWeight: "bold",
+    fontSize: Platform.OS === 'android' ? 36 : 34,
+    fontWeight: "900",
     color: COLORS.textPrim,
+    letterSpacing: -1,
+    textAlign: 'center'
   },
+
+
+
   webHeader: {
-    fontSize: 48,
+    fontSize: 52,
+  },
+  headerDivider: {
+    width: 60,
+    height: 4,
+    backgroundColor: COLORS.textHighlight,
+    borderRadius: 2,
+    marginVertical: 20
   },
   purpleText: {
-    color: COLORS.purple,
+    color: COLORS.textHighlight,
   },
   subText: {
     color: COLORS.textSec,
     fontSize: 16,
     textAlign: "center",
-    marginVertical: 12,
+    maxWidth: 550,
+    lineHeight: 24,
+    marginBottom: 30
   },
 
+
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 15,
+    marginTop: 10,
+    width: '100%',
+    flexWrap: 'wrap'
+  },
   downloadBtn: {
     backgroundColor: COLORS.textHighlight,
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 30,
-    borderRadius: 12,
-    gap: 10,
-    elevation: 5,
-  },
-  btnText: {
-    color: COLORS.primaryBg,
-    fontWeight: "bold",
-    fontSize: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 24,
+    gap: 12,
+    elevation: 10,
+    shadowColor: COLORS.textHighlight,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 15
   },
 
+
+  btnText: {
+    color: COLORS.darkBg,
+    fontWeight: "900",
+    fontSize: 16,
+    letterSpacing: 1,
+    textTransform: 'uppercase'
+  },
+
+
+
+  viewPdfBtn: {
+    backgroundColor: 'rgba(45, 212, 191, 0.05)', 
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: 'rgba(45, 212, 191, 0.3)',
+    gap: 12,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(10px)',
+      } as any,
+      ios: {
+        shadowColor: COLORS.accent,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.2,
+        shadowRadius: 12,
+      },
+      android: {
+        borderWidth: 2, 
+      }
+    })
+  },
+  viewPdfBtnText: {
+    color: COLORS.accent,
+    fontWeight: "900",
+    fontSize: 16,
+    letterSpacing: 1,
+    textTransform: 'uppercase'
+  },
+
+
+
+
   pdfContainer: {
-    flex: 1,
     width: "100%",
-    maxWidth: 850,
-    backgroundColor: COLORS.cardBg,
-    borderRadius: 12,
+    backgroundColor: COLORS.darkBg,
+    borderRadius: 32,
     overflow: "hidden",
     borderWidth: 1,
     borderColor: COLORS.border,
+    height: 1000, // Fixed height for proper scrolling
+    marginTop: 20
   },
 
   digitalResumeScroll: {
@@ -292,67 +421,112 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100,
+    paddingBottom: 150,
   },
 
   section: {
-    marginBottom: 30,
-    backgroundColor: COLORS.surface,
-    padding: 25,
-    borderRadius: 12, // Slightly sharper corners for professional look
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.textHighlight, // Use the teal highlight
+    width: '100%',
+    marginBottom: 25,
+    backgroundColor: COLORS.cardBg,
+    borderRadius: 32,
     borderWidth: 1,
     borderColor: COLORS.border,
+
+
+
     ...Platform.select({
-        web: {}, // Clean, no blur needed for solid surface
-        default: {}
+        web: {
+          backdropFilter: 'blur(10px)',
+          boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)'
+        } as any,
+    default: {
+          elevation: 8,
+          shadowColor: COLORS.textHighlight,
+          shadowOpacity: 0.2,
+          shadowRadius: 15
+        }
     })
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: COLORS.textPrim,
+    fontSize: 18,
+    fontWeight: "900",
+    color: COLORS.textHighlight,
     marginBottom: 15,
     textTransform: "uppercase",
+    letterSpacing: 2
   },
+
   bodyText: {
     color: COLORS.textSec,
-    lineHeight: 24,
+    fontSize: 18,
+    lineHeight: 28,
+  },
+
+
+  highlightText: {
+    color: COLORS.textPrim,
+    fontWeight: '800'
   },
 
   resumeItem: {
-    marginBottom: 20,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    marginBottom: 30,
+    width: '100%'
   },
   itemRole: {
     color: COLORS.textPrim,
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: Platform.OS === 'android' ? 22 : 22,
+    fontWeight: "800",
+    marginBottom: 5
   },
+
+
+
   itemMeta: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: 'center',
+    marginBottom: 12,
+    flexWrap: 'wrap',
+    gap: 10
   },
   itemCompany: {
-    color: COLORS.purple,
-    fontWeight: "bold",
+    color: COLORS.textHighlight,
+    fontWeight: "700",
+    fontSize: 16
   },
   itemDate: {
-    color: COLORS.textSec,
-    fontSize: 12,
-    fontStyle: "italic",
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 13,
+    fontWeight: '600',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 8
   },
   itemDesc: {
     color: COLORS.textSec,
-    marginTop: 6,
+    fontSize: 15,
+    lineHeight: 24,
   },
 
-  skillBadges: {
+
+
+  skillRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12
+  },
+  skillBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border
+  },
+  skillBadgeText: {
     color: COLORS.textPrim,
-    fontSize: 16,
-    lineHeight: 26,
+    fontSize: 15,
+    fontWeight: '700'
   },
 });
