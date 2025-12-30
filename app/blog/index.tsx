@@ -6,23 +6,23 @@ import { auth, db } from "@/firebaseConfig";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
+  ActivityIndicator,
 
-    Platform,
-    ScrollView,
-    Share,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    useWindowDimensions,
-    View
+  Platform,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useWindowDimensions,
+  View
 } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -67,22 +67,29 @@ export default function BlogScreen() {
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, setUser);
-    const q = query(collection(db, "blogs"), orderBy("createdAt", "desc"));
-    const unsubBlogs = onSnapshot(
-      q,
-      snap => {
-        const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as BlogPost));
-        setBlogs(list);
-        setLoading(false);
-      },
-      () => setLoading(false)
-    );
-
-    return () => {
-      unsubAuth();
-      unsubBlogs();
-    };
+    return () => unsubAuth();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      const q = query(collection(db, "blogs"), orderBy("createdAt", "desc"));
+      const unsubBlogs = onSnapshot(
+        q,
+        snap => {
+          const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as BlogPost));
+          setBlogs(list);
+          setLoading(false);
+        },
+        (error) => {
+            console.error("Error fetching blogs:", error);
+            setLoading(false);
+        }
+      );
+
+      return () => unsubBlogs();
+    }, [])
+  );
 
   const openPdfBlog = async (pdfUrl: string) => {
     Haptics.selectionAsync();
