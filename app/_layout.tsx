@@ -87,6 +87,7 @@ export default function TabLayout() {
 
 
     <Tabs
+      backBehavior="history"
       screenOptions={{
         tabBarActiveTintColor: COLORS.tabBarActive,
         tabBarInactiveTintColor: COLORS.tabBarInactive,
@@ -100,7 +101,6 @@ export default function TabLayout() {
           height: (Platform.OS === 'android' || width < 768) ? 80 : 60, 
           paddingBottom: (Platform.OS === 'android' || width < 768) ? 20 : 5,
         },
-
       }}
     >
       <Tabs.Screen
