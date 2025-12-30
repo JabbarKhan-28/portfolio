@@ -4,18 +4,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  useWindowDimensions
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+    useWindowDimensions
 } from "react-native";
 
 
@@ -32,11 +32,13 @@ const EMAILJS_PUBLIC_KEY = "70UUo9eMlSEZH2fE0";
 export default function ContactScreen() {
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const isWeb = Platform.OS === 'web' && width >= 768;
+  const isWeb = Platform.OS === 'web' && width >= 768; // Desktop Web
+  const isMobileWeb = Platform.OS === 'web' && width < 768;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState(""); 
   const [message, setMessage] = useState("");
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -139,7 +141,11 @@ export default function ContactScreen() {
           {/* HEADER */}
           <View style={styles.headerWrapper}>
             <View style={styles.headerTextContainer}>
-              <Text style={[styles.headerText, isWeb && styles.webHeader]}>
+              <Text style={[
+                  styles.headerText, 
+                  isWeb && styles.webHeader,
+                  isMobileWeb && { fontSize: 36, lineHeight: 42 }
+              ]}>
                 Let's <Text style={styles.purpleText}>Design</Text> Something Amazing
               </Text>
               <View style={styles.headerDivider} />
@@ -153,50 +159,106 @@ export default function ContactScreen() {
           <Animatable.View 
             animation="fadeInUp" 
             duration={800} 
-            style={StyleSheet.flatten([styles.formContainer, { padding: width < 450 ? 20 : 40 }])}
+            style={[
+                styles.formContainer, 
+                { padding: width < 450 ? 20 : 40 },
+                isMobileWeb && {
+                    width: '100%', // Reset the 60% width from Web Desktop
+                    boxShadow: 'none',
+                    backdropFilter: 'none',
+                    transition: 'none',
+                    shadowColor: COLORS.textHighlight,
+                    shadowOffset: { width: 0, height: 10 },
+                    shadowOpacity: 0.2,
+                    shadowRadius: 20,
+                } as any
+            ]}
           >
 
 
 
+            {/* Name Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Your Name"
-                placeholderTextColor={COLORS.textSec}
-                value={name}
-                onChangeText={setName}
-              />
+              <View style={[
+                  styles.inputContainer, 
+                  focusedField === 'name' && styles.inputFocused,
+                  isWeb && { outlineStyle: 'none' } as any 
+              ]}>
+                  <Ionicons 
+                    name="person-outline" 
+                    size={20} 
+                    color={focusedField === 'name' ? COLORS.textHighlight : COLORS.textSec} 
+                    style={{ marginRight: 10 }}
+                  />
+                  <TextInput
+                    style={[styles.inputText, isWeb && { outlineStyle: 'none' } as any]}
+                    placeholder="Your Name"
+                    placeholderTextColor={COLORS.textSec}
+                    value={name}
+                    onChangeText={setName}
+                    onFocus={() => setFocusedField('name')}
+                    onBlur={() => setFocusedField(null)}
+                  />
+              </View>
             </View>
 
+            {/* Email Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Your Email"
-                placeholderTextColor={COLORS.textSec}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="off"
-                textContentType="none"
-                importantForAutofill="no"
-                value={email}
-                onChangeText={setEmail}
-              />
+              <View style={[
+                  styles.inputContainer, 
+                  focusedField === 'email' && styles.inputFocused,
+                  isWeb && { outlineStyle: 'none' } as any 
+              ]}>
+                  <Ionicons 
+                    name="mail-outline" 
+                    size={20} 
+                    color={focusedField === 'email' ? COLORS.textHighlight : COLORS.textSec} 
+                    style={{ marginRight: 10 }}
+                  />
+                  <TextInput
+                    style={[styles.inputText, isWeb && { outlineStyle: 'none' } as any]}
+                    placeholder="Your Email"
+                    placeholderTextColor={COLORS.textSec}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    value={email}
+                    onChangeText={setEmail}
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => setFocusedField(null)}
+                  />
+              </View>
             </View>
 
+            {/* Message Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Message</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="Write your message here..."
-                placeholderTextColor={COLORS.textSec}
-                multiline
-                numberOfLines={5}
-                textAlignVertical="top"
-                value={message}
-                onChangeText={setMessage}
-              />
+              <View style={[
+                  styles.inputContainer, 
+                  styles.textAreaContainer,
+                  focusedField === 'message' && styles.inputFocused,
+                  isWeb && { outlineStyle: 'none' } as any 
+              ]}>
+                  <Ionicons 
+                    name="chatbox-ellipses-outline" 
+                    size={20} 
+                    color={focusedField === 'message' ? COLORS.textHighlight : COLORS.textSec} 
+                    style={{ marginRight: 10, marginTop: 4 }}
+                  />
+                  <TextInput
+                    style={[styles.inputText, styles.textArea, isWeb && { outlineStyle: 'none' } as any]}
+                    placeholder="Write your message here..."
+                    placeholderTextColor={COLORS.textSec}
+                    multiline
+                    numberOfLines={5}
+                    textAlignVertical="top"
+                    value={message}
+                    onChangeText={setMessage}
+                    onFocus={() => setFocusedField('message')}
+                    onBlur={() => setFocusedField(null)}
+                  />
+              </View>
             </View>
 
             <TouchableOpacity
@@ -403,20 +465,34 @@ const styles = StyleSheet.create({
 
 
 
-  input: {
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: COLORS.darkBg,
-    color: COLORS.textPrim,
-    padding: 20,
-    borderRadius: 20,
+    paddingHorizontal: 15,
+    borderRadius: 16,
     borderWidth: 1.5,
     borderColor: COLORS.border,
-    fontSize: 16,
-    fontWeight: '500'
+    minHeight: 60
   },
-
-
+  inputFocused: {
+    borderColor: COLORS.textHighlight,
+    backgroundColor: 'rgba(56, 189, 248, 0.05)', // Subtle highlight tint
+  },
+  inputText: {
+    flex: 1,
+    color: COLORS.textPrim,
+    fontSize: 16,
+    fontWeight: '500',
+    height: '100%'
+  },
+  textAreaContainer: {
+    alignItems: 'flex-start',
+    paddingVertical: 15
+  },
   textArea: {
-    minHeight: 160,
+    minHeight: 120,
+    textAlignVertical: "top", // Android fix
   },
   submitButton: {
     backgroundColor: COLORS.textHighlight,

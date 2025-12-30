@@ -3,14 +3,14 @@ import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import React from "react";
 import {
-  Linking,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  useWindowDimensions
+    Linking,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    useWindowDimensions
 } from "react-native";
 
 
@@ -26,7 +26,10 @@ const RESUME_PREVIEW_URL = `https://drive.google.com/file/d/${GOOGLE_DRIVE_ID}/p
 export default function ResumeScreen() {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const isWeb = Platform.OS === "web";
+  const isDesktopWeb = Platform.OS === "web" && width >= 768;
+  const isMobileWeb = Platform.OS === "web" && width < 768;
+  const isAndroidOrMobileWeb = Platform.OS === 'android' || isMobileWeb;
+  
   const [showPdf, setShowPdf] = React.useState(false);
 
   /* ------------------ MOBILE DOWNLOAD HANDLER ------------------ */
@@ -42,7 +45,7 @@ export default function ResumeScreen() {
 
   /* ------------------ VIEW PDF HANDLER ------------------ */
   const handleViewPdf = () => {
-      if (isWeb) {
+      if (isDesktopWeb) {
           setShowPdf(!showPdf);
       } else {
           // On Native, open in browser/drive app
@@ -53,7 +56,7 @@ export default function ResumeScreen() {
   /* ------------------ RENDER HEADER ------------------ */
   const renderHeader = () => (
     <View style={styles.headerSection}>
-      <Text style={[styles.headerText, isWeb && styles.webHeader]}>
+      <Text style={[styles.headerText, isDesktopWeb && styles.webHeader]}>
         Professional <Text style={styles.purpleText}>Profile</Text>
       </Text>
       <View style={styles.headerDivider} />
@@ -68,7 +71,7 @@ export default function ResumeScreen() {
       ])}>
 
 
-        {isWeb ? (
+        {isDesktopWeb ? (
           <a
             href={RESUME_DOWNLOAD_URL}
             download="Jabbar_Khan_Resume.pdf"
@@ -102,15 +105,24 @@ export default function ResumeScreen() {
 
         {/* View PDF Button */}
         <TouchableOpacity 
-            style={StyleSheet.flatten([styles.viewPdfBtn, width < 450 && { width: '100%', justifyContent: 'center' }])}
+            style={[
+                styles.viewPdfBtn, 
+                width < 450 && { width: '100%', justifyContent: 'center' },
+                isMobileWeb && {
+                    // Mobile Web overrides - match Android
+                    borderWidth: 2,
+                    backdropFilter: 'none',
+                    backgroundColor: 'rgba(45, 212, 191, 0.05)',
+                } as any
+            ]}
             onPress={handleViewPdf}
         >
 
             <Text style={styles.viewPdfBtnText}>
-                {isWeb && showPdf ? "View Digital" : "View PDF"}
+                {isDesktopWeb && showPdf ? "View Digital" : "View PDF"}
             </Text>
             <Ionicons
-                name={isWeb && showPdf ? "document-text" : "eye"}
+                name={isDesktopWeb && showPdf ? "document-text" : "eye"}
                 size={22}
                 color={COLORS.accent}
             />
@@ -131,7 +143,7 @@ export default function ResumeScreen() {
           styles.scrollContent, 
           { 
             alignItems: 'center',
-            paddingTop: insets.top + (isWeb ? 60 : 20),
+            paddingTop: insets.top + (isDesktopWeb ? 60 : 20),
             paddingBottom: insets.bottom + 100
           }
         ])} 
@@ -143,7 +155,7 @@ export default function ResumeScreen() {
             duration={800} 
             style={StyleSheet.flatten([
                 styles.contentWrapper, 
-                isWeb && styles.webContentCentered, 
+                isDesktopWeb && styles.webContentCentered, 
                 { flex: 0, paddingHorizontal: width < 400 ? 15 : 20 }
             ])}
         >
@@ -171,7 +183,19 @@ export default function ResumeScreen() {
                     {renderHeader()}
 
                     {/* SUMMARY */}
-                    <View style={StyleSheet.flatten([styles.section, { padding: width < 450 ? 24 : 35 }])}>
+                    <View style={[
+                        styles.section, 
+                        { padding: width < 450 ? 24 : 35 },
+                        isMobileWeb && {
+                             boxShadow: 'none',
+                             backdropFilter: 'none',
+                             transition: 'none',
+                             shadowColor: COLORS.textHighlight,
+                             shadowOffset: { width: 0, height: 10 },
+                             shadowOpacity: 0.2,
+                             shadowRadius: 20,
+                        } as any
+                    ]}>
 
                       <Text style={styles.sectionTitle}>Summary</Text>
                       <Text style={styles.bodyText}>
@@ -182,7 +206,19 @@ export default function ResumeScreen() {
                     </View>
 
                     {/* EXPERIENCE */}
-                    <View style={StyleSheet.flatten([styles.section, { padding: width < 450 ? 24 : 35 }])}>
+                    <View style={[
+                        styles.section, 
+                        { padding: width < 450 ? 24 : 35 },
+                         isMobileWeb && {
+                             boxShadow: 'none',
+                             backdropFilter: 'none',
+                             transition: 'none',
+                             shadowColor: COLORS.textHighlight,
+                             shadowOffset: { width: 0, height: 10 },
+                             shadowOpacity: 0.2,
+                             shadowRadius: 20,
+                        } as any
+                    ]}>
 
                       <Text style={styles.sectionTitle}>Experience</Text>
 
@@ -202,7 +238,19 @@ export default function ResumeScreen() {
                     </View>
 
                     {/* EDUCATION */}
-                    <View style={StyleSheet.flatten([styles.section, { padding: width < 450 ? 24 : 35 }])}>
+                    <View style={[
+                        styles.section,
+                        { padding: width < 450 ? 24 : 35 },
+                        isMobileWeb && {
+                             boxShadow: 'none',
+                             backdropFilter: 'none',
+                             transition: 'none',
+                             shadowColor: COLORS.textHighlight,
+                             shadowOffset: { width: 0, height: 10 },
+                             shadowOpacity: 0.2,
+                             shadowRadius: 20,
+                        } as any
+                    ]}>
 
                       <Text style={styles.sectionTitle}>Education</Text>
                       <ResumeItem
@@ -214,7 +262,19 @@ export default function ResumeScreen() {
                     </View>
 
                     {/* SKILLS */}
-                    <View style={StyleSheet.flatten([styles.section, { borderBottomWidth: 0, paddingBottom: 30, padding: width < 450 ? 24 : 35 }])}>
+                    <View style={[
+                         styles.section, 
+                         { borderBottomWidth: 0, paddingBottom: 30, padding: width < 450 ? 24 : 35 },
+                         isMobileWeb && {
+                             boxShadow: 'none',
+                             backdropFilter: 'none',
+                             transition: 'none',
+                             shadowColor: COLORS.textHighlight,
+                             shadowOffset: { width: 0, height: 10 },
+                             shadowOpacity: 0.2,
+                             shadowRadius: 20,
+                        } as any
+                    ]}>
 
                       <Text style={styles.sectionTitle}>Core Expertise</Text>
 

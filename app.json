@@ -4,7 +4,6 @@
     "slug": "jabbarKhan",
     "version": "1.0.0",
     "orientation": "portrait",
-    
     "icon": "./assets/jabbar.png",
     "scheme": "jabbarkhan",
     "userInterfaceStyle": "automatic",
@@ -20,22 +19,31 @@
         "backgroundColor": "#03045e"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
       "favicon": "./assets/jabbar.png"
     },
     "plugins": [
-      ["expo-image-picker",
-      {
-        "photosPermission": "The app accesses your photos to let you share them with your friends."
-      }]
-
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "6da53883-7566-4561-9276-77490dedeb1e"
+      }
     }
   }
 }

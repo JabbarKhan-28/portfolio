@@ -11,6 +11,7 @@ export default function AboutScreen() {
   const { height, width } = useWindowDimensions();
   const isWeb = Platform.OS === 'web' && width >= 768;
   const isMobile = width < 768;
+  const isMobileWeb = Platform.OS === 'web' && isMobile;
 
   // Web-specific styles to enable CSS Scroll Snap
   const scrollViewStyle: any = isWeb ? {
@@ -46,15 +47,31 @@ export default function AboutScreen() {
         <View style={styles.glowTop} />
         <View style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
             <Animatable.View animation="fadeInDown" style={styles.headerTextContainer}>
-              <Text style={StyleSheet.flatten([styles.headerText, isWeb && styles.webHeader])}>
+              <Text style={StyleSheet.flatten([styles.headerText, isWeb && styles.webHeader, isMobileWeb && { fontSize: 36, lineHeight: 42 }])}>
 
                  Know Who <Text style={styles.purpleText}>I'M</Text>
               </Text>
               <View style={styles.divider} />
             </Animatable.View>
             
-            <Animatable.View animation="fadeInUp" delay={200} style={StyleSheet.flatten([styles.cardContainer, { padding: width < 450 ? 20 : 35 }])}>
-                 <Text style={StyleSheet.flatten([styles.cardText, isWeb && styles.webBodyText])}>
+            <Animatable.View animation="fadeInUp" delay={200} style={[
+                styles.cardContainer, 
+                { padding: width < 450 ? 20 : 35 },
+                isMobileWeb && {
+                    boxShadow: 'none',
+                    backdropFilter: 'none',
+                    transition: 'none',
+                    shadowColor: COLORS.textHighlight,
+                    shadowOffset: { width: 0, height: 10 },
+                    shadowOpacity: 0.2,
+                    shadowRadius: 20,
+                } as any
+            ]}>
+                 <Text style={StyleSheet.flatten([
+                     styles.cardText, 
+                     isWeb && styles.webBodyText,
+                     isMobileWeb && { fontSize: 18, lineHeight: 24 }
+                 ])}>
 
 
 
@@ -79,7 +96,7 @@ export default function AboutScreen() {
          <View style={styles.glowBottomRight} />
 
          <View style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
-            <Text style={StyleSheet.flatten([styles.headerText, isWeb && styles.webHeader])}>
+            <Text style={StyleSheet.flatten([styles.headerText, isWeb && styles.webHeader, isMobileWeb && { fontSize: 36, lineHeight: 42 }])}>
 
                 Professional <Text style={styles.purpleText}>Skillset</Text>
             </Text>
@@ -97,7 +114,7 @@ export default function AboutScreen() {
                 <SkillBadge name="Python" />
             </View>
 
-            <Text style={StyleSheet.flatten([styles.headerText, { marginTop: 40 }, isWeb && styles.webHeader])}>
+            <Text style={StyleSheet.flatten([styles.headerText, { marginTop: 40 }, isWeb && styles.webHeader, isMobileWeb && { fontSize: 36, lineHeight: 42 }])}>
 
                <Text style={styles.purpleText}>Tools</Text> I use
             </Text>
@@ -123,7 +140,7 @@ export default function AboutScreen() {
          
          <View style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
             <Animatable.View animation="fadeInDown" style={styles.headerTextContainer}>
-                <Text style={StyleSheet.flatten([styles.headerText, isWeb && styles.webHeader])}>
+                <Text style={StyleSheet.flatten([styles.headerText, isWeb && styles.webHeader, isMobileWeb && { fontSize: 36, lineHeight: 42 }])}>
 
                     My <Text style={styles.purpleText}>Journey</Text>
                 </Text>
@@ -136,10 +153,10 @@ export default function AboutScreen() {
                     <View style={styles.timelineDot}>
                         <Ionicons name="briefcase" size={12} color={COLORS.primaryBg} />
                     </View>
-                    <View style={styles.timelineContent}>
-                        <Text style={styles.timelineYear}>2024 - Present</Text>
-                        <Text style={styles.timelineTitle}>Freelance Full Stack Developer</Text>
-                        <Text style={styles.timelineDesc}>
+                    <View style={[styles.timelineContent, isMobileWeb && { backdropFilter: 'none', boxShadow: 'none', borderWidth: 1.2 } as any]}>
+                        <Text style={[styles.timelineYear, isMobileWeb && { fontSize: 13 }]}>2024 - Present</Text>
+                        <Text style={[styles.timelineTitle, isMobileWeb && { fontSize: 18 }]}>Freelance Full Stack Developer</Text>
+                        <Text style={[styles.timelineDesc, isMobileWeb && { fontSize: 14 }]}>
                             Building custom mobile apps and web solutions for clients globally. Specializing in React Native performance.
                         </Text>
                     </View>
@@ -150,10 +167,10 @@ export default function AboutScreen() {
                     <View style={styles.timelineDot}>
                         <Ionicons name="code-slash" size={12} color={COLORS.primaryBg} />
                     </View>
-                    <View style={styles.timelineContent}>
-                        <Text style={styles.timelineYear}>2023 - 2024</Text>
-                        <Text style={styles.timelineTitle}>Open Source Contributor</Text>
-                        <Text style={styles.timelineDesc}>
+                    <View style={[styles.timelineContent, isMobileWeb && { backdropFilter: 'none', boxShadow: 'none', borderWidth: 1.2 } as any]}>
+                        <Text style={[styles.timelineYear, isMobileWeb && { fontSize: 13 }]}>2023 - 2024</Text>
+                        <Text style={[styles.timelineTitle, isMobileWeb && { fontSize: 18 }]}>Open Source Contributor</Text>
+                        <Text style={[styles.timelineDesc, isMobileWeb && { fontSize: 14 }]}>
                             Actively contributing to React Native libraries and developer tools. Gained deep understanding of native modules.
                         </Text>
                     </View>
@@ -165,10 +182,10 @@ export default function AboutScreen() {
                     <View style={styles.timelineDot}>
                         <Ionicons name="school" size={12} color={COLORS.primaryBg} />
                     </View>
-                    <View style={styles.timelineContent}>
-                        <Text style={styles.timelineYear}>2024 - 2028 (Expected)</Text>
-                        <Text style={styles.timelineTitle}>BS Computer Science</Text>
-                        <Text style={styles.timelineDesc}>
+                    <View style={[styles.timelineContent, isMobileWeb && { backdropFilter: 'none', boxShadow: 'none', borderWidth: 1.2 } as any]}>
+                        <Text style={[styles.timelineYear, isMobileWeb && { fontSize: 13 }]}>2024 - 2028 (Expected)</Text>
+                        <Text style={[styles.timelineTitle, isMobileWeb && { fontSize: 18 }]}>BS Computer Science</Text>
+                        <Text style={[styles.timelineDesc, isMobileWeb && { fontSize: 14 }]}>
                            Sir Syed CASE Institute of Technology. Algorithms, AI, and Software Engineering principles.
                         </Text>
                     </View>
@@ -183,7 +200,7 @@ export default function AboutScreen() {
          <View style={styles.glowTopLeft} />
 
          <View style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
-            <Text style={StyleSheet.flatten([styles.headerText, isWeb && styles.webHeader])}>
+            <Text style={StyleSheet.flatten([styles.headerText, isWeb && styles.webHeader, isMobileWeb && { fontSize: 36, lineHeight: 42 }])}>
 
                 My <Text style={styles.purpleText}>Philosophy</Text>
             </Text>
@@ -192,7 +209,7 @@ export default function AboutScreen() {
 
 
 
-                 <Text style={StyleSheet.flatten([styles.cardText, isWeb && styles.webBodyText, { textAlign: 'center' }])}>
+                 <Text style={StyleSheet.flatten([styles.cardText, isWeb && styles.webBodyText, { textAlign: 'center' }, isMobileWeb && { fontSize: 18, lineHeight: 24 }])}>
 
                     I believe that code is more than just instructions for a machine; it's a medium for solving real-world problems and improving lives.
                     {"\n\n"}
@@ -214,7 +231,7 @@ export default function AboutScreen() {
             <View style={StyleSheet.flatten([styles.quoteContainer, { padding: width < 450 ? 20 : 30 }])}>
 
                 <Ionicons name="chatbubble-ellipses-outline" size={40} color={COLORS.purple} style={{ opacity: 0.8, marginBottom: 20 }} />
-                <Text style={StyleSheet.flatten([styles.quoteText, { fontSize: width < 450 ? 18 : 22, lineHeight: width < 450 ? 28 : 32 }])}>
+                <Text style={StyleSheet.flatten([styles.quoteText, { fontSize: width < 450 ? 18 : 22, lineHeight: width < 450 ? 28 : 32 }, isMobileWeb && { fontSize: 24, lineHeight: 32 }])}>
 
 
 

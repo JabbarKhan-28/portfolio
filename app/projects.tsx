@@ -18,7 +18,11 @@ import * as Animatable from 'react-native-animatable';
 export default function ProjectsScreen() {
   const { width } = useWindowDimensions();
   const router = useRouter();
-  const isWeb = Platform.OS === 'web';
+  
+  // Treat "Web" styling only for Desktop. Mobile Web should feel like Native/Android.
+  const isDesktopWeb = Platform.OS === 'web' && width >= 768;
+  const isMobileWeb = Platform.OS === 'web' && width < 768;
+  const isAndroidOrMobileWeb = Platform.OS === 'android' || isMobileWeb;
   
    // Calculate dynamic card width
   const numColumns = width > 1024 ? 3 : width > 768 ? 2 : 1;
@@ -164,7 +168,7 @@ export default function ProjectsScreen() {
                  {/* Spacer to center the title */}
 
                 <TouchableOpacity activeOpacity={1} onPress={handleSecretLogin}>
-                    <Text style={[styles.headerText, isWeb && styles.webHeader]}>
+                    <Text style={[styles.headerText, isDesktopWeb && styles.webHeader]}>
                         My Recent <Text style={styles.purpleText}>Works</Text>
                     </Text>
                 </TouchableOpacity>
@@ -179,7 +183,7 @@ export default function ProjectsScreen() {
                     <View style={{ width: 40 }} />
                 )}
             </View>
-            <Text style={styles.subText}>Here are a few projects I've worked on recently.</Text>
+            <Text style={[styles.subText, isMobileWeb && { fontSize: 18 }]}>Here are a few projects I've worked on recently.</Text>
         </View>
 
         {loading ? (
@@ -195,6 +199,8 @@ export default function ProjectsScreen() {
                                 project={project} 
                                 onDelete={user ? () => handleDelete(project.id) : undefined} 
                                 onEdit={user ? () => handleEdit(project) : undefined}
+                                isMobileWeb={isMobileWeb}
+                                isAndroidOrMobileWeb={isAndroidOrMobileWeb}
                             />
                         </ProjectCardWrapper>
                     ))
@@ -251,7 +257,7 @@ function ProjectCardWrapper({ children, index, itemWidth }: { children: React.Re
     );
 }
 
-function ProjectCard({ project, onDelete, onEdit }: { project: Project, onDelete?: () => void, onEdit?: () => void }) {
+function ProjectCard({ project, onDelete, onEdit, isMobileWeb, isAndroidOrMobileWeb }: { project: Project, onDelete?: () => void, onEdit?: () => void, isMobileWeb: boolean, isAndroidOrMobileWeb: boolean }) {
     const { width } = useWindowDimensions();
 
     const handleLink = (url: string) => {
@@ -268,7 +274,19 @@ function ProjectCard({ project, onDelete, onEdit }: { project: Project, onDelete
 
     return (
         <TouchableOpacity activeOpacity={0.9} style={styles.cardContainer}>
-          <View style={styles.card}>
+          <View style={[
+              styles.card,
+              isMobileWeb && {
+                  boxShadow: 'none',
+                  backdropFilter: 'none',
+                  transition: 'none',
+                  borderWidth: 1.5,
+                  shadowColor: COLORS.textHighlight,
+                  shadowOffset: { width: 0, height: 10 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 20,
+              } as any
+          ]}>
               {/* Image Container with Overlay */}
               <View style={StyleSheet.flatten([styles.imageContainer, { height: width < 400 ? 180 : 220 }])}>
 
@@ -303,9 +321,9 @@ function ProjectCard({ project, onDelete, onEdit }: { project: Project, onDelete
 
 
 
-                  <Text style={[styles.cardTitle, (Platform.OS === 'android' || width < 768) && { fontSize: 26 }]}>{project.title}</Text>
+                  <Text style={[styles.cardTitle, isAndroidOrMobileWeb && { fontSize: 26 }]}>{project.title}</Text>
                   <View style={styles.cardDivider} />
-                  <Text style={[styles.cardDescription, (Platform.OS === 'android' || width < 768) && { fontSize: 18 }]} numberOfLines={3}>{project.description}</Text>
+                  <Text style={[styles.cardDescription, isAndroidOrMobileWeb && { fontSize: 18 }]} numberOfLines={3}>{project.description}</Text>
                   
                   <View style={styles.buttonsContainer}>
                       {project.ghLink ? (

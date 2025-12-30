@@ -12,17 +12,17 @@ import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
+    ActivityIndicator,
 
-  Platform,
-  ScrollView,
-  Share,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  useWindowDimensions,
-  View
+    Platform,
+    ScrollView,
+    Share,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    useWindowDimensions,
+    View
 } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -176,6 +176,7 @@ export default function BlogScreen() {
   });
 
   const { width } = useWindowDimensions();
+  const isMobileWeb = Platform.OS === 'web' && width < 768;
 
   return (
     <View style={styles.container}>
@@ -190,7 +191,10 @@ export default function BlogScreen() {
           <View style={styles.headerRow}>
             <View style={{ width: 40 }} />
             <TouchableOpacity onPress={handleSecretLogin}>
-              <Text style={styles.headerText}>
+              <Text style={[
+                  styles.headerText,
+                  isMobileWeb && { fontSize: 36, lineHeight: 42 }
+              ]}>
                 The <Text style={styles.purpleText}>Notebook</Text>
               </Text>
             </TouchableOpacity>
@@ -231,9 +235,20 @@ export default function BlogScreen() {
               filteredBlogs.map((blog, index) => (
                 <BlogCardWrapper key={blog.id} index={index}>
                     <TouchableOpacity activeOpacity={0.9} onPress={() => openPdfBlog(blog.pdfPath)}>
-                      <View style={styles.blogCard}>
+                      <View style={[
+                          styles.blogCard,
+                          isMobileWeb && {
+                             boxShadow: 'none',
+                             backdropFilter: 'none',
+                             transition: 'none',
+                             shadowColor: COLORS.textHighlight,
+                             shadowOffset: { width: 0, height: 10 },
+                             shadowOpacity: 0.2,
+                             shadowRadius: 20,
+                        } as any
+                      ]}>
                           <View style={StyleSheet.flatten([styles.cardBody, { padding: width < 450 ? 20 : 30 }])}>
-                              <Text style={styles.blogDate}>{blog.date}</Text>
+                              <Text style={[styles.blogDate, isMobileWeb && { fontSize: 14 }]}>{blog.date}</Text>
                               <Text style={StyleSheet.flatten([styles.blogTitle, { fontSize: width < 450 ? 20 : 22, height: width < 450 ? 56 : 60 }])} numberOfLines={2}>{blog.title}</Text>
 
 
@@ -241,7 +256,7 @@ export default function BlogScreen() {
 
                               <View style={styles.cardDivider} />
                               <View style={styles.summaryContainer}>
-                                <Text style={styles.blogSummary} numberOfLines={3}>{blog.summary}</Text>
+                                <Text style={[styles.blogSummary, isMobileWeb && { fontSize: 18 }]} numberOfLines={3}>{blog.summary}</Text>
                               </View>
                               
                               <View style={styles.readMoreBtn}>

@@ -17,6 +17,7 @@ export default function HomeScreen() {
   // Otherwise, fallback to mobile/native behaviors.
   const isWeb = Platform.OS === 'web' && width >= 768;
   const isMobile = width < 768;
+  const isMobileWeb = Platform.OS === 'web' && isMobile;
 
   // Web-specific styles to enable CSS Scroll Snap
   const scrollViewStyle: any = isWeb ? {
@@ -81,13 +82,25 @@ export default function HomeScreen() {
                 animation="pulse" 
                 iterationCount="infinite" 
                 duration={4000} 
-                style={[styles.imageContainer, isMobile && { marginTop: 70 }]}
+                style={[
+                    styles.imageContainer, 
+                    isMobile && { marginTop: 70 },
+                    isMobileWeb && {
+                         boxShadow: 'none',
+                         backdropFilter: 'none',
+                         transition: 'none',
+                         shadowColor: COLORS.textHighlight,
+                         shadowOffset: { width: 0, height: 10 },
+                         shadowOpacity: 0.2,
+                         shadowRadius: 20,
+                    } as any
+                ]}
             >
               <Image
                   source={require('../assets/home-main.png')}
                   style={{
-                    width: isWeb ? 280 : (Platform.OS === 'android' ? (width < 380 ? 220 : 260) : (width < 380 ? 180 : 220)),
-                    height: isWeb ? 280 : (Platform.OS === 'android' ? (width < 380 ? 220 : 260) : (width < 380 ? 180 : 220)),
+                    width: isWeb ? 280 : ((Platform.OS === 'android' || isMobileWeb) ? (width < 380 ? 220 : 260) : (width < 380 ? 180 : 220)),
+                    height: isWeb ? 280 : ((Platform.OS === 'android' || isMobileWeb) ? (width < 380 ? 220 : 260) : (width < 380 ? 180 : 220)),
                     maxWidth: '80%'
                   }}
                   contentFit="contain"
@@ -108,7 +121,20 @@ export default function HomeScreen() {
          <View style={styles.glowTopLeft} />
          <View style={styles.glowBottomRight} />
 
-         <Animatable.View animation="fadeInUp" style={StyleSheet.flatten([styles.contentWrapper, isWeb && styles.webContentCentered, isMobile && { padding: 24 }])}>
+         <Animatable.View animation="fadeInUp" style={StyleSheet.flatten([
+             styles.contentWrapper, 
+             isWeb && styles.webContentCentered, 
+             isMobile && { padding: 24 },
+             isMobileWeb && {
+                 boxShadow: 'none',
+                 backdropFilter: 'none',
+                 transition: 'none',
+                 shadowColor: COLORS.textHighlight,
+                 shadowOffset: { width: 0, height: 10 },
+                 shadowOpacity: 0.2,
+                 shadowRadius: 20,
+             } as any
+         ])}>
             <Text style={StyleSheet.flatten([styles.sectionTitle, isWeb && { fontSize: 48 }])}>
               The <Text style={styles.highlight}>Vision</Text>
             </Text>
@@ -135,7 +161,20 @@ export default function HomeScreen() {
          <View style={styles.glowTop} />
          <View style={styles.glowBottomRight} />
 
-         <Animatable.View animation="zoomIn" style={[styles.contentWrapper, isWeb && styles.webContentCentered, isMobile && { padding: 24 }]}>
+         <Animatable.View animation="zoomIn" style={[
+             styles.contentWrapper, 
+             isWeb && styles.webContentCentered, 
+             isMobile && { padding: 24 },
+             isMobileWeb && {
+                 boxShadow: 'none',
+                 backdropFilter: 'none',
+                 transition: 'none',
+                 shadowColor: COLORS.textHighlight,
+                 shadowOffset: { width: 0, height: 10 },
+                 shadowOpacity: 0.2,
+                 shadowRadius: 20,
+             } as any
+         ]}>
             <Text style={[styles.sectionTitle, isWeb && { fontSize: 48 }]}>
               Let's <Text style={styles.highlight}>Connect</Text>
             </Text>
