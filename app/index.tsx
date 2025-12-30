@@ -264,16 +264,20 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       // backgroundColor removed
       padding: Platform.OS === 'android' ? 24 : 40,
-      borderRadius: 24,
-      borderWidth: 1,
+      borderRadius: 32,
       borderColor: COLORS.border,
+      borderWidth: 1.5,
       ...Platform.select({
           web: {
             backdropFilter: 'blur(10px)',
             boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
           } as any,
           default: {
-            // elevation removed
+            elevation: 8,
+            shadowColor: COLORS.textHighlight,
+            shadowOpacity: 0.15,
+            shadowRadius: 20,
+            shadowOffset: { width: 0, height: 8 }
           }
       })
   },

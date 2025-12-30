@@ -366,10 +366,10 @@ const styles = StyleSheet.create({
   // Card / Bio
   cardContainer: {
     backgroundColor: COLORS.cardBg,
-    borderRadius: 24,
+    borderRadius: 32,
     width: '100%',
     marginBottom: 30,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: COLORS.border,
     ...Platform.select({
         web: {
@@ -377,10 +377,11 @@ const styles = StyleSheet.create({
           boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
         } as any,
         default: {
-          elevation: 6,
+          elevation: 8,
           shadowColor: COLORS.textHighlight,
-          shadowOpacity: 0.1,
-          shadowRadius: 10
+          shadowOpacity: 0.15,
+          shadowRadius: 15,
+          shadowOffset: { width: 0, height: 8 }
         }
     })
   },

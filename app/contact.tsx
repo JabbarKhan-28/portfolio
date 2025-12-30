@@ -404,7 +404,11 @@ const styles = StyleSheet.create({
             boxShadow: '0 20px 50px rgba(0,0,0,0.4)',
         } as any,
         default: {
-            // elevation removed
+            elevation: 10,
+            shadowColor: COLORS.textHighlight,
+            shadowOffset: { width: 0, height: 10 },
+            shadowOpacity: 0.15,
+            shadowRadius: 20
         }
     })
   },

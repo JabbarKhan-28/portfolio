@@ -23,7 +23,7 @@ export default function ProjectsScreen() {
    // Calculate dynamic card width
   const numColumns = width > 1024 ? 3 : width > 768 ? 2 : 1;
   const horizontalPadding = 20;
-  const gap = 20;
+  const gap = 25;
   const itemWidth = (width - horizontalPadding * 2 - (numColumns - 1) * gap) / numColumns;
 
 
@@ -159,7 +159,7 @@ export default function ProjectsScreen() {
         showsVerticalScrollIndicator={false}
         >
         <View style={styles.headerContainer}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <View style={styles.headerRow}>
                  <View style={{ width: 40 }} /> 
                  {/* Spacer to center the title */}
 
@@ -179,7 +179,7 @@ export default function ProjectsScreen() {
                     <View style={{ width: 40 }} />
                 )}
             </View>
-            <Text style={[styles.subText, (Platform.OS === 'android' || width < 768) && { fontSize: 18 }]}>Here are a few projects I've worked on recently.</Text>
+            <Text style={styles.subText}>Here are a few projects I've worked on recently.</Text>
         </View>
 
         {loading ? (
@@ -364,6 +364,12 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       marginBottom: 40
   },
+  headerRow: { 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    width: "100%", 
+    alignItems: "center" 
+  },
   headerText: {
     fontSize: Platform.OS === 'android' ? 36 : 34,
 
@@ -384,14 +390,9 @@ const styles = StyleSheet.create({
   },
   subText: {
       color: COLORS.textSec,
-      fontSize: 16, // Base size, overridden if needed in component or leave as is if 16 is fine. 
-      // Actually, Android has 18. I should override in component. 
-      // Wait, subText is in ProjectsScreen (main component).
-      // I should update usage in ProjectsScreen (line 182).
-
-
+      fontSize: Platform.OS === 'android' ? 18 : 16,
       textAlign: 'center',
-      marginTop: 8,
+      marginTop: 10,
       maxWidth: 500,
       lineHeight: 24
   },
@@ -400,7 +401,7 @@ const styles = StyleSheet.create({
   projectsContainer: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 20, // Adjusted gap for itemWidth calculation
+      gap: 25, // Increased gap for premium feel
       justifyContent: 'center'
   },
   emptyText: {
@@ -414,23 +415,24 @@ const styles = StyleSheet.create({
   },
   card: {
       backgroundColor: COLORS.cardBg,
-      borderRadius: 24,
+      borderRadius: 32, // Increased to match Blog/Resume
       overflow: 'hidden',
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
+      borderWidth: 1.5,
+      borderColor: COLORS.border || 'rgba(255, 255, 255, 0.1)',
       width: '100%',
       ...Platform.select({
           web: {
              boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
-             backdropFilter: 'blur(8px)',
+             backdropFilter: 'blur(10px)',
              transition: 'transform 0.3s ease-in-out',
           } as any,
 
           default: {
-              elevation: 5,
+              elevation: 8,
               shadowColor: COLORS.textHighlight,
-              shadowOpacity: 0.2,
-              shadowRadius: 15
+              shadowOpacity: 0.15,
+              shadowRadius: 20,
+              shadowOffset: { width: 0, height: 10 }
           }
       })
   },
@@ -446,7 +448,7 @@ const styles = StyleSheet.create({
   },
   imageOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(26, 0, 51, 0.2)'
+    backgroundColor: 'rgba(26, 0, 51, 0.1)'
   },
   adminActions: {
       position: 'absolute',
@@ -510,22 +512,27 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       paddingVertical: 14,
       paddingHorizontal: 20,
-      borderRadius: 18,
+      borderRadius: 20,
       borderWidth: 1.5,
-      borderColor: 'rgba(56, 189, 248, 0.4)',
-      backgroundColor: 'rgba(56, 189, 248, 0.05)',
+      borderColor: 'rgba(45, 212, 191, 0.3)', // Teal outline matches Resume
+      backgroundColor: 'rgba(45, 212, 191, 0.05)',
       gap: 8,
       flex: 1
   },
   demoButton: {
       backgroundColor: COLORS.textHighlight,
       borderColor: COLORS.textHighlight,
-      borderWidth: 0
+      borderWidth: 0,
+      shadowColor: COLORS.textHighlight,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 5
   },
   buttonText: {
       color: COLORS.textHighlight,
       fontWeight: '900',
-      fontSize: 13,
+      fontSize: 14,
       textTransform: 'uppercase',
       letterSpacing: 1
   },
