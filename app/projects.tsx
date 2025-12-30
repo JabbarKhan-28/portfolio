@@ -164,7 +164,7 @@ export default function ProjectsScreen() {
                  {/* Spacer to center the title */}
 
                 <TouchableOpacity activeOpacity={1} onPress={handleSecretLogin}>
-                    <Text style={styles.headerText}>
+                    <Text style={[styles.headerText, isWeb && styles.webHeader]}>
                         My Recent <Text style={styles.purpleText}>Works</Text>
                     </Text>
                 </TouchableOpacity>
@@ -179,7 +179,7 @@ export default function ProjectsScreen() {
                     <View style={{ width: 40 }} />
                 )}
             </View>
-            <Text style={styles.subText}>Here are a few projects I've worked on recently.</Text>
+            <Text style={[styles.subText, (Platform.OS === 'android' || width < 768) && { fontSize: 18 }]}>Here are a few projects I've worked on recently.</Text>
         </View>
 
         {loading ? (
@@ -303,9 +303,9 @@ function ProjectCard({ project, onDelete, onEdit }: { project: Project, onDelete
 
 
 
-                  <Text style={styles.cardTitle}>{project.title}</Text>
+                  <Text style={[styles.cardTitle, (Platform.OS === 'android' || width < 768) && { fontSize: 26 }]}>{project.title}</Text>
                   <View style={styles.cardDivider} />
-                  <Text style={styles.cardDescription} numberOfLines={3}>{project.description}</Text>
+                  <Text style={[styles.cardDescription, (Platform.OS === 'android' || width < 768) && { fontSize: 18 }]} numberOfLines={3}>{project.description}</Text>
                   
                   <View style={styles.buttonsContainer}>
                       {project.ghLink ? (
@@ -371,9 +371,10 @@ const styles = StyleSheet.create({
       color: COLORS.textPrim,
       marginBottom: 10,
       letterSpacing: -1,
-      ...Platform.select({
-          web: { fontSize: 52 } as any
-      })
+  },
+  webHeader: {
+      fontSize: 52,
+      lineHeight: 58
   },
 
 
@@ -383,7 +384,11 @@ const styles = StyleSheet.create({
   },
   subText: {
       color: COLORS.textSec,
-      fontSize: Platform.OS === 'android' ? 18 : 16,
+      fontSize: 16, // Base size, overridden if needed in component or leave as is if 16 is fine. 
+      // Actually, Android has 18. I should override in component. 
+      // Wait, subText is in ProjectsScreen (main component).
+      // I should update usage in ProjectsScreen (line 182).
+
 
       textAlign: 'center',
       marginTop: 8,

@@ -13,7 +13,10 @@ export default function HomeScreen() {
   const router = useRouter();
   const { height, width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const isWeb = Platform.OS === 'web';
+  // Treat as "Web Desktop" only if platform is web AND screen is large enough.
+  // Otherwise, fallback to mobile/native behaviors.
+  const isWeb = Platform.OS === 'web' && width >= 768;
+  const isMobile = width < 768;
 
   // Web-specific styles to enable CSS Scroll Snap
   const scrollViewStyle: any = isWeb ? {
@@ -68,7 +71,7 @@ export default function HomeScreen() {
                   typing={1} 
                   minDelay={50} 
                   maxDelay={150} 
-                  style={styles.typeText}
+                  style={[styles.typeText, isMobile && { fontSize: 20 }]}
               >
                   Full Stack Developer | React Native Expert | UI/UX Enthusiast
               </TypeWriter>
@@ -78,7 +81,7 @@ export default function HomeScreen() {
                 animation="pulse" 
                 iterationCount="infinite" 
                 duration={4000} 
-                style={styles.imageContainer}
+                style={[styles.imageContainer, isMobile && { marginTop: 70 }]}
             >
               <Image
                   source={require('../assets/home-main.png')}
@@ -105,12 +108,12 @@ export default function HomeScreen() {
          <View style={styles.glowTopLeft} />
          <View style={styles.glowBottomRight} />
 
-         <Animatable.View animation="fadeInUp" style={StyleSheet.flatten([styles.contentWrapper, isWeb && styles.webContentCentered])}>
+         <Animatable.View animation="fadeInUp" style={StyleSheet.flatten([styles.contentWrapper, isWeb && styles.webContentCentered, isMobile && { padding: 24 }])}>
             <Text style={StyleSheet.flatten([styles.sectionTitle, isWeb && { fontSize: 48 }])}>
               The <Text style={styles.highlight}>Vision</Text>
             </Text>
             <View style={styles.divider} />
-            <Text style={StyleSheet.flatten([styles.bodyText, isWeb && styles.webBodyText])}>
+            <Text style={StyleSheet.flatten([styles.bodyText, isWeb && styles.webBodyText, isMobile && { fontSize: 18, lineHeight: 28 }])}>
                 I bridge the gap between imagination and reality by building 
                 <Text style={{color: COLORS.textHighlight, fontWeight: 'bold'}}> seamless digital experiences</Text>. 
                 Specializing in the React Native Full stack Development, I focus on performance, 
@@ -132,11 +135,11 @@ export default function HomeScreen() {
          <View style={styles.glowTop} />
          <View style={styles.glowBottomRight} />
 
-         <Animatable.View animation="zoomIn" style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
+         <Animatable.View animation="zoomIn" style={[styles.contentWrapper, isWeb && styles.webContentCentered, isMobile && { padding: 24 }]}>
             <Text style={[styles.sectionTitle, isWeb && { fontSize: 48 }]}>
               Let's <Text style={styles.highlight}>Connect</Text>
             </Text>
-            <Text style={[styles.bodyText, isWeb && styles.webBodyText]}>
+            <Text style={[styles.bodyText, isWeb && styles.webBodyText, isMobile && { fontSize: 18, lineHeight: 28 }]}>
                 Have a groundbreaking idea? Let's turn it into a reality together.
             </Text>
             

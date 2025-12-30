@@ -9,7 +9,8 @@ import * as Animatable from 'react-native-animatable';
 
 export default function AboutScreen() {
   const { height, width } = useWindowDimensions();
-  const isWeb = Platform.OS === 'web';
+  const isWeb = Platform.OS === 'web' && width >= 768;
+  const isMobile = width < 768;
 
   // Web-specific styles to enable CSS Scroll Snap
   const scrollViewStyle: any = isWeb ? {

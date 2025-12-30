@@ -5,7 +5,7 @@ import { BlurView } from 'expo-blur';
 import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
-import { LogBox, Platform, StyleSheet, View } from "react-native";
+import { LogBox, Platform, StyleSheet, View, useWindowDimensions } from "react-native";
 
 
 LogBox.ignoreLogs([
@@ -63,6 +63,7 @@ function GlassTabBar() {
 }
 
 export default function TabLayout() {
+  const { width } = useWindowDimensions();
   useEffect(() => {
     if (Platform.OS === 'web' && typeof document !== 'undefined') {
       const style = document.createElement('style');
@@ -96,8 +97,8 @@ export default function TabLayout() {
           backgroundColor: 'transparent',
           borderTopWidth: 0,
           elevation: 0,
-          height: Platform.OS === 'android' ? 80 : 60, 
-          paddingBottom: Platform.OS === 'android' ? 20 : 5,
+          height: (Platform.OS === 'android' || width < 768) ? 80 : 60, 
+          paddingBottom: (Platform.OS === 'android' || width < 768) ? 20 : 5,
         },
 
       }}

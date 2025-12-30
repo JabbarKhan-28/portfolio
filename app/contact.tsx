@@ -32,6 +32,7 @@ const EMAILJS_PUBLIC_KEY = "70UUo9eMlSEZH2fE0";
 export default function ContactScreen() {
   const router = useRouter();
   const { width } = useWindowDimensions();
+  const isWeb = Platform.OS === 'web' && width >= 768;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState(""); 
@@ -149,7 +150,7 @@ export default function ContactScreen() {
             </TouchableOpacity>
 
             <View style={styles.headerTextContainer}>
-              <Text style={styles.headerText}>
+              <Text style={[styles.headerText, isWeb && styles.webHeader]}>
                 Let's <Text style={styles.purpleText}>Design</Text> Something Amazing
               </Text>
               <View style={styles.headerDivider} />
@@ -358,11 +359,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     letterSpacing: -1,
     lineHeight: Platform.OS === 'android' ? 42 : 40,
-
-
-    ...Platform.select({
-        web: { fontSize: 52, lineHeight: 58 } as any
-    })
+  },
+  webHeader: {
+      fontSize: 52,
+      lineHeight: 58
   },
 
 
