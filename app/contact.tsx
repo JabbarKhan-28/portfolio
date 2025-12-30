@@ -319,9 +319,6 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 20 : 40,
     paddingBottom: 120,
-
-
-
     justifyContent: "center",
   },
   headerWrapper: {
@@ -333,17 +330,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
     width: '100%'
   },
-  backButton: {
-    alignSelf: "flex-start",
-    padding: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
   headerText: {
-    fontSize: Platform.OS === 'android' ? 36 : 30,
-    fontWeight: "600",
+    fontSize: Platform.OS === 'android' ? 36 : 40,
+    fontWeight: "700",
     color: COLORS.textPrim,
     textAlign: "center",
     letterSpacing: -1,
@@ -377,14 +366,15 @@ const styles = StyleSheet.create({
 
   formContainer: {
     borderRadius: 32, 
-          overflow: "hidden", 
-          borderWidth: 1.5, 
-        borderColor: COLORS.border,
-          marginBottom:10,
+    overflow: "hidden", 
+      borderWidth: 1.5, 
+    borderColor: COLORS.border,
+        alignSelf:'center',
           ...Platform.select({
               web: {
                   boxShadow: '0 10px 40px 0 rgba(0, 0, 0, 0.5)',
-                  backdropFilter: 'blur(15px)',
+              backdropFilter: 'blur(15px)',
+                  width:'60%',
                   transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
               } as any,
     

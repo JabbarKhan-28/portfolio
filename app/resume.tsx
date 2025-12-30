@@ -448,12 +448,14 @@ const styles = StyleSheet.create({
       })
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: COLORS.textHighlight,
-    marginBottom: 15,
-    textTransform: "uppercase",
-    letterSpacing: 2
+    color: COLORS.textPrim,
+    fontSize: Platform.OS === 'android' ? 14 : 13,
+    fontWeight: "800",
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    marginLeft: 15,
+    marginTop:10,
+    opacity: 0.8
   },
 
   bodyText: {
