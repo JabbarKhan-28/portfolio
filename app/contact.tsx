@@ -4,18 +4,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-    useWindowDimensions
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  useWindowDimensions
 } from "react-native";
 
 
@@ -265,6 +265,7 @@ export default function ContactScreen() {
               style={[
                 styles.submitButton,
                 isSubmitting && { opacity: 0.7 },
+                isMobileWeb && { paddingVertical: 14, gap: 8 }
               ]}
               onPress={handleSend}
               disabled={isSubmitting}
@@ -273,10 +274,10 @@ export default function ContactScreen() {
                 <ActivityIndicator color={COLORS.primaryBg} />
               ) : (
                 <>
-                  <Text style={styles.submitButtonText}>Send Message</Text>
+                  <Text style={[styles.submitButtonText, isMobileWeb && { fontSize: 18 }]}>Send Message</Text>
                   <Ionicons
                     name="send"
-                    size={20}
+                    size={isMobileWeb ? 18 : 20}
                     color={COLORS.primaryBg}
                   />
                 </>
@@ -459,7 +460,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     marginLeft: 15,
-    marginTop:10,
+    marginBottom: 6, // Added explicit bottom margin instead of top for better flow
     opacity: 0.8
   },
 
@@ -473,7 +474,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: COLORS.border,
-    minHeight: 60
+    minHeight: Platform.OS === 'android' ? 56 : 60 // Slightly more compact on Android
   },
   inputFocused: {
     borderColor: COLORS.textHighlight,
