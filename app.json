@@ -1,11 +1,10 @@
 {
   "expo": {
-    "name": "Jabbar Khan",
+    "name": "",
     "slug": "jabbarKhan",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/jk.jpeg",
-    "scheme": "jabbarkhan",
     "userInterfaceStyle": "automatic",
     "backgroundColor": "#000000",
     "splash": {
