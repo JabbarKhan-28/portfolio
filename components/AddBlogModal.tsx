@@ -2,6 +2,7 @@ import CustomAlertModal, { AlertType } from '@/components/CustomAlertModal';
 import { URL_REGEX } from '@/constants/regex';
 import { COLORS } from '@/constants/theme';
 import { db } from '@/firebaseConfig';
+import { pickAndUploadToCloudinary } from '@/services/cloudinary';
 import { Ionicons } from '@expo/vector-icons';
 import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
@@ -175,16 +176,33 @@ export default function AddBlogModal({ visible, onClose, onSuccess, blogToEdit }
 
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>PDF Document Link</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="https://example.com/my-blog.pdf"
-                                placeholderTextColor={COLORS.textSec}
-                                value={pdfUrl}
-                                onChangeText={setPdfUrl}
-                                autoCapitalize="none"
-                                keyboardType="url"
-                                autoCorrect={false}
-                            />
+                            <View style={styles.urlInputContainer}>
+                                <TextInput
+                                    style={[styles.input, { flex: 1 }]}
+                                    placeholder="https://example.com/my-blog.pdf"
+                                    placeholderTextColor={COLORS.textSec}
+                                    value={pdfUrl}
+                                    onChangeText={setPdfUrl}
+                                    autoCapitalize="none"
+                                    keyboardType="url"
+                                    autoCorrect={false}
+                                />
+                                <TouchableOpacity 
+                                    style={styles.uploadBtn}
+                                    onPress={async () => {
+                                        try {
+                                            const result = await pickAndUploadToCloudinary();
+                                            if (result) {
+                                                setPdfUrl(result.url);
+                                            }
+                                        } catch (e: any) {
+                                            showAlert('error', 'Upload Error', e.message);
+                                        }
+                                    }}
+                                >
+                                    <Ionicons name="cloud-upload-outline" size={20} color="#FFF" />
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
                         <TouchableOpacity
@@ -247,7 +265,7 @@ const styles = StyleSheet.create({
         borderBottomColor: COLORS.border 
     },
     title: { fontSize: 22, fontWeight: 'bold', color: COLORS.textPrim },
-    highlight: { color: COLORS.purple },
+    highlight: { color: COLORS.textHighlight },
     form: { padding: 20, gap: 16 },
     inputGroup: { gap: 8 },
     label: { color: COLORS.textSec, fontSize: 13, marginLeft: 4, fontWeight: '600' },
@@ -262,7 +280,7 @@ const styles = StyleSheet.create({
     },
     textArea: { height: 100 },
     submitButton: { 
-        backgroundColor: COLORS.purple, 
+        backgroundColor: COLORS.textHighlight, 
         paddingVertical: 14, 
         borderRadius: 12, 
         alignItems: 'center', 
@@ -270,4 +288,19 @@ const styles = StyleSheet.create({
         elevation: 2
     },
     submitButtonText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
+    urlInputContainer: {
+        flexDirection: 'row',
+        gap: 10,
+        alignItems: 'center'
+    },
+    uploadBtn: {
+        backgroundColor: COLORS.textHighlight,
+        width: 50,
+        height: 50,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: COLORS.border
+    }
 });

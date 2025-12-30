@@ -20,7 +20,8 @@ if (typeof console !== 'undefined') {
     const msg = args[0];
     if (typeof msg === 'string' && (
       msg.includes("props.pointerEvents is deprecated") || 
-      msg.includes("Shadow props have been deprecated")
+      msg.includes("Shadow props have been deprecated") ||
+      msg.includes('"shadow*" style props are deprecated')
     )) {
       return;
     }
@@ -122,11 +123,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="blog"
+        name="resume"
         options={{
-          title: "Blogs",
+          title: "Resume",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="book-outline" size={24} color={color} />
+            <Ionicons name="document-text-outline" size={24} color={color} />
           ),
         }}
       />
@@ -140,11 +141,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="resume"
+        name="blog"
         options={{
-          title: "Resume",
+          title: "Blogs",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="document-text-outline" size={24} color={color} />
+            <Ionicons name="book-outline" size={24} color={color} />
           ),
         }}
       />
@@ -159,6 +160,12 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="login"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="resume-viewer"
         options={{
           href: null,
         }}

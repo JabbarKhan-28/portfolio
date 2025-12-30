@@ -1,5 +1,6 @@
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import React from "react";
 import {
@@ -12,43 +13,40 @@ import {
   View,
   useWindowDimensions
 } from "react-native";
-
-
 import * as Animatable from 'react-native-animatable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-/* ------------------ GOOGLE DRIVE LINKS ------------------ */
-const GOOGLE_DRIVE_ID = "1Abh6vZLuBVRvN0OoOEIeVxAKhpy14ALD";
-const RESUME_DOWNLOAD_URL = `https://drive.google.com/uc?export=download&id=${GOOGLE_DRIVE_ID}`;
-const RESUME_PREVIEW_URL = `https://drive.google.com/file/d/${GOOGLE_DRIVE_ID}/preview`;
+/* ------------------ RESUME LINKS ------------------ */
+// Replace this with your actual Cloudinary PDF URL
+const RESUME_URL = "https://res.cloudinary.com/duskoy255/image/upload/v1767098976/j85ez7ptvtoilacagggh.pdf"; 
 
+// For downloading (Cloudinary forces download with fl_attachment usually, or just use the direct link)
+const RESUME_DOWNLOAD_URL = RESUME_URL.replace("/upload/", "/upload/fl_attachment/");
+const RESUME_PREVIEW_URL = RESUME_URL;
 
 export default function ResumeScreen() {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const isDesktopWeb = Platform.OS === "web" && width >= 768;
   const isMobileWeb = Platform.OS === "web" && width < 768;
   const isAndroidOrMobileWeb = Platform.OS === 'android' || isMobileWeb;
   
-  const [showPdf, setShowPdf] = React.useState(false);
-
   /* ------------------ MOBILE DOWNLOAD HANDLER ------------------ */
   const handleDownloadMobile = async () => {
     try {
-      // Use WebBrowser for reliable download/viewing on Android
       await WebBrowser.openBrowserAsync(RESUME_DOWNLOAD_URL);
     } catch (error) {
-       // Fallback
        Linking.openURL(RESUME_DOWNLOAD_URL);
     }
   };
 
   /* ------------------ VIEW PDF HANDLER ------------------ */
-  const handleViewPdf = () => {
-      if (isDesktopWeb) {
-          setShowPdf(!showPdf);
-      } else {
-          // On Native, open in browser/drive app
+  const handleViewPdf = async () => {
+      // Open Cloudinary URL directly in browser (In-App Browser or System Browser)
+      try {
+          await WebBrowser.openBrowserAsync(RESUME_PREVIEW_URL);
+      } catch (error) {
           Linking.openURL(RESUME_PREVIEW_URL);
       }
   };
@@ -109,7 +107,6 @@ export default function ResumeScreen() {
                 styles.viewPdfBtn, 
                 width < 450 && { width: '100%', justifyContent: 'center' },
                 isMobileWeb && {
-                    // Mobile Web overrides - match Android
                     borderWidth: 2,
                     backdropFilter: 'none',
                     backgroundColor: 'rgba(45, 212, 191, 0.05)',
@@ -119,10 +116,10 @@ export default function ResumeScreen() {
         >
 
             <Text style={styles.viewPdfBtnText}>
-                {isDesktopWeb && showPdf ? "View Digital" : "View PDF"}
+                View Resume
             </Text>
             <Ionicons
-                name={isDesktopWeb && showPdf ? "document-text" : "eye"}
+                name="eye"
                 size={22}
                 color={COLORS.accent}
             />
@@ -159,30 +156,10 @@ export default function ResumeScreen() {
                 { flex: 0, paddingHorizontal: width < 400 ? 15 : 20 }
             ])}
         >
+                {/* --- DIGITAL RESUME --- */}
+                {renderHeader()}
 
-
-            {showPdf ? (
-                /* --- PDF VIEW --- */
-                <>
-                    {renderHeader()}
-                    <View style={styles.pdfContainer}>
-                        <iframe
-                            src={RESUME_PREVIEW_URL}
-                            title="Resume PDF"
-                            style={{
-                                width: "100%",
-                                height: "100%",
-                                border: "none",
-                            }}
-                        />
-                    </View>
-                </>
-            ) : (
-                /* --- DIGITAL RESUME --- */
-                <>
-                    {renderHeader()}
-
-                    {/* SUMMARY */}
+                {/* SUMMARY */}
                     <View style={[
                         styles.section, 
                         { padding: width < 450 ? 24 : 35 },
@@ -286,8 +263,6 @@ export default function ResumeScreen() {
                         ))}
                       </View>
                     </View>
-                </>
-            )}
         </Animatable.View>
       </ScrollView>
     </View>

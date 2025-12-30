@@ -21,17 +21,16 @@ import {
 
 import * as Animatable from "react-native-animatable";
 
-import emailjs from '@emailjs/browser';
 
 // ---------------- EMAILJS VALIDATION ----------------
 // PLEASE FILL THESE WITH YOUR EMAILJS CREDENTIALS
-const EMAILJS_SERVICE_ID = "service_ytxjbl4";
-const EMAILJS_TEMPLATE_ID = "template_u7hpd38";
-const EMAILJS_PUBLIC_KEY = "70UUo9eMlSEZH2fE0";
+const EMAILJS_SERVICE_ID = "service_gztexce";
+const EMAILJS_TEMPLATE_ID = "template_6lso8jt";
+const EMAILJS_PUBLIC_KEY = "dSHPV33xQCKrdh2sg";
 
 export default function ContactScreen() {
   const router = useRouter();
-  const { width } = useWindowDimensions();
+  const { width } = useWindowDimensions();  
   const isWeb = Platform.OS === 'web' && width >= 768; // Desktop Web
   const isMobileWeb = Platform.OS === 'web' && width < 768;
 
@@ -81,26 +80,36 @@ export default function ContactScreen() {
       return;
     }
 
-
-
     setIsSubmitting(true);
 
     try {
-      const templateParams = {
-          name, // Matches {{name}} in your template
-          email, // Matches {{email}} in your template
+      const data = {
+        service_id: EMAILJS_SERVICE_ID,
+        template_id: EMAILJS_TEMPLATE_ID,
+        user_id: EMAILJS_PUBLIC_KEY,
+        template_params: {
+          name,
+          email,
           from_name: name,
           from_email: email,
           message,
           to_name: "Jabbar Khan"
+        },
       };
 
-      await emailjs.send(
-          EMAILJS_SERVICE_ID,
-          EMAILJS_TEMPLATE_ID,
-          templateParams,
-          EMAILJS_PUBLIC_KEY
-      );
+      // Using fetch directly is often more reliable in React Native than the browser SDK
+      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`Status: ${response.status} - ${text}`);
+      }
 
       showStatus(
         "success",
@@ -113,7 +122,7 @@ export default function ContactScreen() {
 
     } catch (error: any) {
       console.error("EmailJS Error:", error);
-      const errorMessage = error?.text || error?.message || "Could not send message. Please check your connection.";
+      const errorMessage = error?.message || "Could not send message. Please check your connection.";
       showStatus(
         "error",
         "Sending Failed",
@@ -161,7 +170,7 @@ export default function ContactScreen() {
             duration={800} 
             style={[
                 styles.formContainer, 
-                { padding: width < 450 ? 20 : 40 },
+                { padding: width < 450 ? 15 : 40 }, // Reduced mobile padding
                 isMobileWeb && {
                     width: '100%', // Reset the 60% width from Web Desktop
                     boxShadow: 'none',
@@ -265,7 +274,7 @@ export default function ContactScreen() {
               style={[
                 styles.submitButton,
                 isSubmitting && { opacity: 0.7 },
-                isMobileWeb && { paddingVertical: 14, gap: 8 }
+                (isMobileWeb || Platform.OS === 'android') && { paddingVertical: 12, gap: 6 }
               ]}
               onPress={handleSend}
               disabled={isSubmitting}
@@ -274,10 +283,10 @@ export default function ContactScreen() {
                 <ActivityIndicator color={COLORS.primaryBg} />
               ) : (
                 <>
-                  <Text style={[styles.submitButtonText, isMobileWeb && { fontSize: 18 }]}>Send Message</Text>
+                  <Text style={[styles.submitButtonText, (isMobileWeb || Platform.OS === 'android') && { fontSize: 16 }]}>Send Message</Text>
                   <Ionicons
                     name="send"
-                    size={isMobileWeb ? 18 : 20}
+                    size={(isMobileWeb || Platform.OS === 'android') ? 16 : 20}
                     color={COLORS.primaryBg}
                   />
                 </>
@@ -379,7 +388,8 @@ const styles = StyleSheet.create({
   },
   container: {
     flexGrow: 1,
-    padding: 24,
+    paddingHorizontal: Platform.OS === 'android' ? 15 : 24, // Wider on Android
+    paddingVertical: 24,
     paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 20 : 40,
     paddingBottom: 120,
     justifyContent: "center",
@@ -430,22 +440,23 @@ const styles = StyleSheet.create({
   formContainer: {
     borderRadius: 32, 
     overflow: "hidden", 
-      borderWidth: 1.5, 
+    borderWidth: 1.5, 
     borderColor: COLORS.border,
-        alignSelf:'center',
+    alignSelf:'center',
           ...Platform.select({
               web: {
                   boxShadow: '0 10px 40px 0 rgba(0, 0, 0, 0.5)',
-              backdropFilter: 'blur(15px)',
+                  backdropFilter: 'blur(15px)',
                   width:'60%',
                   transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
               } as any,
     
               default: {
+                  width: '100%', 
                   // elevation removed
                   shadowColor: COLORS.textHighlight,
                   shadowOffset: { width: 0, height: 10 },
-                  shadowOpacity: 0.2,
+                  shadowOpacity: 0.2, // Match Projects
                   shadowRadius: 20,
               }
           })
@@ -460,7 +471,8 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     marginLeft: 15,
-    marginBottom: 6, // Added explicit bottom margin instead of top for better flow
+    marginTop: 15, // Pushing labels down
+    marginBottom: 6, 
     opacity: 0.8
   },
 
@@ -469,12 +481,12 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.darkBg,
+    backgroundColor: COLORS.darkBg, // Reverted to darkBg for contrast on transparent card
     paddingHorizontal: 15,
     borderRadius: 16,
-    borderWidth: 1.5,
+    borderWidth: 1.5, // Reverted to 1.5
     borderColor: COLORS.border,
-    minHeight: Platform.OS === 'android' ? 56 : 60 // Slightly more compact on Android
+    minHeight: Platform.OS === 'android' ? 56 : 60
   },
   inputFocused: {
     borderColor: COLORS.textHighlight,

@@ -2,6 +2,7 @@ import CustomAlertModal, { AlertType } from '@/components/CustomAlertModal';
 import { URL_REGEX } from '@/constants/regex';
 import { COLORS } from '@/constants/theme';
 import { db } from '@/firebaseConfig';
+import { pickAndUploadToCloudinary } from '@/services/cloudinary';
 import { Ionicons } from '@expo/vector-icons';
 import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
@@ -187,15 +188,32 @@ export default function AddProjectModal({ visible, onClose, onSuccess, projectTo
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Image URL (Optional)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="https://example.com/image.png"
-                placeholderTextColor={COLORS.textSec}
-                value={imageUrl}
-                onChangeText={setImageUrl}
-                autoCapitalize="none"
-                keyboardType="url"
-              />
+              <View style={styles.urlInputContainer}>
+                  <TextInput
+                    style={[styles.input, { flex: 1 }]}
+                    placeholder="https://example.com/image.png"
+                    placeholderTextColor={COLORS.textSec}
+                    value={imageUrl}
+                    onChangeText={setImageUrl}
+                    autoCapitalize="none"
+                    keyboardType="url"
+                  />
+                  <TouchableOpacity 
+                    style={styles.uploadBtn}
+                    onPress={async () => {
+                        try {
+                            const result = await pickAndUploadToCloudinary();
+                            if (result) {
+                                setImageUrl(result.url);
+                            }
+                        } catch (e: any) {
+                            showAlert('error', 'Upload Error', e.message);
+                        }
+                    }}
+                  >
+                    <Ionicons name="cloud-upload-outline" size={24} color="#FFF" />
+                  </TouchableOpacity>
+              </View>
             </View>
 
             <View style={styles.inputGroup}>
@@ -275,7 +293,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: COLORS.border,
     backgroundColor: COLORS.primaryBg,
   },
   title: {
@@ -284,7 +302,7 @@ const styles = StyleSheet.create({
     color: COLORS.textPrim,
   },
   highlight: {
-    color: COLORS.purple,
+    color: COLORS.textHighlight,
   },
   form: {
     padding: 20,
@@ -311,7 +329,7 @@ const styles = StyleSheet.create({
     height: 100,
   },
   submitButton: {
-    backgroundColor: COLORS.darkPurple,
+    backgroundColor: COLORS.textHighlight,
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 12,
@@ -320,8 +338,23 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   submitButtonText: {
-    color: COLORS.primaryBg,
+    color: '#FFF',
     fontSize: 18,
     fontWeight: 'bold',
   },
+  urlInputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10
+  },
+  uploadBtn: {
+      backgroundColor: COLORS.textHighlight,
+      borderRadius: 12,
+      width: 50,
+      height: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.1)'
+  }
 });

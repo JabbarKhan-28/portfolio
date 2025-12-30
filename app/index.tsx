@@ -139,12 +139,23 @@ export default function HomeScreen() {
               The <Text style={styles.highlight}>Vision</Text>
             </Text>
             <View style={styles.divider} />
-            <Text style={StyleSheet.flatten([styles.bodyText, isWeb && styles.webBodyText, isMobile && { fontSize: 18, lineHeight: 28 }])}>
-                I bridge the gap between imagination and reality by building 
-                <Text style={{color: COLORS.textHighlight, fontWeight: 'bold'}}> seamless digital experiences</Text>. 
-                Specializing in the React Native Full stack Development, I focus on performance, 
-                scalability, and user-centric design.
-            </Text>
+            <Text
+  style={StyleSheet.flatten([
+    styles.bodyText,
+    isWeb && styles.webBodyText,
+    isMobile && { fontSize: 18, lineHeight: 28 }
+  ])}
+>
+  I transform concepts into powerful digital products by crafting
+  <Text style={{ color: COLORS.textHighlight, fontWeight: 'bold' }}>
+    {" "}seamless, intuitive, and high-performance solutions
+  </Text>
+  . As a React Native Full-Stack Developer, I blend creativity with
+  technical precision to build scalable architectures, optimized user
+  experiences, and modern applications that bridge imagination with
+  real-world impact.
+</Text>
+
             <Link href="/about" asChild>
                 <TouchableOpacity style={styles.secondaryButton}>
                     <Text style={styles.secondaryButtonText}>Discover My Journey</Text>
