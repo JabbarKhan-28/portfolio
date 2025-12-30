@@ -4,18 +4,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-    useWindowDimensions
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  useWindowDimensions
 } from "react-native";
 
 
@@ -138,17 +138,6 @@ export default function ContactScreen() {
         >
           {/* HEADER */}
           <View style={styles.headerWrapper}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              style={styles.backButton}
-            >
-              <Ionicons
-                name="arrow-back"
-                size={24}
-                color={COLORS.textPrim}
-              />
-            </TouchableOpacity>
-
             <View style={styles.headerTextContainer}>
               <Text style={[styles.headerText, isWeb && styles.webHeader]}>
                 Let's <Text style={styles.purpleText}>Design</Text> Something Amazing
@@ -353,8 +342,8 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   headerText: {
-    fontSize: Platform.OS === 'android' ? 36 : 34,
-    fontWeight: "900",
+    fontSize: Platform.OS === 'android' ? 36 : 30,
+    fontWeight: "600",
     color: COLORS.textPrim,
     textAlign: "center",
     letterSpacing: -1,
@@ -387,30 +376,26 @@ const styles = StyleSheet.create({
 
 
   formContainer: {
-    width: "100%",
-    alignSelf: "center",
-    maxWidth: 600,
-    borderRadius: 32,
-    // backgroundColor removed
-    padding: 40,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    gap: 30,
-
-
-    ...Platform.select({
-        web: { 
-            backdropFilter: 'blur(15px)',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.4)',
-        } as any,
-        default: {
-            elevation: 10,
-            shadowColor: COLORS.textHighlight,
-            shadowOffset: { width: 0, height: 10 },
-            shadowOpacity: 0.15,
-            shadowRadius: 20
-        }
-    })
+    borderRadius: 32, 
+          overflow: "hidden", 
+          borderWidth: 1.5, 
+        borderColor: COLORS.border,
+          marginBottom:10,
+          ...Platform.select({
+              web: {
+                  boxShadow: '0 10px 40px 0 rgba(0, 0, 0, 0.5)',
+                  backdropFilter: 'blur(15px)',
+                  transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+              } as any,
+    
+              default: {
+                  // elevation removed
+                  shadowColor: COLORS.textHighlight,
+                  shadowOffset: { width: 0, height: 10 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 20,
+              }
+          })
   },
   inputGroup: {
     gap: 12,
@@ -421,7 +406,8 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: 1.5,
     textTransform: 'uppercase',
-    marginLeft: 4,
+    marginLeft: 15,
+    marginTop:10,
     opacity: 0.8
   },
 

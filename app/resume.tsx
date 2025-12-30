@@ -305,8 +305,9 @@ const styles = StyleSheet.create({
     fontSize: Platform.OS === 'android' ? 36 : 34,
     fontWeight: "900",
     color: COLORS.textPrim,
+    textAlign: "center",
     letterSpacing: -1,
-    textAlign: 'center'
+    lineHeight: Platform.OS === 'android' ? 42 : 40,
   },
 
 
@@ -425,27 +426,26 @@ const styles = StyleSheet.create({
   },
 
   section: {
-    width: '100%',
-    marginBottom: 25,
-    backgroundColor: COLORS.cardBg,
-    borderRadius: 32,
-    borderWidth: 1,
+   borderRadius: 32, 
+      overflow: "hidden", 
+      borderWidth: 1.5, 
     borderColor: COLORS.border,
+      marginBottom:10,
+      ...Platform.select({
+          web: {
+              boxShadow: '0 10px 40px 0 rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(15px)',
+              transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          } as any,
 
-
-
-    ...Platform.select({
-        web: {
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)'
-        } as any,
-    default: {
-          elevation: 8,
-          shadowColor: COLORS.textHighlight,
-          shadowOpacity: 0.2,
-          shadowRadius: 15
-        }
-    })
+          default: {
+              // elevation removed
+              shadowColor: COLORS.textHighlight,
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.2,
+              shadowRadius: 20,
+          }
+      })
   },
   sectionTitle: {
     fontSize: 18,

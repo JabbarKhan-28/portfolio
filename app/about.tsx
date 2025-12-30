@@ -365,25 +365,26 @@ const styles = StyleSheet.create({
 
   // Card / Bio
   cardContainer: {
-    backgroundColor: COLORS.cardBg,
-    borderRadius: 32,
-    width: '100%',
-    marginBottom: 30,
-    borderWidth: 1.5,
-    borderColor: COLORS.border,
-    ...Platform.select({
-        web: {
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
-        } as any,
-        default: {
-          elevation: 8,
-          shadowColor: COLORS.textHighlight,
-          shadowOpacity: 0.15,
-          shadowRadius: 15,
-          shadowOffset: { width: 0, height: 8 }
-        }
-    })
+    borderRadius: 32, 
+      overflow: "hidden", 
+    borderWidth: 1.5, 
+      marginTop:20,
+      borderColor: COLORS.border,
+      ...Platform.select({
+          web: {
+              boxShadow: '0 10px 40px 0 rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(15px)',
+              transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          } as any,
+
+          default: {
+              // elevation removed
+              shadowColor: COLORS.textHighlight,
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.2,
+              shadowRadius: 20,
+          }
+      })
   },
   highlightText: {
     color: COLORS.textHighlight,

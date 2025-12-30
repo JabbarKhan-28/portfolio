@@ -368,18 +368,14 @@ const styles = StyleSheet.create({
     width: "100%", 
     alignItems: "center" 
   },
-  headerText: { 
-    fontSize: Platform.OS === 'android' ? 36 : 34, 
-    fontWeight: "900", 
-    color: COLORS.textPrim,
-    letterSpacing: -1,
-    ...Platform.select({
-        web: { fontSize: 52 } as any
-    })
-  },
-
-
-
+  headerText: {
+     fontSize: Platform.OS === 'android' ? 36 : 34,
+     fontWeight: "900",
+     color: COLORS.textPrim,
+     textAlign: "center",
+     letterSpacing: -1,
+     lineHeight: Platform.OS === 'android' ? 42 : 40,
+   },
   purpleText: { 
     color: COLORS.textHighlight 
   },

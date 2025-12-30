@@ -143,36 +143,29 @@ export default function HomeScreen() {
                 Have a groundbreaking idea? Let's turn it into a reality together.
             </Text>
             
-            <View style={StyleSheet.flatten([
-              styles.contactLinks, 
-              isWeb && { width: 'auto', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
-              width < 400 && { flexDirection: 'column', width: '100%' }
-            ])}>
+          <View style={styles.contactLinks}>
 
                 <Link href="/contact" asChild>
-                    <TouchableOpacity style={StyleSheet.flatten([styles.primaryButton, width < 450 && { width: '100%' }])}>
+                    <TouchableOpacity style={StyleSheet.flatten([styles.primaryButton])}>
 
                         <Ionicons name="mail" size={24} color={COLORS.primaryBg} />
-                        <Text style={styles.primaryButtonText}>Email Me</Text>
 
                     </TouchableOpacity>
                 </Link>
 
                 <TouchableOpacity 
-                  style={StyleSheet.flatten([styles.primaryButton, width < 450 && { width: '100%' }])} 
+                  style={StyleSheet.flatten([styles.primaryButton,])} 
                   onPress={() => Linking.openURL('https://github.com/JabbarKhan-28')}
                 >
                     <Ionicons name="logo-github" size={24} color={COLORS.primaryBg} />
-                    <Text style={styles.primaryButtonText}>Github</Text>
 
                 </TouchableOpacity>
 
                 <TouchableOpacity 
-                  style={StyleSheet.flatten([styles.primaryButton, width < 450 && { width: '100%' }])} 
+                  style={StyleSheet.flatten([styles.primaryButton])} 
                   onPress={() => Linking.openURL('https://www.linkedin.com/in/jabbar-khan-824868366/')}
                 >
                     <Ionicons name="logo-linkedin" size={24} color={COLORS.primaryBg} />
-                    <Text style={styles.primaryButtonText}>LinkedIn</Text>
 
                 </TouchableOpacity>
 
@@ -259,25 +252,23 @@ const styles = StyleSheet.create({
       alignItems: 'center'
   },
   contentWrapper: {
-      width: '100%',
-      maxWidth: 600,
-      alignItems: 'center',
-      // backgroundColor removed
-      padding: Platform.OS === 'android' ? 24 : 40,
-      borderRadius: 32,
+      borderRadius: 32, 
+      overflow: "hidden", 
+      borderWidth: 1.5, 
       borderColor: COLORS.border,
-      borderWidth: 1.5,
       ...Platform.select({
           web: {
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+              boxShadow: '0 10px 40px 0 rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(15px)',
+              transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
           } as any,
+
           default: {
-            elevation: 8,
-            shadowColor: COLORS.textHighlight,
-            shadowOpacity: 0.15,
-            shadowRadius: 20,
-            shadowOffset: { width: 0, height: 8 }
+              // elevation removed
+              shadowColor: COLORS.textHighlight,
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.2,
+              shadowRadius: 20,
           }
       })
   },
@@ -286,6 +277,7 @@ const styles = StyleSheet.create({
     height: 4,
     backgroundColor: COLORS.textHighlight,
     borderRadius: 2,
+    alignSelf:'center',
     marginBottom: 20
   },
   
@@ -295,7 +287,8 @@ const styles = StyleSheet.create({
       textAlign: 'center'
   },
   webContentCentered: {
-      alignItems: 'center',
+    alignItems: 'center',
+    padding:20,
       maxWidth: 900
   },
   webHeading: {
@@ -349,11 +342,30 @@ const styles = StyleSheet.create({
   },
   
   imageContainer: {
-    marginTop: Platform.OS === 'android' ? 70 : 40,
-    marginBottom: 10,
-    alignSelf: 'center',
-    width: '100%',
-    alignItems: 'center'
+    borderRadius: 32, 
+      overflow: "hidden", 
+    borderWidth: 1.5, 
+    padding: 20,
+    justifyContent: 'center',
+    alignItem: 'ceter',
+    alignSelf:'center',
+      marginTop:20,
+      borderColor: COLORS.border,
+      ...Platform.select({
+          web: {
+              boxShadow: '0 10px 40px 0 rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(15px)',
+              transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          } as any,
+
+          default: {
+              // elevation removed
+              shadowColor: COLORS.textHighlight,
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.2,
+              shadowRadius: 20,
+          }
+      })
   },
   
   scrollIndicator: {
@@ -398,8 +410,7 @@ const styles = StyleSheet.create({
       backgroundColor: COLORS.textHighlight,
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 14,
-      paddingHorizontal: 28,
+      padding:20,
       borderRadius: 20,
       gap: 12,
       elevation: 8,
@@ -492,7 +503,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: COLORS.border
+    borderColor: COLORS.border,
+    alignSelf:'center'
   },
   
   // Contact section
@@ -502,7 +514,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       flexWrap: 'wrap',
       gap: 12,
-      width: '100%',
-      marginVertical: 15
+    marginVertical: 15,
+      
   }
 });
