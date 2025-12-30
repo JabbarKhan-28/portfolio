@@ -1,28 +1,31 @@
 import { COLORS } from "@/constants/theme";
+import { auth, db } from "@/firebaseConfig";
+import { pickAndUploadToCloudinary } from "@/services/cloudinary";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import React from "react";
 import {
+  ActivityIndicator,
   Linking,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
-  useWindowDimensions
+  useWindowDimensions,
+  View
 } from "react-native";
 import * as Animatable from 'react-native-animatable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 /* ------------------ RESUME LINKS ------------------ */
 // Replace this with your actual Cloudinary PDF URL
-const RESUME_URL = "https://res.cloudinary.com/duskoy255/image/upload/v1767098976/j85ez7ptvtoilacagggh.pdf"; 
-
 // For downloading (Cloudinary forces download with fl_attachment usually, or just use the direct link)
-const RESUME_DOWNLOAD_URL = RESUME_URL.replace("/upload/", "/upload/fl_attachment/");
-const RESUME_PREVIEW_URL = RESUME_URL;
+const DEFAULT_RESUME_URL = "https://res.cloudinary.com/duskoy255/image/upload/v1767098976/j85ez7ptvtoilacagggh.pdf"; 
+
 
 export default function ResumeScreen() {
   const { width } = useWindowDimensions();
@@ -32,12 +35,55 @@ export default function ResumeScreen() {
   const isMobileWeb = Platform.OS === "web" && width < 768;
   const isAndroidOrMobileWeb = Platform.OS === 'android' || isMobileWeb;
   
+  const [user, setUser] = React.useState<User | null>(null);
+  const [resumeUrl, setResumeUrl] = React.useState(DEFAULT_RESUME_URL);
+  const [isUploading, setIsUploading] = React.useState(false);
+
+  // Derived URLs
+  const downloadUrl = resumeUrl.replace("/upload/", "/upload/fl_attachment/");
+  const previewUrl = resumeUrl;
+  
+  // Auth Listener
+  React.useEffect(() => {
+    const unsub = onAuthStateChanged(auth, setUser);
+    return unsub;
+  }, []);
+
+  // Fetch Resume URL from DB
+  React.useEffect(() => {
+      const unsub = onSnapshot(doc(db, 'config', 'portfolio'), (snap) => {
+          if (snap.exists() && snap.data().resumeUrl) {
+              setResumeUrl(snap.data().resumeUrl);
+          }
+      });
+      return unsub;
+  }, []);
+
+  // Admin Update Resume
+  const handleUpdateResume = async () => {
+      try {
+          setIsUploading(true);
+          const result = await pickAndUploadToCloudinary();
+          if (result && result.url) {
+              // Save to Firestore
+              await setDoc(doc(db, 'config', 'portfolio'), {
+                  resumeUrl: result.url
+              }, { merge: true });
+              alert("Resume Updated Successfully!");
+          }
+      } catch (error: any) {
+          alert("Failed to upload: " + error.message);
+      } finally {
+          setIsUploading(false);
+      }
+  };
+  
   /* ------------------ MOBILE DOWNLOAD HANDLER ------------------ */
   const handleDownloadMobile = async () => {
     try {
-      await WebBrowser.openBrowserAsync(RESUME_DOWNLOAD_URL);
+      await WebBrowser.openBrowserAsync(downloadUrl);
     } catch (error) {
-       Linking.openURL(RESUME_DOWNLOAD_URL);
+       Linking.openURL(downloadUrl);
     }
   };
 
@@ -45,9 +91,9 @@ export default function ResumeScreen() {
   const handleViewPdf = async () => {
       // Open Cloudinary URL directly in browser (In-App Browser or System Browser)
       try {
-          await WebBrowser.openBrowserAsync(RESUME_PREVIEW_URL);
+          await WebBrowser.openBrowserAsync(previewUrl);
       } catch (error) {
-          Linking.openURL(RESUME_PREVIEW_URL);
+          Linking.openURL(previewUrl);
       }
   };
 
@@ -71,7 +117,7 @@ export default function ResumeScreen() {
 
         {isDesktopWeb ? (
           <a
-            href={RESUME_DOWNLOAD_URL}
+            href={downloadUrl}
             download="Jabbar_Khan_Resume.pdf"
             style={{ textDecoration: "none", width: (width < 450 ? '100%' : 'auto') as any }}
 
@@ -124,6 +170,28 @@ export default function ResumeScreen() {
                 color={COLORS.accent}
             />
         </TouchableOpacity>
+
+        {/* ADMIN UPDATE BUTTON */}
+        {user && (
+            <TouchableOpacity 
+                style={[styles.viewPdfBtn, { borderColor: COLORS.purple, backgroundColor: 'rgba(37, 99, 235, 0.1)' }]}
+                onPress={handleUpdateResume}
+                disabled={isUploading}
+            >
+                {isUploading ? <ActivityIndicator size="small" color={COLORS.purple} /> : (
+                    <>
+                        <Text style={[styles.viewPdfBtnText, { color: COLORS.purple }]}>
+                            Update
+                        </Text>
+                        <Ionicons
+                            name="cloud-upload"
+                            size={22}
+                            color={COLORS.purple}
+                        />
+                    </>
+                )}
+            </TouchableOpacity>
+        )}
       </View>
     </View>
   );
