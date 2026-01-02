@@ -324,7 +324,7 @@ export default function ResumeScreen() {
                       <Text style={styles.sectionTitle}>Core Expertise</Text>
 
                       <View style={styles.skillRow}>
-                        {["React Native", "TypeScript", "Node.js", "Firebase", "Git", "UI/UX"].map((skill, i) => (
+                        {["React Native","React", "TypeScript", "Javascript", "Firebase", "Git", "Github"].map((skill, i) => (
                           <View key={i} style={styles.skillBadge}>
                             <Text style={styles.skillBadgeText}>{skill}</Text>
                           </View>

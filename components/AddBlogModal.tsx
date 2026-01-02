@@ -13,6 +13,7 @@ import {
     Platform,
     ScrollView,
     StyleSheet,
+    Switch,
     Text,
     TextInput,
     TouchableOpacity,
@@ -25,6 +26,8 @@ export interface BlogPost {
     summary: string;
     pdfPath: string; // This is the URL
     date?: string;
+    isPrivate?: boolean;
+    views?: number;
 }
 
 interface AddBlogModalProps {
@@ -38,6 +41,7 @@ export default function AddBlogModal({ visible, onClose, onSuccess, blogToEdit }
     const [title, setTitle] = useState('');
     const [summary, setSummary] = useState('');
     const [pdfUrl, setPdfUrl] = useState('');
+    const [isPrivate, setIsPrivate] = useState(false);
     const [loading, setLoading] = useState(false);
 
     // Alert State
@@ -61,10 +65,12 @@ export default function AddBlogModal({ visible, onClose, onSuccess, blogToEdit }
                 setTitle(blogToEdit.title || '');
                 setSummary(blogToEdit.summary || '');
                 setPdfUrl(blogToEdit.pdfPath || '');
+                setIsPrivate(blogToEdit.isPrivate || false);
             } else {
                 setTitle('');
                 setSummary('');
                 setPdfUrl('');
+                setIsPrivate(false);
             }
         }
     }, [visible, blogToEdit]);
@@ -102,6 +108,7 @@ export default function AddBlogModal({ visible, onClose, onSuccess, blogToEdit }
                 title: title.trim(),
                 summary: summary.trim(),
                 pdfPath: pdfUrl.trim(),
+                isPrivate: isPrivate,
                 updatedAt: serverTimestamp(),
             };
 
@@ -113,6 +120,7 @@ export default function AddBlogModal({ visible, onClose, onSuccess, blogToEdit }
                 // Create
                 await addDoc(collection(db, 'blogs'), {
                     ...blogData,
+                    views: 0,
                     date: getFormattedDate(), // Keep string date for display as per design
                     createdAt: serverTimestamp(),
                 });
@@ -203,6 +211,24 @@ export default function AddBlogModal({ visible, onClose, onSuccess, blogToEdit }
                                     <Ionicons name="cloud-upload-outline" size={20} color="#FFF" />
                                 </TouchableOpacity>
                             </View>
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <View style={[styles.header, { padding: 0, borderBottomWidth: 0 }]}>
+                                <Text style={styles.label}>Visibility: {isPrivate ? "Private" : "Public"}</Text>
+                                <Switch
+                                    trackColor={{ false: COLORS.border, true: COLORS.textHighlight }}
+                                    thumbColor={isPrivate ? "#FFF" : "#f4f3f4"}
+                                    ios_backgroundColor="#3e3e3e"
+                                    onValueChange={setIsPrivate}
+                                    value={isPrivate}
+                                />
+                            </View>
+                            <Text style={{ color: COLORS.textSec, fontSize: 12, marginTop: -10 }}>
+                                {isPrivate 
+                                    ? "Only visible to admin and via direct link." 
+                                    : "Visible to everyone on the blog list."}
+                            </Text>
                         </View>
 
                         <TouchableOpacity

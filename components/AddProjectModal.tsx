@@ -26,6 +26,7 @@ export interface Project {
   ghLink: string;
   demoLink: string;
   imageUrl?: string;
+  tags?: string[];
 }
 
 interface AddProjectModalProps {
@@ -41,6 +42,8 @@ export default function AddProjectModal({ visible, onClose, onSuccess, projectTo
   const [ghLink, setGhLink] = useState('');
   const [demoLink, setDemoLink] = useState('');
   const [imageUrl, setImageUrl] = useState(''); 
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
   const [loading, setLoading] = useState(false);
 
   /* State Reset on Open */
@@ -52,12 +55,14 @@ export default function AddProjectModal({ visible, onClose, onSuccess, projectTo
           setGhLink(projectToEdit.ghLink);
           setDemoLink(projectToEdit.demoLink);
           setImageUrl(projectToEdit.imageUrl || '');
+          setTags(projectToEdit.tags || []);
       } else {
           setTitle('');
           setDescription('');
           setGhLink('');
           setDemoLink('');
           setImageUrl('');
+          setTags([]);
       }
       setLoading(false);
     }
@@ -85,6 +90,20 @@ export default function AddProjectModal({ visible, onClose, onSuccess, projectTo
     setAlertConfig((prev) => ({ ...prev, visible: false }));
   };
 
+  const handleAddTag = () => {
+      if(!tagInput.trim()) return;
+      if (tags.length >= 5) {
+          showAlert('info', 'Tag Limit', 'You can only add up to 5 tags.');
+          return;
+      }
+      setTags([...tags, tagInput.trim()]);
+      setTagInput('');
+  };
+
+  const removeTag = (t: string) => {
+      setTags(tags.filter(tag => tag !== t));
+  };
+
   const handleSubmit = async () => {
     if (!title || !description) {
       showAlert('error', 'Missing Fields', 'Title and Description are required.');
@@ -109,6 +128,7 @@ export default function AddProjectModal({ visible, onClose, onSuccess, projectTo
               ghLink,
               demoLink,
               imageUrl,
+              tags,
               updatedAt: serverTimestamp(),
           });
       } else {
@@ -118,7 +138,9 @@ export default function AddProjectModal({ visible, onClose, onSuccess, projectTo
             description,
             ghLink,
             demoLink,
+            demoLink,
             imageUrl, 
+            tags,
             createdAt: serverTimestamp(),
           });
       }
@@ -184,6 +206,34 @@ export default function AddProjectModal({ visible, onClose, onSuccess, projectTo
                 textAlignVertical="top"
               />
 
+            </View>
+
+            <View style={styles.inputGroup}>
+                <Text style={styles.label}>Tags</Text>
+                <View style={[styles.urlInputContainer, { marginBottom: 10 }]}>
+                    <TextInput
+                        style={[styles.input, { flex: 1 }]}
+                        placeholder="Add a tag... (e.g. React Native)"
+                        placeholderTextColor={COLORS.textSec}
+                        value={tagInput}
+                        onChangeText={setTagInput}
+                        onSubmitEditing={handleAddTag}
+                    />
+                     <TouchableOpacity 
+                        style={[styles.uploadBtn, { backgroundColor: COLORS.cardBg, borderColor: COLORS.primaryBg }]}
+                        onPress={handleAddTag}
+                    >
+                        <Ionicons name="add" size={24} color={COLORS.textHighlight} />
+                    </TouchableOpacity>
+                </View>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                    {tags.map((tag, idx) => (
+                        <TouchableOpacity key={idx} onPress={() => removeTag(tag)} style={styles.tagChip}>
+                            <Text style={styles.tagText}>{tag}</Text>
+                            <Ionicons name="close-circle" size={16} color={COLORS.textPrim} />
+                        </TouchableOpacity>
+                    ))}
+                </View>
             </View>
 
             <View style={styles.inputGroup}>
@@ -356,5 +406,19 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       borderWidth: 1,
       borderColor: 'rgba(255,255,255,0.1)'
+  },
+  tagChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: COLORS.textHighlight,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 20,
+      gap: 6
+  },
+  tagText: {
+      color: COLORS.primaryBg,
+      fontWeight: 'bold',
+      fontSize: 12
   }
 });

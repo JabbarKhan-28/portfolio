@@ -1,5 +1,6 @@
 import AddBlogModal, { type BlogPost } from "@/components/AddBlogModal";
 import CustomAlertModal, { AlertType } from "@/components/CustomAlertModal";
+import NewsletterSection from "@/components/NewsletterSection";
 import { COLORS } from "@/constants/theme";
 import { auth, db } from "@/firebaseConfig";
 
@@ -9,20 +10,20 @@ import * as Linking from "expo-linking";
 import { useFocusEffect, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, deleteDoc, doc, increment, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
+    ActivityIndicator,
 
-  Platform,
-  ScrollView,
-  Share,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  useWindowDimensions,
-  View
+    Platform,
+    ScrollView,
+    Share,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    useWindowDimensions,
+    View
 } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -91,16 +92,28 @@ export default function BlogScreen() {
     }, [])
   );
 
-  const openPdfBlog = async (pdfUrl: string) => {
+  const incrementBlogView = async (id: string) => {
+      try {
+          const ref = doc(db, 'blogs', id);
+          await updateDoc(ref, {
+              views: increment(1)
+          });
+      } catch (e) {
+          console.error("View increment failed", e);
+      }
+  };
+
+  const openPdfBlog = async (blog: BlogPost) => {
     Haptics.selectionAsync();
+    incrementBlogView(blog.id);
     try {
         // Open directly in browser / system viewer
         // This handles Google Drive links much better than an in-app generic PDF viewer
-        await WebBrowser.openBrowserAsync(pdfUrl);
+        await WebBrowser.openBrowserAsync(blog.pdfPath);
     } catch (e) {
         console.error("Failed to open link", e);
         // Fallback
-        Linking.openURL(pdfUrl);
+        Linking.openURL(blog.pdfPath);
     }
   };
 
@@ -178,6 +191,10 @@ export default function BlogScreen() {
   };
 
   const filteredBlogs = blogs.filter(blog => {
+    // Visibility Check
+    // If private, only show if user is logged in (admin)
+    if (blog.isPrivate && !user) return false;
+
     const query = searchQuery.toLowerCase();
     return blog.title.toLowerCase().includes(query) || blog.summary.toLowerCase().includes(query);
   });
@@ -230,6 +247,10 @@ export default function BlogScreen() {
           </Animatable.View>
         </View>
 
+        <Animatable.View animation="fadeIn" delay={400} style={{ marginBottom: 20 }}>
+            <NewsletterSection compact />
+        </Animatable.View>
+
         {loading ? (
           <ActivityIndicator size="large" color={COLORS.purple} style={{ marginTop: 50 }} />
         ) : (
@@ -241,7 +262,7 @@ export default function BlogScreen() {
             ) : (
               filteredBlogs.map((blog, index) => (
                 <BlogCardWrapper key={blog.id} index={index}>
-                    <TouchableOpacity activeOpacity={0.9} onPress={() => openPdfBlog(blog.pdfPath)}>
+                    <TouchableOpacity activeOpacity={0.9} onPress={() => openPdfBlog(blog)}>
                       <View style={[
                           styles.blogCard,
                           isMobileWeb && {
@@ -255,7 +276,13 @@ export default function BlogScreen() {
                         } as any
                       ]}>
                           <View style={StyleSheet.flatten([styles.cardBody, { padding: width < 450 ? 20 : 30 }])}>
-                              <Text style={[styles.blogDate, isMobileWeb && { fontSize: 14 }]}>{blog.date}</Text>
+                              <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 8}}>
+                                  <Text style={[styles.blogDate, isMobileWeb && { fontSize: 14 }, {marginBottom: 0}]}>{blog.date}</Text>
+                                  {blog.isPrivate && <Ionicons name="lock-closed" size={12} color={COLORS.textHighlight} />}
+                                  <View style={{ width: 1, height: 12, backgroundColor: COLORS.textSec, opacity: 0.5, marginHorizontal: 4 }} />
+                                  <Ionicons name="eye-outline" size={12} color={COLORS.textSec} />
+                                  <Text style={{ color: COLORS.textSec, fontSize: 12, fontWeight: '600' }}>{blog.views || 0}</Text>
+                              </View>
                               <Text style={StyleSheet.flatten([styles.blogTitle, { fontSize: width < 450 ? 20 : 22, height: width < 450 ? 56 : 60 }])} numberOfLines={2}>{blog.title}</Text>
 
 

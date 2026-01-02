@@ -8,16 +8,16 @@ import * as WebBrowser from "expo-web-browser";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Linking,
-  Platform,
-  ScrollView,
-  Share,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  useWindowDimensions
+    ActivityIndicator,
+    Linking,
+    Platform,
+    ScrollView,
+    Share,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    useWindowDimensions
 } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -121,7 +121,10 @@ export default function BlogDetailScreen() {
 
 
 
-            <Text style={styles.date}>{blog.date}</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 10}}>
+                <Text style={[styles.date, {marginBottom: 0}]}>{blog.date}</Text>
+                {blog.isPrivate && <Ionicons name="lock-closed" size={16} color={COLORS.textHighlight} />}
+            </View>
             <Text style={StyleSheet.flatten([styles.title, width < 450 && { fontSize: 24 }])}>{blog.title}</Text>
             <View style={styles.divider} />
             <Text style={StyleSheet.flatten([styles.summary, width < 450 && { fontSize: 16, lineHeight: 24 }])}>{blog.summary}</Text>

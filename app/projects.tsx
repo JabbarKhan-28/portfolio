@@ -36,6 +36,19 @@ export default function ProjectsScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  
+  const [selectedTag, setSelectedTag] = useState("All");
+
+  const allTags = React.useMemo(() => {
+    const tags = new Set<string>(["All"]);
+    projects.forEach(p => p.tags?.forEach(t => tags.add(t)));
+    return Array.from(tags);
+  }, [projects]);
+
+  const filteredProjects = React.useMemo(() => {
+    if (selectedTag === "All") return projects;
+    return projects.filter(p => p.tags?.includes(selectedTag));
+  }, [projects, selectedTag]);
 
     // Custom Alert State
   const [alertConfig, setAlertConfig] = useState<{
@@ -184,16 +197,47 @@ export default function ProjectsScreen() {
                 )}
             </View>
             <Text style={[styles.subText, isMobileWeb && { fontSize: 18 }]}>Here are a few projects I've worked on recently.</Text>
+            
+            {/* Tag Filter */}
+            {!loading && projects.length > 0 && (
+                <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false} 
+                    contentContainerStyle={{ gap: 10, paddingVertical: 10, paddingHorizontal: 5 }}
+                    style={{ marginTop: 20, maxHeight: 60 }}
+                >
+                    {allTags.map(tag => (
+                        <TouchableOpacity 
+                            key={tag} 
+                            onPress={() => {
+                                Haptics.selectionAsync();
+                                setSelectedTag(tag);
+                            }}
+                            style={[
+                                styles.filterChip, 
+                                selectedTag === tag && styles.activeFilterChip
+                            ]}
+                        >
+                            <Text style={[
+                                styles.filterText,
+                                selectedTag === tag && styles.activeFilterText
+                            ]}>
+                                {tag}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
+            )}
         </View>
 
         {loading ? (
             <ActivityIndicator size="large" color={COLORS.purple} style={{ marginTop: 50 }} />
         ) : (
             <View style={styles.projectsContainer}>
-                {projects.length === 0 ? (
-                    <Text style={styles.emptyText}>No projects added yet.</Text>
+                {filteredProjects.length === 0 ? (
+                    <Text style={styles.emptyText}>No projects found for "{selectedTag}".</Text>
                 ) : (
-                    projects.map((project, index) => (
+                    filteredProjects.map((project, index) => (
                         <ProjectCardWrapper key={project.id} index={index} itemWidth={itemWidth}>
                             <ProjectCard 
                                 project={project} 
@@ -322,6 +366,17 @@ function ProjectCard({ project, onDelete, onEdit, isMobileWeb, isAndroidOrMobile
 
 
                   <Text style={[styles.cardTitle, isAndroidOrMobileWeb && { fontSize: 26 }]}>{project.title}</Text>
+                  
+                  {project.tags && project.tags.length > 0 && (
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginBottom: 12 }}>
+                          {project.tags.map(tag => (
+                              <View key={tag} style={styles.cardTag}>
+                                  <Text style={styles.cardTagText}>{tag}</Text>
+                              </View>
+                          ))}
+                      </View>
+                  )}
+
                   <View style={styles.cardDivider} />
                   <Text style={[styles.cardDescription, isAndroidOrMobileWeb && { fontSize: 18 }]} numberOfLines={3}>{project.description}</Text>
                   
@@ -482,6 +537,41 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       borderWidth: 1,
       borderColor: 'rgba(255,255,255,0.2)'
+  },
+  cardTag: {
+      backgroundColor: 'rgba(45, 212, 191, 0.1)',
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: 'rgba(45, 212, 191, 0.3)'
+  },
+  cardTagText: {
+      color: COLORS.textHighlight,
+      fontSize: 12,
+      fontWeight: 'bold'
+  },
+  filterChip: {
+      paddingHorizontal: 20,
+      paddingVertical: 8,
+      borderRadius: 20,
+      backgroundColor: COLORS.cardBg,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+      marginRight: 5
+  },
+  activeFilterChip: {
+      backgroundColor: COLORS.textHighlight,
+      borderColor: COLORS.textHighlight
+  },
+  filterText: {
+      color: COLORS.textSec,
+      fontWeight: '600',
+      fontSize: 14
+  },
+  activeFilterText: {
+      color: COLORS.primaryBg,
+      fontWeight: 'bold'
   },
   cardBody: {
       alignItems: 'center'

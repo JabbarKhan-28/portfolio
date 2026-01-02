@@ -103,13 +103,12 @@ export default function AboutScreen() {
             
             <View style={styles.skillRow}>
                 <SkillBadge name="React Native" />
+                <SkillBadge name="React" />
                 <SkillBadge name="Typescript" />
                 <SkillBadge name="Javascript" />
-                <SkillBadge name="Node.js" />
-                <SkillBadge name="Babel" />
-                <SkillBadge name="Firebase" />
-                <SkillBadge name="Vercel"/>
-                <SkillBadge name="PostgreSQL" />
+                <SkillBadge name="API Integration" />
+                <SkillBadge name="HTML" />
+                <SkillBadge name="CSS" />
                 <SkillBadge name="C++" />
                 <SkillBadge name="Python" />
             </View>
@@ -120,12 +119,14 @@ export default function AboutScreen() {
             </Text>
             <View style={styles.skillRow}>
                 <SkillBadge name="VS Code" />
-                <SkillBadge name="Postman" />
+                <SkillBadge name="Vercel"/>
+                <SkillBadge name="Firebase" />
                 <SkillBadge name="Git" />
                 <SkillBadge name="Github" />
                 <SkillBadge name="Expo" />
                 <SkillBadge name="Figma" />
-                <SkillBadge name="Adobe Illustrator" />
+                <SkillBadge name="Cloudinary" />
+                <SkillBadge name="Email JS" />
             </View>
          </View>
       </View>

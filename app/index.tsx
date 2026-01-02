@@ -69,12 +69,12 @@ export default function HomeScreen() {
             
             <View style={styles.typeContainer}>
               <TypeWriter 
-                  typing={1} 
+                  typing={2} 
                   minDelay={50} 
                   maxDelay={150} 
                   style={[styles.typeText, isMobile && { fontSize: 20 }]}
               >
-                  Full Stack Developer | React Native Expert | UI/UX Enthusiast
+                  React Native App Developer | Student
               </TypeWriter>
             </View>
 
@@ -234,6 +234,9 @@ export default function HomeScreen() {
 
          </Animatable.View>
       </View>
+
+       {/* --- NEWSLETTER SECTION --- */}
+
 
     </ScrollView>
   );
