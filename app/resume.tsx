@@ -1,3 +1,5 @@
+import BackgroundGlows from '@/components/ui/BackgroundGlows';
+import ResumeItem from '@/components/ui/ResumeItem';
 import { COLORS } from "@/constants/theme";
 import { auth, db } from "@/firebaseConfig";
 import { pickAndUploadToCloudinary } from "@/services/cloudinary";
@@ -199,8 +201,7 @@ export default function ResumeScreen() {
   return (
     <View style={styles.container}>
       {/* Background Glows */}
-      <View style={styles.glowTop} />
-      <View style={styles.glowBottom} />
+      <BackgroundGlows top bottom />
 
       <ScrollView 
         style={styles.digitalResumeScroll}
@@ -208,7 +209,7 @@ export default function ResumeScreen() {
           styles.scrollContent, 
           { 
             alignItems: 'center',
-            paddingTop: insets.top + (isDesktopWeb ? 60 : 20),
+            paddingTop: insets.top + (isDesktopWeb ? 100 : 20),
             paddingBottom: insets.bottom + 100
           }
         ])} 
@@ -337,29 +338,7 @@ export default function ResumeScreen() {
   );
 }
 
-/* ------------------ RESUME ITEM ------------------ */
-function ResumeItem({
-  role,
-  company,
-  date,
-  desc,
-}: {
-  role: string;
-  company: string;
-  date: string;
-  desc: string;
-}) {
-  return (
-    <View style={styles.resumeItem}>
-      <Text style={styles.itemRole}>{role}</Text>
-      <View style={styles.itemMeta}>
-        <Text style={styles.itemCompany}>{company}</Text>
-        <Text style={styles.itemDate}>{date}</Text>
-      </View>
-      <Text style={styles.itemDesc}>{desc}</Text>
-    </View>
-  );
-}
+// ResumeItem extracted to components/ResumeItem.tsx
 
 /* ------------------ STYLES ------------------ */
 const styles = StyleSheet.create({
@@ -367,26 +346,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.primaryBg,
   },
-  glowTop: {
-    position: 'absolute',
-    top: -100,
-    right: -100,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: COLORS.glowPurple,
-    opacity: 0.5,
-  },
-  glowBottom: {
-    position: 'absolute',
-    bottom: -100,
-    left: -100,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: COLORS.glowCyan,
-    opacity: 0.3,
-  },
+
+  // Glow styles removed - used BackgroundGlows component
   contentWrapper: {
     paddingBottom: 40,
     width: '100%',
@@ -572,49 +533,8 @@ const styles = StyleSheet.create({
     fontWeight: '800'
   },
 
-  resumeItem: {
-    marginBottom: 30,
-    width: '100%'
-  },
-  itemRole: {
-    color: COLORS.textPrim,
-    fontSize: Platform.OS === 'android' ? 22 : 22,
-    fontWeight: "800",
-    marginBottom: 5
-  },
-
-
-
-  itemMeta: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: 'center',
-    marginBottom: 12,
-    flexWrap: 'wrap',
-    gap: 10
-  },
-  itemCompany: {
-    color: COLORS.textHighlight,
-    fontWeight: "700",
-    fontSize: 16
-  },
-  itemDate: {
-    color: 'rgba(255, 255, 255, 0.6)',
-    fontSize: 13,
-    fontWeight: '600',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 8
-  },
-  itemDesc: {
-    color: COLORS.textSec,
-    fontSize: 15,
-    lineHeight: 24,
-  },
-
-
-
+  // ResumeItem styles removed - moved to component
+  
   skillRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',

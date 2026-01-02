@@ -1,5 +1,5 @@
 
-import CustomAlertModal, { AlertType } from '@/components/CustomAlertModal';
+import CustomAlertModal, { AlertType } from '@/components/modals/CustomAlertModal';
 import { EMAIL_REGEX } from '@/constants/regex';
 import { COLORS } from '@/constants/theme';
 import { db } from '@/firebaseConfig';

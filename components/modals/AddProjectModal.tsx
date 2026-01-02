@@ -1,4 +1,4 @@
-import CustomAlertModal, { AlertType } from '@/components/CustomAlertModal';
+import CustomAlertModal, { AlertType } from '@/components/modals/CustomAlertModal';
 import { URL_REGEX } from '@/constants/regex';
 import { COLORS } from '@/constants/theme';
 import { db } from '@/firebaseConfig';
@@ -137,7 +137,6 @@ export default function AddProjectModal({ visible, onClose, onSuccess, projectTo
             title,
             description,
             ghLink,
-            demoLink,
             demoLink,
             imageUrl, 
             tags,
@@ -336,6 +335,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     overflow: 'hidden',
+    ...Platform.select({
+      android: {
+        elevation: 10,
+      },
+      default: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.5,
+        shadowRadius: 20,
+      }
+    })
   },
   header: {
     flexDirection: 'row',

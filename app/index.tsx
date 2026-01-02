@@ -1,4 +1,5 @@
-import { TypeWriter } from '@/components/TypeWriter';
+import BackgroundGlows from '@/components/ui/BackgroundGlows';
+import { TypeWriter } from '@/components/ui/TypeWriter';
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from '@expo/vector-icons';
 
@@ -29,7 +30,8 @@ export default function HomeScreen() {
   const pageStyle: any = isWeb ? {
     height: height,
     minHeight: '100vh',
-    scrollSnapAlign: 'start'
+    scrollSnapAlign: 'start',
+    paddingTop: 80
   } : {
     // On native, allow flexibility but try to fit screen.
     // If content is too big, pagingEnabled might be tricky, but we'll keep standard behavior.
@@ -54,8 +56,7 @@ export default function HomeScreen() {
       <View style={StyleSheet.flatten([styles.page, pageStyle])}>
 
         {/* Abstract Background Glows */}
-        <View style={styles.glowTop} />
-        <View style={styles.glowBottom} />
+        <BackgroundGlows top bottom />
 
         <View style={[styles.heroContent, isWeb && styles.webContentRaw]}>
             <Animatable.View animation="fadeInDown" duration={1000} style={styles.header}>
@@ -118,8 +119,7 @@ export default function HomeScreen() {
       {/* --- ABOUT PREVIEW --- */}
       <View style={StyleSheet.flatten([styles.page, pageStyle])}>
          {/* Alternating Glows */}
-         <View style={styles.glowTopLeft} />
-         <View style={styles.glowBottomRight} />
+         <BackgroundGlows topLeft bottomRight />
 
          <Animatable.View animation="fadeInUp" style={StyleSheet.flatten([
              styles.contentWrapper, 
@@ -169,8 +169,7 @@ export default function HomeScreen() {
       {/* --- CONTACT SECTION --- */}
       <View style={StyleSheet.flatten([styles.page, pageStyle])}>
          {/* Alternating Glows (Mix) */}
-         <View style={styles.glowTop} />
-         <View style={styles.glowBottomRight} />
+         <BackgroundGlows top bottomRight />
 
          <Animatable.View animation="zoomIn" style={[
              styles.contentWrapper, 
@@ -259,46 +258,7 @@ const styles = StyleSheet.create({
       position: 'relative',
       overflow: 'hidden'
   },
-  glowTop: {
-    position: 'absolute',
-    top: -100,
-    right: -100,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: COLORS.glowPurple,
-    opacity: 0.5,
-  },
-  glowBottom: {
-    position: 'absolute',
-    bottom: -100,
-    left: -100,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: COLORS.glowCyan,
-    opacity: 0.3,
-  },
-  glowTopLeft: {
-    position: 'absolute',
-    top: -100,
-    left: -100,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: COLORS.glowCyan, // Varied color
-    opacity: 0.4,
-  },
-  glowBottomRight: {
-    position: 'absolute',
-    bottom: -100,
-    right: -100,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: COLORS.glowPurple, // Varied color
-    opacity: 0.4,
-  },
+  // Glow styles removed - now in BackgroundGlows.tsx
   heroContent: {
       width: '100%',
       justifyContent: 'center',
@@ -311,17 +271,21 @@ const styles = StyleSheet.create({
       borderColor: COLORS.border,
       ...Platform.select({
           web: {
-              boxShadow: '0 10px 40px 0 rgba(0, 0, 0, 0.5)',
+              boxShadow: `0 10px 40px -10px ${COLORS.textHighlight}40`, // Colored Glow
               backdropFilter: 'blur(15px)',
               transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
           } as any,
 
           default: {
-              // elevation removed
-              shadowColor: COLORS.textHighlight,
-              shadowOffset: { width: 0, height: 10 },
-              shadowOpacity: 0.2,
-              shadowRadius: 20,
+              ...Platform.select({
+                  android: { elevation: 10 },
+                  default: {
+                      shadowColor: COLORS.textHighlight,
+                      shadowOffset: { width: 0, height: 10 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 20,
+                  }
+              })
           }
       })
   },
@@ -406,17 +370,21 @@ const styles = StyleSheet.create({
       borderColor: COLORS.border,
       ...Platform.select({
           web: {
-              boxShadow: '0 10px 40px 0 rgba(0, 0, 0, 0.5)',
+              boxShadow: `0 10px 40px -10px ${COLORS.textHighlight}40`, // Colored Glow
               backdropFilter: 'blur(15px)',
               transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
           } as any,
 
           default: {
-              // elevation removed
-              shadowColor: COLORS.textHighlight,
-              shadowOffset: { width: 0, height: 10 },
-              shadowOpacity: 0.2,
-              shadowRadius: 20,
+              ...Platform.select({
+                  android: { elevation: 10 },
+                  default: {
+                      shadowColor: COLORS.textHighlight,
+                      shadowOffset: { width: 0, height: 10 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 20,
+                  }
+              })
           }
       })
   },
@@ -528,8 +496,9 @@ const styles = StyleSheet.create({
         shadowRadius: 12,
       },
       android: {
-        // Elevation removed to prevent shadow artifacts through transparent background
-        borderWidth: 2, 
+        elevation: 5,
+        backgroundColor: COLORS.primaryBg, // Needed for elevation to show
+        borderWidth: 1.5,
       }
     })
   },

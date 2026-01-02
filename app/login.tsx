@@ -1,4 +1,4 @@
-import CustomAlertModal, { AlertType } from '@/components/CustomAlertModal';
+import CustomAlertModal, { AlertType } from '@/components/modals/CustomAlertModal';
 import { COLORS } from '@/constants/theme';
 import { auth } from '@/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,16 +6,16 @@ import { router } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  useWindowDimensions
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+    useWindowDimensions
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -62,8 +62,8 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // Login successful, navigate back
-      router.back(); 
+      // Login successful, redirect to dashboard
+      router.replace('/dashboard'); 
     } catch (error: any) {
       console.error(error.code);
       let errorMessage = "An unexpected error occurred.";

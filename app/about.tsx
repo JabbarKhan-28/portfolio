@@ -1,3 +1,5 @@
+import BackgroundGlows from "@/components/ui/BackgroundGlows";
+import SkillBadge from "@/components/ui/SkillBadge";
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -23,7 +25,8 @@ export default function AboutScreen() {
   const pageStyle: any = isWeb ? {
     height: height,
     minHeight: '100vh',
-    scrollSnapAlign: 'start'
+    scrollSnapAlign: 'start',
+    paddingTop: 80
   } : {
     height: height
   };
@@ -44,7 +47,8 @@ export default function AboutScreen() {
       {/* --- PAGE 1: INTRODUCTION --- */}
       <View style={StyleSheet.flatten([styles.page, pageStyle])}>
 
-        <View style={styles.glowTop} />
+
+        <BackgroundGlows top />
         <View style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
             <Animatable.View animation="fadeInDown" style={styles.headerTextContainer}>
               <Text style={StyleSheet.flatten([styles.headerText, isWeb && styles.webHeader, isMobileWeb && { fontSize: 36, lineHeight: 42 }])}>
@@ -92,8 +96,7 @@ export default function AboutScreen() {
 
       {/* --- PAGE 2: SKILLS & TOOLS --- */}
       <View style={StyleSheet.flatten([styles.page, pageStyle])}>
-         <View style={styles.glowTopLeft} />
-         <View style={styles.glowBottomRight} />
+         <BackgroundGlows topLeft bottomRight />
 
          <View style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
             <Text style={StyleSheet.flatten([styles.headerText, isWeb && styles.webHeader, isMobileWeb && { fontSize: 36, lineHeight: 42 }])}>
@@ -136,7 +139,7 @@ export default function AboutScreen() {
       <View style={StyleSheet.flatten([styles.page, pageStyle])}>
 
          {/* Background Node Glows */}
-         <View style={StyleSheet.flatten([styles.glowBottom, { top: '30%', right: -150, opacity: 0.1 }])} />
+         <BackgroundGlows style={{ top: '30%', right: -150, opacity: 0.1 }} />
 
          
          <View style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
@@ -148,23 +151,24 @@ export default function AboutScreen() {
                 <View style={styles.divider} />
             </Animatable.View>
             
+            
             <View style={styles.timelineContainer}>
                 {/* Item 1 */}
-                <Animatable.View animation="fadeInLeft" delay={100} style={styles.timelineItem}>
+                <View style={styles.timelineItemWrapper}>
                     <View style={styles.timelineDot}>
                         <Ionicons name="briefcase" size={12} color={COLORS.primaryBg} />
                     </View>
                     <View style={[styles.timelineContent, isMobileWeb && { backdropFilter: 'none', boxShadow: 'none', borderWidth: 1.2 } as any]}>
-                        <Text style={[styles.timelineYear, isMobileWeb && { fontSize: 13 }]}>2024 - Present</Text>
-                        <Text style={[styles.timelineTitle, isMobileWeb && { fontSize: 18 }]}>Freelance Full Stack Developer</Text>
-                        <Text style={[styles.timelineDesc, isMobileWeb && { fontSize: 14 }]}>
-                            Building custom mobile apps and web solutions for clients globally. Specializing in React Native performance.
-                        </Text>
+                       <Text style={[styles.timelineYear, isMobileWeb && { fontSize: 13 }]}>2024 - Present</Text>
+                       <Text style={[styles.timelineTitle, isMobileWeb && { fontSize: 18 }]}>Freelance Full Stack Developer</Text>
+                       <Text style={[styles.timelineDesc, isMobileWeb && { fontSize: 14 }]}>
+                           Building custom mobile apps and web solutions for clients globally. Specializing in React Native performance.
+                       </Text>
                     </View>
-                </Animatable.View>
-                
+                </View>
+
                 {/* Item 2 */}
-                <Animatable.View animation="fadeInLeft" delay={300} style={styles.timelineItem}>
+                <View style={styles.timelineItemWrapper}>
                     <View style={styles.timelineDot}>
                         <Ionicons name="code-slash" size={12} color={COLORS.primaryBg} />
                     </View>
@@ -172,25 +176,24 @@ export default function AboutScreen() {
                         <Text style={[styles.timelineYear, isMobileWeb && { fontSize: 13 }]}>2023 - 2024</Text>
                         <Text style={[styles.timelineTitle, isMobileWeb && { fontSize: 18 }]}>Open Source Contributor</Text>
                         <Text style={[styles.timelineDesc, isMobileWeb && { fontSize: 14 }]}>
-                            Actively contributing to React Native libraries and developer tools. Gained deep understanding of native modules.
+                             Actively contributing to React Native libraries and developer tools. Gained deep understanding of native modules.
                         </Text>
                     </View>
-                </Animatable.View>
+                </View>
 
                 {/* Item 3 */}
-                <Animatable.View animation="fadeInLeft" delay={500} style={StyleSheet.flatten([styles.timelineItem, { borderLeftWidth: 0, paddingBottom: 0 }])}>
-
+                <View style={StyleSheet.flatten([styles.timelineItemWrapper, { borderLeftWidth: 0, paddingBottom: 0 }])}>
                     <View style={styles.timelineDot}>
                         <Ionicons name="school" size={12} color={COLORS.primaryBg} />
                     </View>
-                    <View style={[styles.timelineContent, isMobileWeb && { backdropFilter: 'none', boxShadow: 'none', borderWidth: 1.2 } as any]}>
+                     <View style={[styles.timelineContent, isMobileWeb && { backdropFilter: 'none', boxShadow: 'none', borderWidth: 1.2 } as any]}>
                         <Text style={[styles.timelineYear, isMobileWeb && { fontSize: 13 }]}>2024 - 2028 (Expected)</Text>
                         <Text style={[styles.timelineTitle, isMobileWeb && { fontSize: 18 }]}>BS Computer Science</Text>
                         <Text style={[styles.timelineDesc, isMobileWeb && { fontSize: 14 }]}>
                            Sir Syed CASE Institute of Technology. Algorithms, AI, and Software Engineering principles.
                         </Text>
                     </View>
-                </Animatable.View>
+                </View>
             </View>
          </View>
       </View>
@@ -198,7 +201,7 @@ export default function AboutScreen() {
 
       {/* --- PAGE 4: PHILOSOPHY --- */}
       <View style={StyleSheet.flatten([styles.page, pageStyle])}>
-         <View style={styles.glowTopLeft} />
+         <BackgroundGlows topLeft />
 
          <View style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
             <Text style={StyleSheet.flatten([styles.headerText, isWeb && styles.webHeader, isMobileWeb && { fontSize: 36, lineHeight: 42 }])}>
@@ -226,7 +229,7 @@ export default function AboutScreen() {
 
       {/* --- PAGE 5: QUOTE & CTA --- */}
       <View style={StyleSheet.flatten([styles.page, pageStyle])}>
-         <View style={styles.glowBottomRight} />
+         <BackgroundGlows bottomRight />
 
          <View style={[styles.contentWrapper, isWeb && styles.webContentCentered]}>
             <View style={StyleSheet.flatten([styles.quoteContainer, { padding: width < 450 ? 20 : 30 }])}>
@@ -258,22 +261,9 @@ export default function AboutScreen() {
   );
 }
 
-function SkillBadge({ name }: { name: string }) {
-    const { width } = useWindowDimensions();
-    return (
-        <View style={StyleSheet.flatten([styles.badge, { 
-          paddingVertical: width < 450 ? 8 : 12,
-          paddingHorizontal: width < 450 ? 14 : 20,
-          minWidth: width < 450 ? 80 : 100
-        }])}>
 
 
-
-
-            <Text style={styles.badgeText}>{name}</Text>
-        </View>
-    )
-}
+// Removed local SkillBadge component in favor of extracted one
 
 const styles = StyleSheet.create({
   container: {
@@ -295,46 +285,6 @@ const styles = StyleSheet.create({
       position: 'relative',
 
       overflow: 'hidden'
-  },
-  glowTop: {
-    position: 'absolute',
-    top: -100,
-    right: -100,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: COLORS.glowPurple,
-    opacity: 0.5,
-  },
-  glowBottom: {
-    position: 'absolute',
-    bottom: -100,
-    left: -100,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: COLORS.glowCyan,
-    opacity: 0.3,
-  },
-  glowTopLeft: {
-    position: 'absolute',
-    top: -100,
-    left: -100,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: COLORS.glowCyan,
-    opacity: 0.5,
-  },
-  glowBottomRight: {
-    position: 'absolute',
-    bottom: -100,
-    right: -100,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: COLORS.glowPurple,
-    opacity: 0.3,
   },
   contentWrapper: {
       width: '100%',
@@ -417,7 +367,7 @@ const styles = StyleSheet.create({
 
 
   
-  // Skills
+  // Skills - styles removed now in SkillBadge.tsx
   skillRow: {
       flexDirection: 'row',
       flexWrap: 'wrap',
@@ -426,18 +376,6 @@ const styles = StyleSheet.create({
       marginTop: 10,
       width: '100%'
   },
-  badge: {
-      backgroundColor: 'rgba(45, 212, 191, 0.1)', // Cyan tint for better visual
-      borderRadius: 14,
-      borderWidth: 1,
-      borderColor: 'rgba(45, 212, 191, 0.2)',
-      alignItems: 'center'
-  },
-  badgeText: {
-      color: COLORS.textPrim,
-      fontWeight: '700',
-      fontSize: 15
-  },
 
   // Timeline (Journey)
   timelineContainer: {
@@ -445,7 +383,7 @@ const styles = StyleSheet.create({
       paddingLeft: 10,
       marginTop: 20
   },
-  timelineItem: {
+  timelineItemWrapper: {
       marginLeft: 20,
       borderLeftWidth: 2,
       borderLeftColor: COLORS.border,

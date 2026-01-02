@@ -12,7 +12,7 @@ import {
     View,
 } from "react-native";
 
-import PdfViewer from "@/components/PdfViewer";
+import PdfViewer from "@/components/features/PdfViewer";
 
 
 export default function PdfBlogScreen() {

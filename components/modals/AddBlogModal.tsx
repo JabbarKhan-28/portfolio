@@ -1,4 +1,4 @@
-import CustomAlertModal, { AlertType } from '@/components/CustomAlertModal';
+import CustomAlertModal, { AlertType } from '@/components/modals/CustomAlertModal';
 import { URL_REGEX } from '@/constants/regex';
 import { COLORS } from '@/constants/theme';
 import { db } from '@/firebaseConfig';
@@ -21,6 +21,7 @@ import {
 } from 'react-native';
 
 export interface BlogPost {
+    createdAt: any;
     id: string;
     title: string;
     summary: string;
@@ -280,7 +281,18 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         width: '100%',
         maxWidth: 500,
-        alignSelf: 'center'
+        alignSelf: 'center',
+        ...Platform.select({
+            android: {
+                elevation: 10,
+            },
+            default: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 10 },
+                shadowOpacity: 0.5,
+                shadowRadius: 20,
+            }
+        })
     },
     header: { 
         flexDirection: 'row', 

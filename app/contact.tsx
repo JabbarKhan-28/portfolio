@@ -1,3 +1,4 @@
+import BackgroundGlows from "@/components/ui/BackgroundGlows";
 import { EMAIL_REGEX } from "@/constants/regex";
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
@@ -136,14 +137,13 @@ export default function ContactScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.primaryBg }}>
       {/* Background Glows */}
-      <View style={styles.glowTop} />
-      <View style={styles.glowBottom} />
+      <BackgroundGlows top bottom />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.keyboardView}
       >
         <ScrollView
-          contentContainerStyle={styles.container}
+          contentContainerStyle={[styles.container, isWeb && { paddingTop: 100 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -366,26 +366,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.primaryBg,
   },
-  glowTop: {
-    position: 'absolute',
-    top: -100,
-    left: -100, // Shift to Left for variety
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: COLORS.glowPurple,
-    opacity: 0.5,
-  },
-  glowBottom: {
-    position: 'absolute',
-    bottom: -100,
-    right: -100, // Shift to Right for variety
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: COLORS.glowCyan,
-    opacity: 0.3,
-  },
+
+
+  // Glows removed - used BackgroundGlows component
   container: {
     flexGrow: 1,
     paddingHorizontal: Platform.OS === 'android' ? 15 : 24, // Wider on Android

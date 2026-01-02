@@ -1,19 +1,22 @@
+import CustomDrawerContent from '@/components/layout/CustomDrawerContent';
+import WebHeader from '@/components/layout/WebHeader';
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { Analytics } from "@vercel/analytics/react";
-import { BlurView } from 'expo-blur';
-import { Tabs } from "expo-router";
+import * as NavigationBar from 'expo-navigation-bar';
+import { Drawer } from "expo-router/drawer";
 import { StatusBar } from "expo-status-bar";
+import * as SystemUI from 'expo-system-ui';
 import React, { useEffect } from "react";
-import { LogBox, Platform, StyleSheet, View, useWindowDimensions } from "react-native";
-
+import { LogBox, Platform, useWindowDimensions } from "react-native";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 LogBox.ignoreLogs([
   "props.pointerEvents is deprecated",
   "Shadow props have been deprecated",
 ]);
 
-// Polyfill/Hack to silence the terminal warnings during web build (SSR)
+// Polyfill for Web Warnings
 if (typeof console !== 'undefined') {
   const originalWarn = console.warn;
   console.warn = (...args) => {
@@ -29,42 +32,10 @@ if (typeof console !== 'undefined') {
   };
 }
 
-function GlassTabBar() {
-  if (Platform.OS === 'web') {
-    return (
-      <View style={{
-        flex: 1,
-        backgroundColor: `${COLORS.primaryBg}CC`, // Semi-transparent using theme color
-        backdropFilter: 'blur(25px)', 
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderTopWidth: 1,
-        borderColor: COLORS.border
-      } as any} />
-    );
-  }
-
-  // Native Blur
-  return (
-    <BlurView 
-      intensity={80} 
-      tint="dark" 
-      style={{
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: `${COLORS.primaryBg}F2`, // Slightly more opaque for better legibility on Android
-        borderTopWidth: 1,
-        borderTopColor: 'rgba(255, 255, 255, 0.1)'
-      }}
-    />
-
-  );
-}
-
-export default function TabLayout() {
+export default function RootLayout() {
   const { width } = useWindowDimensions();
+  const isWebDesktop = Platform.OS === 'web' && width >= 768;
+
   useEffect(() => {
     if (Platform.OS === 'web' && typeof document !== 'undefined') {
       const style = document.createElement('style');
@@ -76,109 +47,142 @@ export default function TabLayout() {
       `;
       document.head.appendChild(style);
       return () => {
-        // Optional cleanup if we wanted to be strict, but for global theme it's fine to keep
-        // document.head.removeChild(style);
+         // Cleanup usually not needed
       };
+    }
+
+    // Android System Navigation Bar
+    if (Platform.OS === 'android') {
+        NavigationBar.setBackgroundColorAsync(COLORS.primaryBg);
+        NavigationBar.setButtonStyleAsync("light"); // Light icons for dark background
+        SystemUI.setBackgroundColorAsync(COLORS.primaryBg);
     }
   }, []);
 
   return (
-    <>
-    <StatusBar style="light" />
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: COLORS.primaryBg }}>
+      <StatusBar style="light" />
+      
+      <Drawer
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
+        screenOptions={{
+          headerShown: !isWebDesktop, // Hide header on Web Desktop
+          headerStyle: {
+              backgroundColor: COLORS.primaryBg,
+              elevation: 0,
+              shadowOpacity: 0,
+              borderBottomWidth: 1,
+              borderBottomColor: COLORS.border // 'rgba(255, 255, 255, 0.1)'
+          },
+          headerTintColor: COLORS.textPrim,
+          headerTitleStyle: {
+              fontWeight: 'bold',
+              fontSize: 20
+          },
+          drawerStyle: {
+            backgroundColor: COLORS.primaryBg,
+            width: 280,
+            borderRightWidth: 1,
+            borderRightColor: COLORS.border,
+          },
+          drawerActiveTintColor: COLORS.textHighlight,
+          drawerActiveBackgroundColor: 'rgba(45, 212, 191, 0.1)',
+          drawerInactiveTintColor: COLORS.textSec,
+          drawerType: isWebDesktop ? 'front' : 'slide', // Don't take space on web
+          drawerHideStatusBarOnOpen: false,
+          overlayColor: 'rgba(0,0,0,0.7)',
+        }}
+      >
+        <Drawer.Screen
+          name="index"
+          options={{
+            title: "Home",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="home-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="about"
+          options={{
+            title: "About",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="person-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="resume"
+          options={{
+            title: "Resume",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="document-text-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="projects"
+          options={{
+            title: "Projects",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="code-slash-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="blog"
+          options={{
+            title: "Blogs",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="book-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="contact"
+          options={{
+            title: "Contact",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="mail-outline" size={size} color={color} />
+            ),
+          }}
+        />
 
-
-    <Tabs
-      backBehavior="history"
-      screenOptions={{
-        tabBarActiveTintColor: COLORS.tabBarActive,
-        tabBarInactiveTintColor: COLORS.tabBarInactive,
-        headerShown: false,
-        tabBarBackground: () => <GlassTabBar />,
-        tabBarStyle: {
-          position: 'absolute',
-          backgroundColor: 'transparent',
-          borderTopWidth: 0,
-          elevation: 0,
-          height: (Platform.OS === 'android' || width < 768) ? 80 : 60, 
-          paddingBottom: (Platform.OS === 'android' || width < 768) ? 20 : 5,
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="home-outline" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="about"
-        options={{
-          title: "About",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="person-outline" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="resume"
-        options={{
-          title: "Resume",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="document-text-outline" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="projects"
-        options={{
-          title: "Projects",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="code-slash-outline" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="blog"
-        options={{
-          title: "Blogs",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="book-outline" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="contact"
-        options={{
-          title: "Contact",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="mail-outline" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="login"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="resume-viewer"
-        options={{
-          href: null,
-        }}
-      />
-
-      <Tabs.Screen
-        name="pdf/[id]"
-        options={{
-          href: null,
-        }}
-      />
-    </Tabs>
-    {Platform.OS === 'web' && <Analytics />}
-    </>
+        {/* Hidden Routes */}
+        <Drawer.Screen
+          name="login"
+          options={{
+            drawerItemStyle: { display: 'none' },
+            headerShown: false // Also hide header for login even on mobile usually? Or keep standard.
+          }}
+        />
+        <Drawer.Screen
+          name="dashboard"
+          options={{
+            title: "Dashboard",
+            headerShown: !isWebDesktop // Show header on mobile dashboard
+          }}
+        />
+        <Drawer.Screen
+          name="resume-viewer"
+          options={{
+            drawerItemStyle: { display: 'none' },
+            headerShown: false
+          }}
+        />
+         <Drawer.Screen
+          name="pdf/[id]"
+          options={{
+            drawerItemStyle: { display: 'none' },
+             headerShown: false
+          }}
+        />
+      </Drawer>
+      
+      {/* Web Header Overlay */}
+      <WebHeader />
+      
+      {Platform.OS === 'web' && <Analytics />}
+    </GestureHandlerRootView>
   );
 }
