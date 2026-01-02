@@ -4,21 +4,22 @@ import { COLORS } from "@/constants/theme";
 import { auth, db } from "@/firebaseConfig";
 import { pickAndUploadToCloudinary } from "@/services/cloudinary";
 import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from 'expo-blur';
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import React from "react";
 import {
-  ActivityIndicator,
-  Linking,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useWindowDimensions,
-  View
+    ActivityIndicator,
+    Linking,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    useWindowDimensions,
+    View
 } from "react-native";
 import * as Animatable from 'react-native-animatable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -209,7 +210,7 @@ export default function ResumeScreen() {
           styles.scrollContent, 
           { 
             alignItems: 'center',
-            paddingTop: insets.top + (isDesktopWeb ? 100 : 20),
+            paddingTop: insets.top + (isDesktopWeb ? 140 : 5),
             paddingBottom: insets.bottom + 100
           }
         ])} 
@@ -242,7 +243,9 @@ export default function ResumeScreen() {
                              shadowRadius: 20,
                         } as any
                     ]}>
-
+                      {Platform.OS !== 'web' && (
+                        <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+                      )}
                       <Text style={styles.sectionTitle}>Summary</Text>
                       <Text style={styles.bodyText}>
                         Dynamic <Text style={styles.highlightText}>React Native Developer</Text> with a strong foundation in 
@@ -265,7 +268,9 @@ export default function ResumeScreen() {
                              shadowRadius: 20,
                         } as any
                     ]}>
-
+                      {Platform.OS !== 'web' && (
+                        <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+                      )}
                       <Text style={styles.sectionTitle}>Experience</Text>
 
                       <ResumeItem
@@ -297,7 +302,9 @@ export default function ResumeScreen() {
                              shadowRadius: 20,
                         } as any
                     ]}>
-
+                      {Platform.OS !== 'web' && (
+                        <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+                      )}
                       <Text style={styles.sectionTitle}>Education</Text>
                       <ResumeItem
                         role="BS Computer Science"
@@ -321,7 +328,9 @@ export default function ResumeScreen() {
                              shadowRadius: 20,
                         } as any
                     ]}>
-
+                      {Platform.OS !== 'web' && (
+                        <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+                      )}
                       <Text style={styles.sectionTitle}>Core Expertise</Text>
 
                       <View style={styles.skillRow}>
@@ -492,12 +501,13 @@ const styles = StyleSheet.create({
   section: {
    borderRadius: 32, 
       overflow: "hidden", 
-      borderWidth: 1.5, 
-    borderColor: COLORS.border,
+      borderWidth: 1, 
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(30, 30, 40, 0.4)',
       marginBottom:10,
       ...Platform.select({
           web: {
-              boxShadow: '0 10px 40px 0 rgba(0, 0, 0, 0.5)',
+              boxShadow: `0 0 40px ${COLORS.textHighlight}40`,
               backdropFilter: 'blur(15px)',
               transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
           } as any,

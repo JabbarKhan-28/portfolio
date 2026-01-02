@@ -2,25 +2,26 @@ import BackgroundGlows from "@/components/ui/BackgroundGlows";
 import { EMAIL_REGEX } from "@/constants/regex";
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from 'expo-blur';
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  useWindowDimensions
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+    useWindowDimensions
 } from "react-native";
 
 
 import * as Animatable from "react-native-animatable";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 // ---------------- EMAILJS VALIDATION ----------------
@@ -31,6 +32,7 @@ const EMAILJS_PUBLIC_KEY = "dSHPV33xQCKrdh2sg";
 
 export default function ContactScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();  
   const isWeb = Platform.OS === 'web' && width >= 768; // Desktop Web
   const isMobileWeb = Platform.OS === 'web' && width < 768;
@@ -143,7 +145,7 @@ export default function ContactScreen() {
         style={styles.keyboardView}
       >
         <ScrollView
-          contentContainerStyle={[styles.container, isWeb && { paddingTop: 100 }]}
+          contentContainerStyle={[styles.container, { paddingTop: isWeb ? 140 : insets.top + 5 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -183,6 +185,9 @@ export default function ContactScreen() {
                 } as any
             ]}
           >
+            {Platform.OS !== 'web' && (
+                <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+            )}
 
 
 
@@ -373,7 +378,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: Platform.OS === 'android' ? 15 : 24, // Wider on Android
     paddingVertical: 24,
-    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 20 : 40,
+    // paddingTop handled inline
     paddingBottom: 120,
     justifyContent: "center",
   },
@@ -428,7 +433,7 @@ const styles = StyleSheet.create({
     alignSelf:'center',
           ...Platform.select({
               web: {
-                  boxShadow: '0 10px 40px 0 rgba(0, 0, 0, 0.5)',
+                  boxShadow: `0 0 40px ${COLORS.textHighlight}40`,
                   backdropFilter: 'blur(15px)',
                   width:'60%',
                   transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
@@ -436,7 +441,6 @@ const styles = StyleSheet.create({
     
               default: {
                   width: '100%', 
-                  // elevation removed
                   shadowColor: COLORS.textHighlight,
                   shadowOffset: { width: 0, height: 10 },
                   shadowOpacity: 0.2, // Match Projects
@@ -464,11 +468,11 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.darkBg, // Reverted to darkBg for contrast on transparent card
+    backgroundColor: 'rgba(30, 30, 40, 0.6)', 
     paddingHorizontal: 15,
     borderRadius: 16,
-    borderWidth: 1.5, // Reverted to 1.5
-    borderColor: COLORS.border,
+    borderWidth: 1, 
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     minHeight: Platform.OS === 'android' ? 56 : 60
   },
   inputFocused: {

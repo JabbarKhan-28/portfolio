@@ -3,6 +3,7 @@ import { TypeWriter } from '@/components/ui/TypeWriter';
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from '@expo/vector-icons';
 
+import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
 import React from 'react';
@@ -51,7 +52,6 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
       bounces={false}
     >
-      
       {/* --- HERO SECTION --- */}
       <View style={StyleSheet.flatten([styles.page, pageStyle])}>
 
@@ -97,6 +97,9 @@ export default function HomeScreen() {
                     } as any
                 ]}
             >
+              {Platform.OS !== 'web' && (
+                  <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+              )}
               <Image
                   source={require('../assets/home-main.png')}
                   style={{
@@ -135,6 +138,9 @@ export default function HomeScreen() {
                  shadowRadius: 20,
              } as any
          ])}>
+            {Platform.OS !== 'web' && (
+                <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+            )}
             <Text style={StyleSheet.flatten([styles.sectionTitle, isWeb && { fontSize: 48 }])}>
               The <Text style={styles.highlight}>Vision</Text>
             </Text>
@@ -185,6 +191,9 @@ export default function HomeScreen() {
                  shadowRadius: 20,
              } as any
          ]}>
+            {Platform.OS !== 'web' && (
+                <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+            )}
             <Text style={[styles.sectionTitle, isWeb && { fontSize: 48 }]}>
               Let's <Text style={styles.highlight}>Connect</Text>
             </Text>
@@ -267,12 +276,13 @@ const styles = StyleSheet.create({
   contentWrapper: {
       borderRadius: 32, 
       overflow: "hidden", 
-      borderWidth: 1.5, 
-      borderColor: COLORS.border,
+      borderWidth: 1, 
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      backgroundColor: 'rgba(30, 30, 40, 0.4)',
       ...Platform.select({
           web: {
-              boxShadow: `0 10px 40px -10px ${COLORS.textHighlight}40`, // Colored Glow
-              backdropFilter: 'blur(15px)',
+              boxShadow: `0 0 40px ${COLORS.textHighlight}40`, // Colored Glow
+              backdropFilter: 'blur(40px)',
               transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
           } as any,
 
@@ -282,7 +292,7 @@ const styles = StyleSheet.create({
                   default: {
                       shadowColor: COLORS.textHighlight,
                       shadowOffset: { width: 0, height: 10 },
-                      shadowOpacity: 0.2,
+                      shadowOpacity: 0.3,
                       shadowRadius: 20,
                   }
               })
@@ -361,17 +371,18 @@ const styles = StyleSheet.create({
   imageContainer: {
     borderRadius: 32, 
       overflow: "hidden", 
-    borderWidth: 1.5, 
+    borderWidth: 1, 
     padding: 20,
     justifyContent: 'center',
     alignItem: 'ceter',
     alignSelf:'center',
       marginTop:20,
-      borderColor: COLORS.border,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      backgroundColor: 'rgba(30, 30, 40, 0.4)',
       ...Platform.select({
           web: {
-              boxShadow: `0 10px 40px -10px ${COLORS.textHighlight}40`, // Colored Glow
-              backdropFilter: 'blur(15px)',
+              boxShadow: `0 0 40px ${COLORS.textHighlight}40`, // Colored Glow
+              backdropFilter: 'blur(40px)',
               transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
           } as any,
 
@@ -381,7 +392,7 @@ const styles = StyleSheet.create({
                   default: {
                       shadowColor: COLORS.textHighlight,
                       shadowOffset: { width: 0, height: 10 },
-                      shadowOpacity: 0.2,
+                      shadowOpacity: 0.3,
                       shadowRadius: 20,
                   }
               })

@@ -1,4 +1,3 @@
-
 import AddProjectModal, { type Project } from "@/components/modals/AddProjectModal";
 import CustomAlertModal, { AlertType } from "@/components/modals/CustomAlertModal";
 import BackgroundGlows from "@/components/ui/BackgroundGlows";
@@ -14,6 +13,9 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import * as Animatable from 'react-native-animatable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import ProjectCard, { ProjectCardWrapper } from "@/components/features/ProjectCard";
+
 
 export default function ProjectsScreen() {
   const insets = useSafeAreaInsets();
@@ -37,6 +39,7 @@ export default function ProjectsScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+
   
   const [selectedTag, setSelectedTag] = useState("All");
 
@@ -175,7 +178,7 @@ export default function ProjectsScreen() {
         <ScrollView contentContainerStyle={[
             styles.contentContainer,
             { 
-              paddingTop: (Platform.OS === 'web' && width >= 768) ? 100 : insets.top + 20,
+              paddingTop: (Platform.OS === 'web' && width >= 768) ? 140 : insets.top + 5,
               paddingBottom: insets.bottom + 100 
             }
         ]}
@@ -183,23 +186,20 @@ export default function ProjectsScreen() {
         >
         <View style={styles.headerContainer}>
             <View style={styles.headerRow}>
-                 <View style={{ width: 40 }} /> 
-                 {/* Spacer to center the title */}
-
-                <TouchableOpacity activeOpacity={1} onPress={handleSecretLogin}>
+                {/* Title Centered */}
+                <TouchableOpacity activeOpacity={1} onPress={handleSecretLogin} style={{ flex: 1, alignItems: 'center' }}>
                     <Text style={[styles.headerText, isDesktopWeb && styles.webHeader]}>
                         My Recent <Text style={styles.purpleText}>Works</Text>
                     </Text>
                 </TouchableOpacity>
 
-
-                {/* Logout Button */}
-                {user ? (
-                    <TouchableOpacity onPress={handleLogout} style={{ padding: 5 }}>
-                        <Ionicons name="log-out-outline" size={24} color={COLORS.textSec} />
-                    </TouchableOpacity>
-                ) : (
-                    <View style={{ width: 40 }} />
+                {/* Logout Button Absolute Right */}
+                {user && (
+                    <View style={{ position: 'absolute', right: 0 }}>
+                        <TouchableOpacity onPress={handleLogout} style={{ padding: 5 }}>
+                            <Ionicons name="log-out-outline" size={24} color={COLORS.textSec} />
+                        </TouchableOpacity>
+                    </View>
                 )}
             </View>
             <Text style={[styles.subText, isMobileWeb && { fontSize: 18 }]}>Here are a few projects I've worked on recently.</Text>
@@ -281,6 +281,8 @@ export default function ProjectsScreen() {
             }}
         />
 
+
+
         <CustomAlertModal
             visible={alertConfig.visible}
             type={alertConfig.type}
@@ -293,8 +295,6 @@ export default function ProjectsScreen() {
     </View>
   );
 }
-
-import ProjectCard, { ProjectCardWrapper } from "@/components/features/ProjectCard";
 
 const styles = StyleSheet.create({
   container: {
@@ -315,21 +315,26 @@ const styles = StyleSheet.create({
   },
   headerRow: { 
     flexDirection: "row", 
-    justifyContent: "space-between", 
+    justifyContent: "center", 
     width: "100%", 
-    alignItems: "center" 
+    alignItems: "center",
+    position: 'relative'
     },
   headerText: {
-    fontSize: Platform.OS === 'android' ? 36 : 34,
+    fontSize: Platform.OS === 'android' ? 36 : 46,
     fontWeight: "900",
     color: COLORS.textPrim,
     textAlign: "center",
-    letterSpacing: -1,
-    lineHeight: Platform.OS === 'android' ? 42 : 40,
+    letterSpacing: -2,
+    lineHeight: Platform.OS === 'android' ? 48 : 46,
+    textShadowColor: COLORS.glowPurple, // Consistent Blue Glow
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20,
   },
   webHeader: {
-      fontSize: 52,
-      lineHeight: 58
+      fontSize: 64,
+      lineHeight: 72,
+      letterSpacing: -3,
   },
 
 
@@ -350,7 +355,7 @@ const styles = StyleSheet.create({
   projectsContainer: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 25, // Increased gap for premium feel
+      gap: 30, // Increased gap for premium feel
       justifyContent: 'center'
   },
   emptyText: {
@@ -400,5 +405,3 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   }
 });
-
-

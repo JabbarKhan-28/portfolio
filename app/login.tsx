@@ -2,6 +2,7 @@ import CustomAlertModal, { AlertType } from '@/components/modals/CustomAlertModa
 import { COLORS } from '@/constants/theme';
 import { auth } from '@/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { router } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
@@ -124,6 +125,9 @@ export default function LoginScreen() {
             </Text>
 
             <View style={StyleSheet.flatten([styles.form, { padding: width < 400 ? 20 : 32 }])}>
+              {Platform.OS !== 'web' && (
+                  <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+              )}
               <View style={styles.inputContainer}>
                 <Ionicons name="mail" size={20} color={COLORS.textHighlight} style={styles.icon} />
                 <TextInput
@@ -240,20 +244,22 @@ const styles = StyleSheet.create({
     gap: 24,
     width: '100%',
     maxWidth: 400,
-    backgroundColor: COLORS.cardBg,
+    backgroundColor: 'rgba(30, 30, 40, 0.4)',
     padding: 32,
     borderRadius: 32,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    overflow: 'hidden',
     ...Platform.select({
         web: {
           backdropFilter: 'blur(15px)',
-          boxShadow: '0 20px 50px rgba(0,0,0,0.4)',
+          boxShadow: `0 0 40px ${COLORS.textHighlight}40`,
         } as any,
     default: {
-            elevation: 12,
+            // elevation removed
             shadowColor: COLORS.textHighlight,
-            shadowOpacity: 0.1,
+            shadowOffset: { width: 0, height: 10 },
+            shadowOpacity: 0.2,
             shadowRadius: 20
         }
     })

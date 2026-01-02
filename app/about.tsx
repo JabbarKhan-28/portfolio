@@ -3,13 +3,16 @@ import SkillBadge from "@/components/ui/SkillBadge";
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 
+import { BlurView } from 'expo-blur';
 import { Link } from "expo-router";
 import React from "react";
-import { Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
+import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 
 import * as Animatable from 'react-native-animatable';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function AboutScreen() {
+  const insets = useSafeAreaInsets();
   const { height, width } = useWindowDimensions();
   const isWeb = Platform.OS === 'web' && width >= 768;
   const isMobile = width < 768;
@@ -26,9 +29,10 @@ export default function AboutScreen() {
     height: height,
     minHeight: '100vh',
     scrollSnapAlign: 'start',
-    paddingTop: 80
+    paddingTop: 140
   } : {
-    height: height
+    height: height,
+    paddingTop: insets.top + 5
   };
 
   return (
@@ -71,6 +75,9 @@ export default function AboutScreen() {
                     shadowRadius: 20,
                 } as any
             ]}>
+                {Platform.OS !== 'web' && (
+                  <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+                )}
                  <Text style={StyleSheet.flatten([
                      styles.cardText, 
                      isWeb && styles.webBodyText,
@@ -159,6 +166,9 @@ export default function AboutScreen() {
                         <Ionicons name="briefcase" size={12} color={COLORS.primaryBg} />
                     </View>
                     <View style={[styles.timelineContent, isMobileWeb && { backdropFilter: 'none', boxShadow: 'none', borderWidth: 1.2 } as any]}>
+                       {Platform.OS !== 'web' && (
+                         <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+                       )}
                        <Text style={[styles.timelineYear, isMobileWeb && { fontSize: 13 }]}>2024 - Present</Text>
                        <Text style={[styles.timelineTitle, isMobileWeb && { fontSize: 18 }]}>Freelance Full Stack Developer</Text>
                        <Text style={[styles.timelineDesc, isMobileWeb && { fontSize: 14 }]}>
@@ -173,6 +183,9 @@ export default function AboutScreen() {
                         <Ionicons name="code-slash" size={12} color={COLORS.primaryBg} />
                     </View>
                     <View style={[styles.timelineContent, isMobileWeb && { backdropFilter: 'none', boxShadow: 'none', borderWidth: 1.2 } as any]}>
+                        {Platform.OS !== 'web' && (
+                          <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+                        )}
                         <Text style={[styles.timelineYear, isMobileWeb && { fontSize: 13 }]}>2023 - 2024</Text>
                         <Text style={[styles.timelineTitle, isMobileWeb && { fontSize: 18 }]}>Open Source Contributor</Text>
                         <Text style={[styles.timelineDesc, isMobileWeb && { fontSize: 14 }]}>
@@ -187,6 +200,9 @@ export default function AboutScreen() {
                         <Ionicons name="school" size={12} color={COLORS.primaryBg} />
                     </View>
                      <View style={[styles.timelineContent, isMobileWeb && { backdropFilter: 'none', boxShadow: 'none', borderWidth: 1.2 } as any]}>
+                        {Platform.OS !== 'web' && (
+                          <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+                        )}
                         <Text style={[styles.timelineYear, isMobileWeb && { fontSize: 13 }]}>2024 - 2028 (Expected)</Text>
                         <Text style={[styles.timelineTitle, isMobileWeb && { fontSize: 18 }]}>BS Computer Science</Text>
                         <Text style={[styles.timelineDesc, isMobileWeb && { fontSize: 14 }]}>
@@ -210,7 +226,9 @@ export default function AboutScreen() {
             </Text>
 
             <View style={StyleSheet.flatten([styles.cardContainer, { padding: width < 450 ? 20 : 35 }])}>
-
+                 {Platform.OS !== 'web' && (
+                   <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+                 )}
 
 
                  <Text style={StyleSheet.flatten([styles.cardText, isWeb && styles.webBodyText, { textAlign: 'center' }, isMobileWeb && { fontSize: 18, lineHeight: 24 }])}>
@@ -276,10 +294,10 @@ const styles = StyleSheet.create({
   },
   page: {
       width: '100%',
-      justifyContent: 'center',
+      justifyContent: 'flex-start', // Align to top to match other screens
       alignItems: 'center',
       paddingHorizontal: 15,
-      paddingTop: Platform.OS === 'web' ? 80 : (StatusBar.currentHeight || 0) + 20,
+      paddingTop: 0,
       paddingBottom: Platform.OS === 'web' ? 120 : 100, 
  
       position: 'relative',
@@ -308,8 +326,10 @@ const styles = StyleSheet.create({
       maxWidth: 900
   },
   webHeader: {
-      fontSize: 52,
-      marginBottom: 20
+      fontSize: 64,
+      lineHeight: 72,
+      letterSpacing: -3,
+      marginBottom: 30
   },
   webBodyText: {
       fontSize: 22,
@@ -318,12 +338,14 @@ const styles = StyleSheet.create({
 
   // Headers
   headerText: {
-    fontSize: Platform.OS === 'android' ? 36 : 34,
-
+    fontSize: Platform.OS === 'android' ? 36 : 46, 
     fontWeight: '900',
     color: COLORS.textPrim,
     textAlign: 'center',
-    letterSpacing: -1
+    letterSpacing: -2,
+    textShadowColor: COLORS.glowPurple,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20,
   },
 
 
@@ -335,12 +357,13 @@ const styles = StyleSheet.create({
   cardContainer: {
     borderRadius: 32, 
       overflow: "hidden", 
-    borderWidth: 1.5, 
+    borderWidth: 1, 
       marginTop:20,
-      borderColor: COLORS.border,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      backgroundColor: 'rgba(30, 30, 40, 0.4)',
       ...Platform.select({
           web: {
-              boxShadow: '0 10px 40px 0 rgba(0, 0, 0, 0.5)',
+              boxShadow: `0 0 40px ${COLORS.textHighlight}40`,
               backdropFilter: 'blur(15px)',
               transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
           } as any,
@@ -411,16 +434,17 @@ const styles = StyleSheet.create({
   },
   timelineContent: {
       alignItems: 'flex-start',
-      backgroundColor: COLORS.cardBg,
+      backgroundColor: 'rgba(30,30,40,0.4)',
       padding: 12, // Compact padding
       borderRadius: 16,
-      borderWidth: 1.2,
-      borderColor: COLORS.border,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.1)',
       width: '100%',
+      overflow: 'hidden',
       ...Platform.select({
         web: {
           backdropFilter: 'blur(10px)',
-          boxShadow: '0 6px 24px 0 rgba(0, 0, 0, 0.4)'
+          boxShadow: `0 0 20px ${COLORS.textHighlight}20`
         } as any
       })
   },

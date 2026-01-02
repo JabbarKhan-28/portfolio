@@ -1,8 +1,10 @@
 
 import { BlogPost } from '@/components/modals/AddBlogModal';
+import AddSubscriberModal from '@/components/modals/AddSubscriberModal';
 import { COLORS } from '@/constants/theme';
 import { auth, db } from '@/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
@@ -23,6 +25,7 @@ import {
 import * as Animatable from 'react-native-animatable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+
 interface Subscriber {
     id: string;
     email: string;
@@ -36,6 +39,7 @@ export default function DashboardScreen() {
     const { width } = useWindowDimensions();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isAddUserModalVisible, setIsAddUserModalVisible] = useState(false);
 
     // Data State
     const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
@@ -117,7 +121,7 @@ export default function DashboardScreen() {
             <ScrollView 
                 style={styles.container} 
                 contentContainerStyle={[styles.content, { 
-                    paddingTop: insets.top + 20, 
+                    paddingTop: (Platform.OS === 'web' && width >= 768) ? 140 : insets.top + 5, 
                     paddingBottom: insets.bottom + 80 
                 }]}
                 showsVerticalScrollIndicator={false}
@@ -128,9 +132,14 @@ export default function DashboardScreen() {
                         <Text style={styles.title}>Dashboard</Text>
                         <Text style={styles.subtitle}>Welcome back, Admin</Text>
                     </View>
-                    <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
-                        <Ionicons name="log-out-outline" size={24} color={COLORS.error} />
-                    </TouchableOpacity>
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                        <TouchableOpacity onPress={() => setIsAddUserModalVisible(true)} style={[styles.logoutBtn, { borderColor: `${COLORS.textHighlight}40`, backgroundColor: `${COLORS.textHighlight}10` }]}>
+                             <Ionicons name="person-add-outline" size={24} color={COLORS.textHighlight} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+                            <Ionicons name="log-out-outline" size={24} color={COLORS.error} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 {/* Stats Grid */}
@@ -160,6 +169,9 @@ export default function DashboardScreen() {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Recent Subscribers</Text>
                         <View style={styles.listCard}>
+                            {Platform.OS !== 'web' && (
+                                <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+                            )}
                             {subscribers.length === 0 ? (
                                 <Text style={styles.emptyText}>No subscribers yet.</Text>
                             ) : (
@@ -184,6 +196,9 @@ export default function DashboardScreen() {
                     <View style={styles.section}>
                          <Text style={styles.sectionTitle}>Top Performing Articles</Text>
                          <View style={styles.listCard}>
+                            {Platform.OS !== 'web' && (
+                                <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+                            )}
                             {blogs.length === 0 ? (
                                 <Text style={styles.emptyText}>No articles published.</Text>
                             ) : (
@@ -214,6 +229,15 @@ export default function DashboardScreen() {
                 </View>
 
             </ScrollView>
+            
+            <AddSubscriberModal 
+                visible={isAddUserModalVisible}
+                onClose={() => setIsAddUserModalVisible(false)}
+                onSuccess={() => {
+                    // Optional: Show a success toast or Haptic feedback
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                }}
+            />
         </View>
     );
 }
@@ -221,6 +245,9 @@ export default function DashboardScreen() {
 function StatCard({ title, value, icon, color }: { title: string, value: string, icon: any, color: string }) {
     return (
         <Animatable.View animation="fadeInUp" style={styles.statCard}>
+            {Platform.OS !== 'web' && (
+                <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+            )}
             <View style={[styles.iconBox, { backgroundColor: `${color}20`, borderColor: `${color}40` }]}>
                 <Ionicons name={icon} size={24} color={color} />
             </View>
@@ -296,16 +323,26 @@ const styles = StyleSheet.create({
     statCard: {
         flex: 1,
         minWidth: 150,
-        backgroundColor: 'rgba(30, 30, 40, 0.6)',
+        backgroundColor: 'rgba(30, 30, 40, 0.4)',
         borderRadius: 20,
         padding: 20,
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.1)',
+        overflow: 'hidden',
         flexDirection: 'row',
         alignItems: 'center',
         gap: 15,
         ...Platform.select({
-            web: { backdropFilter: 'blur(10px)' } as any
+            web: { 
+                backdropFilter: 'blur(10px)',
+                boxShadow: `0 0 20px ${COLORS.textHighlight}20` 
+            } as any,
+            default: {
+                shadowColor: COLORS.textHighlight,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.2,
+                shadowRadius: 10
+            }
         })
     },
     iconBox: {
@@ -342,13 +379,22 @@ const styles = StyleSheet.create({
         marginLeft: 5
     },
     listCard: {
-        backgroundColor: 'rgba(30, 30, 40, 0.6)',
+        backgroundColor: 'rgba(30, 30, 40, 0.4)',
         borderRadius: 24,
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.1)',
         overflow: 'hidden',
         ...Platform.select({
-            web: { backdropFilter: 'blur(10px)' } as any
+            web: { 
+                backdropFilter: 'blur(10px)',
+                boxShadow: `0 0 30px ${COLORS.textHighlight}20` 
+            } as any,
+            default: {
+                shadowColor: COLORS.textHighlight,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.2,
+                shadowRadius: 10
+            }
         })
     },
     listItem: {

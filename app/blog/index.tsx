@@ -1,11 +1,15 @@
 import NewsletterSection from "@/components/features/NewsletterSection";
 import AddBlogModal, { type BlogPost } from "@/components/modals/AddBlogModal";
+import AddSubscriberModal from "@/components/modals/AddSubscriberModal";
 import CustomAlertModal, { AlertType } from "@/components/modals/CustomAlertModal";
 import BackgroundGlows from "@/components/ui/BackgroundGlows";
 import { COLORS } from "@/constants/theme";
 import { auth, db } from "@/firebaseConfig";
 
+import BlogCard from "@/components/features/BlogCard";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { BlurView } from 'expo-blur';
 import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -14,17 +18,16 @@ import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { collection, deleteDoc, doc, increment, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-
-  Platform,
-  ScrollView,
-  Share,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  useWindowDimensions,
-  View
+    ActivityIndicator,
+    Platform,
+    ScrollView,
+    Share,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    useWindowDimensions,
+    View
 } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -39,6 +42,7 @@ export default function BlogScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [editingBlog, setEditingBlog] = useState<BlogPost | null>(null);
+  const [isAddUserModalVisible, setIsAddUserModalVisible] = useState(false);
 
   const [alertConfig, setAlertConfig] = useState<{
     visible: boolean;
@@ -58,13 +62,6 @@ export default function BlogScreen() {
     if (user) return;
     const taps = secretTaps + 1;
     setSecretTaps(taps);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (taps >= 5) {
-      setSecretTaps(0);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.push("/login");
-    }
-    setTimeout(() => setSecretTaps(0), 2000);
   };
 
   useEffect(() => {
@@ -202,10 +199,29 @@ export default function BlogScreen() {
 
   const { width } = useWindowDimensions();
   const isMobileWeb = Platform.OS === 'web' && width < 768;
+  const isDesktopWeb = Platform.OS === 'web' && width >= 768;
+  const navigation = useNavigation();
+
+  React.useLayoutEffect(() => {
+    if (Platform.OS === 'android' || Platform.OS === 'web') {
+      // Target the parent Drawer navigator because the current Stack header is hidden
+      const parent = navigation.getParent(); 
+      parent?.setOptions({
+        headerRight: () => (
+          <TouchableOpacity 
+            onPress={() => setIsAddUserModalVisible(true)} 
+            style={{ marginRight: 15 }}
+          >
+            <Ionicons name="person-add-outline" size={24} color={COLORS.textPrim} />
+          </TouchableOpacity>
+        ),
+      });
+    }
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={StyleSheet.flatten([styles.contentContainer, { paddingHorizontal: width < 400 ? 15 : 20, paddingTop: (Platform.OS === 'web' && width >= 768) ? 100 : insets.top + 20, paddingBottom: insets.bottom + 100 }])} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={StyleSheet.flatten([styles.contentContainer, { paddingHorizontal: width < 400 ? 15 : 20, paddingTop: (Platform.OS === 'web' && width >= 768) ? 140 : insets.top + 5, paddingBottom: insets.bottom + 100 }])} showsVerticalScrollIndicator={false}>
 
 
 
@@ -214,24 +230,36 @@ export default function BlogScreen() {
 
         <View style={styles.headerContainer}>
           <View style={styles.headerRow}>
-            <View style={{ width: 40 }} />
-            <TouchableOpacity onPress={handleSecretLogin}>
-              <Text style={[
-                  styles.headerText,
-                  isMobileWeb && { fontSize: 36, lineHeight: 42 }
-              ]}>
-                The <Text style={styles.purpleText}>Notebook</Text>
-              </Text>
-            </TouchableOpacity>
-            {user ? (
-              <TouchableOpacity onPress={handleLogout}>
-                <Ionicons name="log-out-outline" size={24} color={COLORS.textSec} />
+              {/* Title Centered */}
+              <TouchableOpacity onPress={handleSecretLogin} style={{ flex: 1, alignItems: 'center' }}>
+                <Text style={[
+                    styles.headerText,
+                    isDesktopWeb && styles.webHeader,
+                    // Mobile Web specific override can remain or be adjusted in styles
+                     isMobileWeb && { fontSize: 32, lineHeight: 38 }
+                ]}>
+                  The <Text style={styles.purpleText}>Notebook</Text>
+                </Text>
               </TouchableOpacity>
-            ) : <View style={{ width: 40 }} />}
+
+            {/* Admin Controls Absolute Right */}
+            {user && (
+              <View style={{ position: 'absolute', right: 0, flexDirection: 'row', gap: 15 }}>
+                <TouchableOpacity onPress={() => setIsAddUserModalVisible(true)}>
+                  <Ionicons name="person-add-outline" size={24} color={COLORS.textHighlight} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleLogout}>
+                  <Ionicons name="log-out-outline" size={24} color={COLORS.textSec} />
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
           <Text style={styles.subText}>Exploring the intersection of code, design, and creativity.</Text>
           
           <Animatable.View animation="fadeIn" delay={300} style={styles.searchContainer}>
+             {Platform.OS !== 'web' && (
+                 <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+             )}
             <Ionicons name="search" size={22} color={COLORS.textHighlight} />
             <TextInput
               style={styles.searchInput}
@@ -248,51 +276,93 @@ export default function BlogScreen() {
           </Animatable.View>
         </View>
 
-        <Animatable.View animation="fadeIn" delay={400} style={{ marginBottom: 20 }}>
-            <NewsletterSection compact />
-        </Animatable.View>
-
         {loading ? (
-          <ActivityIndicator size="large" color={COLORS.purple} style={{ marginTop: 50 }} />
+          <ActivityIndicator size="large" color={COLORS.textHighlight} style={{ marginTop: 50 }} />
         ) : (
-          <View style={styles.listContainer}>
-            {filteredBlogs.length === 0 ? (
-              <Text style={styles.emptyText}>
-                {searchQuery ? "No matching articles found." : "The notebook is currently empty."}
-              </Text>
-            ) : (
-              filteredBlogs.map((blog, index) => (
-                <BlogCardWrapper key={blog.id} index={index}>
+          <View style={styles.grid}>
+             {/* Admin Add Card */}
+             {user && (
+                  <Animatable.View animation="fadeInUp" duration={500} delay={100} style={styles.cardWrapper}>
+                       <TouchableOpacity 
+                          style={[styles.card, styles.addCard]}
+                          onPress={() => {
+                              setEditingBlog(null);
+                              setModalVisible(true);
+                          }}
+                       >
+                           <View style={styles.addIconContainer}>
+                               <Ionicons name="add" size={40} color={COLORS.textHighlight} />
+                           </View>
+                           <Text style={styles.addText}>New Article</Text>
+                       </TouchableOpacity>
+                  </Animatable.View>
+             )}
+
+             {/* Blog Cards */}
+             {filteredBlogs.map((blog, index) => {
+                // Dynamic Card Width Calculation for strict grid
+                let cardStyle = {};
+                if (Platform.OS === 'web') {
+                    if (width >= 1024) {
+                        // 3 Columns
+                        cardStyle = { width: '31%', flex: 0, minWidth: 350 }; 
+                    } else if (width >= 768) {
+                        // 2 Columns
+                        cardStyle = { width: '48%', flex: 0, minWidth: 300 };
+                    } else {
+                        // 1 Column
+                        cardStyle = { width: '100%', flex: 0 };
+                    }
+                }
+
+                return (
+                <Animatable.View 
+                    key={blog.id} 
+                    animation="fadeInUp" 
+                    duration={500} 
+                    delay={index * 100 + 200}
+                    style={[styles.cardWrapper, cardStyle]}
+                >
                     <BlogCard 
                         blog={blog} 
-                        user={user} 
+                        user={user}
                         onPress={() => openPdfBlog(blog)}
-                        onDelete={handleDelete}
-                        onEdit={handleEdit}
+                        onDelete={() => handleDelete(blog.id)}
+                        onEdit={() => handleEdit(blog)}
                         isMobileWeb={isMobileWeb}
                     />
-                </BlogCardWrapper>
-              ))
-            )}
+                </Animatable.View>
+             )})}
+
+             {filteredBlogs.length === 0 && !loading && (
+                 <View style={styles.emptyContainer}>
+                     <Ionicons name="document-text-outline" size={48} color={COLORS.textMuted} />
+                     <Text style={styles.emptyText}>No articles found.</Text>
+                 </View>
+             )}
           </View>
         )}
+        
+        <View style={styles.newsletterSection}>
+            <NewsletterSection />
+        </View>
+
       </ScrollView>
 
-      {user && (
-        <Animatable.View animation="zoomIn" delay={500} style={styles.fabContainer}>
-          <TouchableOpacity style={styles.fab} onPress={() => { setEditingBlog(null); setModalVisible(true); }}>
-            <Ionicons name="add" size={30} color="#FFF" />
-          </TouchableOpacity>
-        </Animatable.View>
-      )}
-
+      {/* Modals */}
       <AddBlogModal
         visible={modalVisible}
-        onClose={() => { setModalVisible(false); setEditingBlog(null); }}
+        onClose={() => setModalVisible(false)}
         blogToEdit={editingBlog}
+      />
+      
+      <AddSubscriberModal
+        visible={isAddUserModalVisible}
+        onClose={() => setIsAddUserModalVisible(false)}
         onSuccess={() => {
-          showAlert('success', 'Success!', `Blog ${editingBlog ? 'updated' : 'published'} successfully.`);
-          setTimeout(hideAlert, 1500);
+             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+             showAlert("success", "User Added", "Subscriber has been added successfully.");
+             setTimeout(hideAlert, 2000);
         }}
       />
 
@@ -303,114 +373,153 @@ export default function BlogScreen() {
         message={alertConfig.message}
         onClose={hideAlert}
         onConfirm={alertConfig.onConfirm}
-        confirmText="Delete"
       />
     </View>
   );
 }
 
-import BlogCard, { BlogCardWrapper } from "@/components/features/BlogCard";
-
-// STYLES
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: COLORS.primaryBg 
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.primaryBg,
   },
-  contentContainer: { 
-    position: 'relative'
+  contentContainer: {
+    paddingBottom: 40,
   },
-
-
-
-  // Glows removed - used BackgroundGlows component
-  headerContainer: { 
-    alignItems: "center", 
-    marginBottom: 40 
+  headerContainer: {
+    marginBottom: 40,
+    alignItems: "center",
   },
-  headerRow: { 
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    width: "100%", 
-    alignItems: "center" 
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 10,
+    position: 'relative' // Critical for centering
   },
   headerText: {
-     fontSize: Platform.OS === 'android' ? 36 : 34,
-     fontWeight: "900",
-     color: COLORS.textPrim,
-     textAlign: "center",
-     letterSpacing: -1,
-     lineHeight: Platform.OS === 'android' ? 42 : 40,
-   },
-  purpleText: { 
-    color: COLORS.textHighlight 
+    fontSize: Platform.OS === 'android' ? 36 : 48, // Reduced for Android
+    fontWeight: "900",
+    color: COLORS.textPrim,
+    textAlign: "center",
+    letterSpacing: -2,
+    textShadowColor: COLORS.glowPurple,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20,
   },
-  subText: { 
-    color: COLORS.textSec, 
-    fontSize: Platform.OS === 'android' ? 18 : 16, 
- 
-    textAlign: 'center', 
-    marginTop: 10,
+  webHeader: {
+    fontSize: 64,
+    lineHeight: 72,
+    letterSpacing: -3,
+  },
+  purpleText: {
+    color: COLORS.textHighlight,
+  },
+  subText: {
+    fontSize: 16,
+    color: COLORS.textSec,
+    marginTop: 8,
+    textAlign: "center",
+    maxWidth: 600,
+    lineHeight: 24,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(30, 30, 40, 0.4)",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginTop: 30,
+    width: "100%",
     maxWidth: 500,
-    lineHeight: 24
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    ...Platform.select({
+        web: { 
+            backdropFilter: 'blur(10px)',
+            boxShadow: `0 0 30px ${COLORS.textHighlight}30`
+        } as any,
+        default: {
+             shadowColor: COLORS.textHighlight,
+             shadowOffset: { width: 0, height: 4 },
+             shadowOpacity: 0.2,
+             shadowRadius: 10,
+        }
+    })
   },
-
-
-  
-  listContainer: { 
-    flexDirection: 'row', 
-    flexWrap: 'wrap', 
-    gap: 25, 
-    justifyContent: 'center' 
+  searchInput: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 16,
+    color: COLORS.textPrim,
   },
-  emptyText: { 
-    color: COLORS.textMuted, 
-    textAlign: "center", 
-    marginTop: 60,
-    fontSize: 20
+  grid: {
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 20,
+    justifyContent: 'center' // Centered grid
   },
-  
-
-  
-  fabContainer: { 
-    position: "absolute", 
-    bottom: 110, 
-    right: 25 
+  cardWrapper: {
+      flexBasis: '100%', // Mobile default
+      // @ts-ignore
+      ...Platform.select({
+          web: {
+              flexBasis: 'auto', // Allow it to shrink/grow based on width media queries manually handled or minWidth
+              minWidth: 350,
+              maxWidth: 600,
+              flex: 1
+          }
+      })
   },
-  fab: { 
-    backgroundColor: COLORS.textHighlight, 
-    width: 64, 
-    height: 64, 
-    borderRadius: 32, 
-    justifyContent: "center", 
-    alignItems: "center", 
-    elevation: 10,
-    shadowColor: COLORS.textHighlight,
-    shadowOpacity: 0.5,
-    shadowRadius: 10
+  // Add Card Specifics
+  card: {
+      backgroundColor: 'rgba(30,30,40,0.6)',
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.08)',
+      padding: 24,
+      marginBottom: 20
   },
-  
-  searchContainer: { 
-      flexDirection: "row", 
-      alignItems: "center", 
-      backgroundColor: COLORS.darkBg, 
-      borderRadius: 20, 
-      paddingHorizontal: 20, 
-      paddingVertical: Platform.OS === 'android' ? 8 : 14, 
-      marginTop: 30, 
-      width: "100%", 
-      maxWidth: 600,
-      borderWidth: 1.5, 
-      borderColor: COLORS.border,
-      elevation: 4 
+  addCard: {
+      borderStyle: 'dashed',
+      borderColor: COLORS.textHighlight,
+      backgroundColor: 'rgba(45, 212, 191, 0.05)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 200, // Match typical card height
   },
-
-
-  searchInput: { 
-    flex: 1, 
-    color: COLORS.textPrim, 
-    marginLeft: 12, 
-    fontSize: 18,
-    fontWeight: '500'
+  addIconContainer: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: 'rgba(45, 212, 191, 0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16
   },
+  addText: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: COLORS.textHighlight
+  },
+  emptyContainer: {
+      width: '100%',
+      alignItems: 'center',
+      padding: 40,
+      opacity: 0.5
+  },
+  emptyText: {
+      marginTop: 10,
+      color: COLORS.textSec,
+      fontSize: 16
+  },
+  newsletterSection: {
+      marginTop: 60,
+      width: '100%',
+      maxWidth: 800,
+      alignSelf: 'center'
+  }
 });

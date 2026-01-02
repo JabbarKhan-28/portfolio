@@ -1,6 +1,7 @@
 import { type BlogPost } from "@/components/modals/AddBlogModal";
 import { COLORS } from "@/constants/theme";
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import * as Linking from 'expo-linking';
 import React from 'react';
@@ -73,6 +74,9 @@ export default function BlogCard({ blog, user, onPress, onDelete, onEdit, isMobi
                  shadowRadius: 20,
             } as any
           ]}>
+              {Platform.OS !== 'web' && (
+                  <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+              )}
               <View style={StyleSheet.flatten([styles.cardBody, { padding: width < 450 ? 20 : 30 }])}>
                   <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 8}}>
                       <Text style={[styles.blogDate, isMobileWeb && { fontSize: 14 }, {marginBottom: 0}]}>{blog.date}</Text>
@@ -119,13 +123,17 @@ const styles = StyleSheet.create({
   blogCard: { 
       borderRadius: 32, 
       overflow: "hidden", 
-      borderWidth: 1.5, 
-      borderColor: COLORS.border,
+      borderWidth: 1, 
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      backgroundColor: 'rgba(30,30,40,0.4)',
+      height: 380, // Fixed height for uniformity
       ...Platform.select({
           web: {
-              boxShadow: '0 10px 40px 0 rgba(0, 0, 0, 0.5)',
+              boxShadow: `0 0 40px ${COLORS.textHighlight}40`,
               backdropFilter: 'blur(15px)',
               transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+              display: 'flex', 
+              flexDirection: 'column'
           } as any,
 
           default: {
@@ -138,7 +146,10 @@ const styles = StyleSheet.create({
   },
   cardBody: { 
     alignItems: 'center',
-    width: '100%' 
+    width: '100%',
+    flex: 1, // Fill the fixed height
+    justifyContent: 'space-between',
+    padding: 24
   },
   blogTitle: { 
     fontSize: Platform.OS === 'android' ? 26 : 22,

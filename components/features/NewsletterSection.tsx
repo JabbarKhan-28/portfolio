@@ -4,6 +4,7 @@ import { EMAIL_REGEX } from '@/constants/regex';
 import { COLORS } from '@/constants/theme';
 import { db } from '@/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import React, { useState } from 'react';
 import {
@@ -20,6 +21,7 @@ import {
 export default function NewsletterSection({ compact = false }: { compact?: boolean }) {
     const { width } = useWindowDimensions();
     const isMobile = width < 768; // Mobile or Mobile Web
+    const isDesktop = Platform.OS === 'web' && width > 768;
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     
@@ -80,28 +82,40 @@ export default function NewsletterSection({ compact = false }: { compact?: boole
         <View style={[styles.container, compact && styles.compactContainer]}>
             <View style={[
                 styles.card,
-                Platform.OS === 'web' && width > 768 && !compact && styles.webCard,
+                isDesktop && !compact && styles.webCard,
                 compact && styles.compactCard
             ]}>
+                {Platform.OS !== 'web' && (
+                    <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+                )}
                 <View style={[
                     styles.content, 
-                    compact && { flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', flexWrap: 'wrap', gap: 15 }
+                    compact && { flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', flexWrap: 'wrap', gap: 20 },
+                    (isDesktop && !compact) && { flexDirection: 'column', alignItems: 'center', width: '100%', gap: 30 }
                 ]}>
                     {!compact && (
-                        <View style={styles.iconContainer}>
-                            <Ionicons name="mail-open-outline" size={32} color={COLORS.textHighlight} />
+                        <View style={[styles.iconContainer, (isDesktop && !compact) && { marginBottom: 0 }]}>
+                            <Ionicons name="newspaper-outline" size={32} color={COLORS.textHighlight} />
                         </View>
                     )}
                     
                     <View style={[
                         styles.textContainer, 
-                        compact && { marginBottom: isMobile ? 15 : 0, flex: 1, minWidth: 200, width: isMobile ? '100%' : 'auto' }
+                        compact && { marginBottom: isMobile ? 15 : 0, flex: 1, minWidth: 200, width: isMobile ? '100%' : 'auto' },
+                        (isDesktop && !compact) && { alignItems: 'center', marginBottom: 0, width: '100%' }
                     ]}>
-                        <Text style={[styles.title, compact && styles.compactTitle]}>
+                        <Text style={[
+                            styles.title, 
+                            compact && styles.compactTitle,
+                            (isDesktop && !compact) && { textAlign: 'center' }
+                        ]}>
                             {compact ? "Subscribe to updates" : "Stay in the loop"}
                         </Text>
                         {!compact && (
-                            <Text style={styles.subtitle}>
+                            <Text style={[
+                                styles.subtitle,
+                                (isDesktop && !compact) && { textAlign: 'center' }
+                            ]}>
                                 Join other developers receiving the latest updates on my projects and articles.
                             </Text>
                         )}
@@ -109,13 +123,13 @@ export default function NewsletterSection({ compact = false }: { compact?: boole
 
                     <View style={[
                         styles.form,
-                        (Platform.OS === 'web' && width > 768 && !compact) && { flexDirection: 'row', alignItems: 'center' },
-                        compact && { flexDirection: isMobile ? 'column' : 'row', gap: 10, flex: 1, minWidth: 250, width: isMobile ? '100%' : 'auto' }
+                        (isDesktop && !compact) && { flexDirection: 'row', alignItems: 'center', width: '100%', maxWidth: 500, justifyContent: 'center' },
+                        compact && { flexDirection: isMobile ? 'column' : 'row', gap: 15, flex: 1, minWidth: 250, width: isMobile ? '100%' : 'auto' }
                     ]}>
                         <TextInput
                             style={[
                                 styles.input,
-                                (Platform.OS === 'web' && width > 768 && !compact) && { marginBottom: 0, marginRight: 10, flex: 1 },
+                                (isDesktop && !compact) && { marginBottom: 0, marginRight: 15, flex: 1 },
                                 compact && styles.compactInput,
                                 (compact && isMobile) && { marginBottom: 0, width: '100%' }
                             ]}
@@ -129,7 +143,7 @@ export default function NewsletterSection({ compact = false }: { compact?: boole
                         <TouchableOpacity
                             style={[
                                 styles.button,
-                                (Platform.OS === 'web' && width > 768 && !compact) && { width: 'auto', minWidth: 140 },
+                                (isDesktop && !compact) && { width: 'auto', minWidth: 140 },
                                 compact && styles.compactButton,
                                 (compact && isMobile) && { width: '100%', alignItems: 'center' }
                             ]}
@@ -167,7 +181,7 @@ const styles = StyleSheet.create({
     card: {
         width: '100%',
         maxWidth: 800,
-        backgroundColor: 'rgba(30, 30, 40, 0.6)', // Glassy dark
+        backgroundColor: 'rgba(30, 30, 40, 0.4)', // Glassy dark
         borderRadius: 30,
         alignItems: 'center',
         justifyContent: 'center',
@@ -177,22 +191,23 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         ...Platform.select({
             web: {
-                backdropFilter: 'blur(20px)',
-                boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
+                backdropFilter: 'blur(40px)',
+                boxShadow: `0 0 40px ${COLORS.textHighlight}40`,
+                transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
             } as any,
             default: {
-                shadowColor: '#000',
+                shadowColor: COLORS.textHighlight,
                 shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.3,
+                shadowOpacity: 0.2,
                 shadowRadius: 20
             }
         })
     },
     webCard: {
-        padding: 50,
+        padding: 30, // Reduced from 50 to prevent overflow on smaller desktop windows
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'flex-start' 
     },
     content: {
         width: '100%'
@@ -207,10 +222,11 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         borderWidth: 1,
         borderColor: 'rgba(45, 212, 191, 0.3)',
-        alignSelf: Platform.OS === 'web' ? 'flex-start' : 'center',
+        alignSelf: 'center', // Default to center
          ...Platform.select({
             web: {
                 boxShadow: '0 0 20px rgba(45, 212, 191, 0.2)',
+                marginBottom: 0 // Reset margin for web row layout
             } as any
         })
     },
@@ -244,7 +260,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.1)',
-        marginBottom: 5
+        marginBottom: 15
     },
     button: {
         backgroundColor: COLORS.textHighlight,
@@ -252,6 +268,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
+        minWidth: 140,
         ...Platform.select({
             web: {
                 boxShadow: '0 4px 15px rgba(45, 212, 191, 0.4)',
@@ -275,20 +292,20 @@ const styles = StyleSheet.create({
     },
     // Compact Styles
     compactContainer: {
-        marginBottom: 20,
+        marginBottom: 25,
         padding: 0
     },
     compactCard: {
         borderRadius: 24,
-        padding: 16,
+        padding: 24,
         backgroundColor: 'rgba(20, 20, 25, 0.6)',
         borderColor: 'rgba(255, 255, 255, 0.08)',
         borderWidth: 1
     },
     compactTitle: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: '700',
-        marginBottom: 0,
+        marginBottom: 8,
         textAlign: 'center',
         color: COLORS.textPrim,
         letterSpacing: 0.5,
@@ -297,7 +314,7 @@ const styles = StyleSheet.create({
     compactInput: {
         flex: 1,
         marginBottom: 0,
-        paddingVertical: 12,
+        paddingVertical: 14,
         paddingHorizontal: 16,
         fontSize: 14,
         backgroundColor: 'rgba(0,0,0,0.4)',
@@ -305,7 +322,7 @@ const styles = StyleSheet.create({
         borderRadius: 12
     },
     compactButton: {
-        paddingVertical: 12,
+        paddingVertical: 14,
         paddingHorizontal: 24,
         borderRadius: 12,
         backgroundColor: COLORS.textHighlight,

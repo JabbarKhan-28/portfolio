@@ -7,11 +7,14 @@ import React, { useEffect, useState } from "react";
 import { Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import * as Animatable from 'react-native-animatable';
 
+import AddSubscriberModal from "@/components/modals/AddSubscriberModal";
+
 export default function WebHeader() {
     const pathname = usePathname();
     const router = useRouter();
     const { width } = useWindowDimensions();
     const [user, setUser] = useState<User | null>(null);
+    const [isAddUserModalVisible, setIsAddUserModalVisible] = useState(false);
 
     // Auth Subscription
     useEffect(() => {
@@ -76,6 +79,9 @@ export default function WebHeader() {
         <Animatable.View animation="fadeInDown" duration={800} style={styles.header}>
             <View style={styles.container}>
                 {/* Logo with Secret Login */}
+                {/* Note: User requested to configure icon on project tab (?) and name on index for secret login 
+                   Configuring Main Name for Secret Login
+                */}
                 <TouchableOpacity onPress={handleLogoPress} activeOpacity={0.8}>
                     <Text style={styles.logo}>
                         Jabbar<Text style={styles.highlight}>.</Text>
@@ -103,7 +109,22 @@ export default function WebHeader() {
                             </Link>
                         );
                     })}
+                    
+
                 </View>
+
+                {/* Modals placed here or in root/layout. Since Header is in Layout, we can put modal here or use a context. 
+                    Putting it here might be localized. Let's see if we can render it.
+                    However, modals usually need to be at root. But React Native modals work fine.
+                */}
+                <AddSubscriberModal
+                    visible={isAddUserModalVisible}
+                    onClose={() => setIsAddUserModalVisible(false)}
+                    onSuccess={() => {
+                         // Simple success alert
+                         alert("Subscriber Added Successfully!");
+                    }}
+                />
             </View>
         </Animatable.View>
     );
