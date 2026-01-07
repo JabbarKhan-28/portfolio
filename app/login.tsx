@@ -64,7 +64,7 @@ export default function LoginScreen() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // Login successful, redirect to dashboard
-      router.replace('/dashboard'); 
+      router.replace('/'); 
     } catch (error: any) {
       console.error(error.code);
       let errorMessage = "An unexpected error occurred.";

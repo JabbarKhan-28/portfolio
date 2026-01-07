@@ -55,12 +55,8 @@ export default function CustomDrawerContent(props: any) {
             {...props} 
             state={{
                 ...props.state,
-                routes: props.state.routes.filter((route: any) => 
-                    user ? true : route.name !== 'dashboard'
-                ),
-                routeNames: user 
-                    ? props.state.routeNames 
-                    : props.state.routeNames.filter((name: string) => name !== 'dashboard')
+                routes: props.state.routes,
+                routeNames: props.state.routeNames
             }}
         />
       </DrawerContentScrollView>

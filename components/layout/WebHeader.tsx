@@ -7,14 +7,13 @@ import React, { useEffect, useState } from "react";
 import { Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import * as Animatable from 'react-native-animatable';
 
-import AddSubscriberModal from "@/components/modals/AddSubscriberModal";
+
 
 export default function WebHeader() {
     const pathname = usePathname();
     const router = useRouter();
     const { width } = useWindowDimensions();
     const [user, setUser] = useState<User | null>(null);
-    const [isAddUserModalVisible, setIsAddUserModalVisible] = useState(false);
 
     // Auth Subscription
     useEffect(() => {
@@ -30,13 +29,10 @@ export default function WebHeader() {
         { name: "About", path: "/about", icon: "person-outline" },
         { name: "Resume", path: "/resume", icon: "document-text-outline" },
         { name: "Projects", path: "/projects", icon: "code-slash-outline" },
-        { name: "Blogs", path: "/blog", icon: "book-outline" },
         { name: "Contact", path: "/contact", icon: "mail-outline" },
     ];
 
-    if (user) {
-        navItems.splice(3, 0, { name: "Dashboard", path: "/dashboard", icon: "stats-chart-outline" });
-    }
+
 
     // Secret Login Logic
     const [secretTaps, setSecretTaps] = useState(0);
@@ -117,14 +113,6 @@ export default function WebHeader() {
                     Putting it here might be localized. Let's see if we can render it.
                     However, modals usually need to be at root. But React Native modals work fine.
                 */}
-                <AddSubscriberModal
-                    visible={isAddUserModalVisible}
-                    onClose={() => setIsAddUserModalVisible(false)}
-                    onSuccess={() => {
-                         // Simple success alert
-                         alert("Subscriber Added Successfully!");
-                    }}
-                />
             </View>
         </Animatable.View>
     );

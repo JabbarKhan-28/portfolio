@@ -131,15 +131,7 @@ export default function RootLayout() {
             ),
           }}
         />
-        <Drawer.Screen
-          name="blog"
-          options={{
-            title: "Blogs",
-            drawerIcon: ({ color, size }) => (
-              <Ionicons name="book-outline" size={size} color={color} />
-            ),
-          }}
-        />
+
         <Drawer.Screen
           name="contact"
           options={{
@@ -158,13 +150,7 @@ export default function RootLayout() {
             headerShown: false // Also hide header for login even on mobile usually? Or keep standard.
           }}
         />
-        <Drawer.Screen
-          name="dashboard"
-          options={{
-            title: "Dashboard",
-            headerShown: !isWebDesktop // Show header on mobile dashboard
-          }}
-        />
+
         <Drawer.Screen
           name="resume-viewer"
           options={{
@@ -172,13 +158,7 @@ export default function RootLayout() {
             headerShown: false
           }}
         />
-         <Drawer.Screen
-          name="pdf/[id]"
-          options={{
-            drawerItemStyle: { display: 'none' },
-             headerShown: false
-          }}
-        />
+
       </Drawer>
       
       {/* Web Header Overlay */}
@@ -191,7 +171,7 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
-const MAIN_ROUTES = ['/', '/about', '/resume', '/projects', '/blog', '/contact'];
+const MAIN_ROUTES = ['/', '/about', '/resume', '/projects', '/contact'];
 
 function FloatingNav() {
   const router = useRouter();

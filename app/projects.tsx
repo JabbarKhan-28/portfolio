@@ -212,7 +212,7 @@ export default function ProjectsScreen() {
                     contentContainerStyle={{ gap: 10, paddingVertical: 10, paddingHorizontal: 5 }}
                     style={{ marginTop: 20, maxHeight: 60 }}
                 >
-                    {allTags.map(tag => (
+                    {allTags.map((tag: string) => (
                         <TouchableOpacity 
                             key={tag} 
                             onPress={() => {

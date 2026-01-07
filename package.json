@@ -1,7 +1,7 @@
 {
   "name": "portfolio",
   "main": "expo-router/entry",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -39,7 +39,8 @@
     "expo-symbols": "~1.0.8",
     "expo-system-ui": "~6.0.9",
     "expo-web-browser": "~15.0.10",
-    "firebase": "^12.7.0",
+    "firebase": "^11.1.0",
+    "js-tokens": "^10.0.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
